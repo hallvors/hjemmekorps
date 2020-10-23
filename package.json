@@ -1,0 +1,23 @@
+{
+  "name": "hjemmekorps",
+  "version": "1.0.0",
+  "description": "Hjemmekorps skal inspirere til hjemmeøving ved å gjøre leksene til en del av felles prosjekter.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "dev": "nodemon index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hallvors/hjemmekorps.git"
+  },
+  "author": "HallRic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hallvors/hjemmekorps/issues"
+  },
+  "homepage": "https://github.com/hallvors/hjemmekorps#readme",
+  "dependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
