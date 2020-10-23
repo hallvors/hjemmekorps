@@ -19,7 +19,13 @@
   "homepage": "https://github.com/hallvors/hjemmekorps#readme",
   "dependencies": {
     "@sanity/client": "^2.0.1",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
+    "express-handlebars": "^5.1.0",
+    "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.2",
+    "nanoid": "^3.1.15",
     "nodemon": "^2.0.6"
   }
 }
