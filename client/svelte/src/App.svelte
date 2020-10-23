@@ -4,7 +4,14 @@
 
 	export let name = "på deg!";
 </script>
-<Navbar backgroundColor="#7B91F0"/>
+<div class="navbar">
+	<Navbar backgroundColor="#7B91F0"/>
+</div>
+
 
 <style>
+	.navbar {
+		position: fixed;
+		width: 100%;
+	}
 </style>

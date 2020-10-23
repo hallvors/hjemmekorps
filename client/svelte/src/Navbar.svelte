@@ -14,7 +14,6 @@
 
 <style>
 	.navbar-wrapper {
-		color: green;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -37,6 +36,7 @@
 	}
 
 	.navbar-elm {
+		color: #6EF086;
 		padding: 0 50px 0 50px;
 	}
 </style>
