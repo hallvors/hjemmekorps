@@ -32,6 +32,7 @@
     transition: 0.3s;
   }
   h2 {
+    padding: 0 30px;
     text-transform: uppercase;
     font-weight: lighter;
     font-size: 2em;

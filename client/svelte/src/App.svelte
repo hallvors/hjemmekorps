@@ -3,20 +3,33 @@
 	import Navbar from "./Navbar.svelte";
 	import ProjectDisplay from "./ProjectDisplay.svelte";
 
+	export let backgroundColor = "red";
+	export let navbarColor;
+
+	// Dette man fra backend, bilde?
 	let projectDisplays = [
-		{}
+		{
+			title: "Star Wars main theme",
+		},
+		{
+			title: "Norge i rødt, hvitt og blått",
+		},
+		{
+			title: "Game of thrones",
+		},
 	]
 </script>
 
+
 <div class="navbar">
-	<Navbar backgroundColor="#7B91F0"/>
+	<Navbar backgroundColor={navbarColor}/>
 </div>
 <div class="main-wrapper">
 	<div class="display">
 		<ProjectDisplay newProject={true}/>
 
-		{#each displays as display}
-			<ProjectDisplay/>
+		{#each projectDisplays as display}
+			<ProjectDisplay title={display.title}/>
 		{/each}
 	</div>
 </div>
@@ -31,9 +44,10 @@
 	}
 
 	.main-wrapper {
-		padding-top: 150px;
+		padding: 150px 0;
 		width: 80%;
 		margin: 0 auto;
+
 	}
 	.display {
 		display: grid;
