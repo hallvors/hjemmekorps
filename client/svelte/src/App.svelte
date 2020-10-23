@@ -1,38 +1,21 @@
 
 <script>
+	// import { Router } from "svelte-router-spa";
+	// import { routes } from "./routes.js"
+
 	import Navbar from "./Navbar.svelte";
-	import ProjectDisplay from "./ProjectDisplay.svelte";
+	import Homepage from "./Homepage.svelte"
 
 	export let backgroundColor = "red";
-	export let navbarColor;
+	export let navbarColor = "green";
 
-	// Dette man fra backend, bilde?
-	let projectDisplays = [
-		{
-			title: "Star Wars main theme",
-		},
-		{
-			title: "Norge i rødt, hvitt og blått",
-		},
-		{
-			title: "Game of thrones",
-		},
-	]
 </script>
 
 
 <div class="navbar">
 	<Navbar backgroundColor={navbarColor}/>
 </div>
-<div class="main-wrapper">
-	<div class="display">
-		<ProjectDisplay newProject={true}/>
-
-		{#each projectDisplays as display}
-			<ProjectDisplay title={display.title}/>
-		{/each}
-	</div>
-</div>
+<Homepage backgroundColor={backgroundColor}/>
 
 
 
@@ -40,7 +23,7 @@
 	.navbar {
 		position: fixed;
 		width: 100%;
-		z-index: 10;
+		z-index: 100;
 	}
 
 	.main-wrapper {
