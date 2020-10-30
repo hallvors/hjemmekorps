@@ -26,27 +26,47 @@
   main {
     position: relative;
     border: solid 1px #333;
-    width: 300px;
-    height: 300px;
+    width: 25vw;
+    height: 25vw;
     box-shadow: 0px 0px 7px 0px rgba(0,0,0,0.75);
     transition: 0.3s;
   }
   h2 {
-    padding: 0 30px;
+    padding: 0 10%;
     text-transform: uppercase;
     font-weight: lighter;
-    font-size: 2em;
+    font-size: 2.5vw;
     text-align: center;
   }
   .plus-sign {
     position: absolute;
-    width: 128px;
-    height: 128px;
+    /* 64px is half of plus sign-width and height */
     top: calc(50% - 64px);
     left: calc(50% - 64px);
   }
   main:hover {
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.75);
     cursor: pointer;
   }
+  @media only screen and (min-width: 1200px) {
+      main {
+    width: 300px;
+    height: 300px;
+  }
+  }
+  @media only screen and (max-width: 820px) {
+    main {
+      width: 40vw;
+      height: 40vw;
+    }
+    h2 {
+      font-size: 2em;
+    }
+  }
+  @media only screen and (max-width: 600px) {
+    main {
+      width: 80vw;
+      height: 70vw;
+    }
+    }
 </style>

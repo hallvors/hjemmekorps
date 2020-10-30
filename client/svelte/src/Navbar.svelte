@@ -1,6 +1,6 @@
 <script>
 	export let logosrc = "images/music.png"
-  export let backgroundColor = "red";
+  	export let backgroundColor = "red";
 </script>
 
 <div style="background-color: {backgroundColor};" class="navbar-wrapper">
