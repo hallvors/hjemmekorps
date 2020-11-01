@@ -31,7 +31,7 @@
 
 <style>
   .main-wrapper {
-    padding: 150px 0;
+    padding: 50px 0;
     width: 90%;
     margin: 0 auto;
   }

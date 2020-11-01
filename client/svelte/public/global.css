@@ -1,3 +1,7 @@
+:root {
+  --example: black;
+}
+
 html,
 body {
   position: relative;

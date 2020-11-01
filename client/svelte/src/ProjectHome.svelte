@@ -1,13 +1,27 @@
 
 <script>
     import DeltakerDisplay from "./DeltakerDisplay.svelte"
+    export let projectName = "Navnløs";
+    export let currentRoute;
+
+    const deltakere = [
+        {
+            navn: "Richard"
+        },
+        {
+            navn: "Ove"
+        },
+    ]
 </script>
 
 <main> 
     <div class="members">
-        <DeltakerDisplay navn="Richard"/>
+        <h1 class="members-title">Deltakere</h1>
+        <DeltakerDisplay deltaker={deltakere[0]}/>
     </div>
-    <div class="project-main">Dette er prosjektet</div>
+    <div class="project-main">
+        <h1>{currentRoute.namedParams.id}</h1>
+        Dette er prosjektet</div>
 </main>
 
 
@@ -17,6 +31,7 @@
         --height: 800px;
     }
     main {
+        padding-top: 20px;
         display: flex;
     }
     .members {
@@ -24,6 +39,10 @@
         width: 30%;
         height: var(--height);
         /* position: fixed; */
+    }
+
+    .members-title {
+        text-align: center;
     }
     .project-main {
         width: 70%;

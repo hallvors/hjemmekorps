@@ -8,7 +8,11 @@ const routes = [
   },
   {
     name: "about",
-    component: ProjectDisplay,
+    component: Homepage,
+  },
+  {
+    name: "project/:id",
+    component: ProjectHome,
   },
   // { name: "login", component: Login, layout: PublicLayout },
   // {
