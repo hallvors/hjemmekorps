@@ -16,15 +16,15 @@
     }
     .mute-btn {
         border: 1px solid black;
-        background: #333;
-        color: white;
+        background: var(--dark);
+        color: var(--light);
         padding: 5px 10px;
         border-radius: 100px;
     }
     .mute-btn:hover {
         cursor: pointer;
         background: none;
-        color: var(--example);
+        color: var(--blue);
     }
 
 </style>

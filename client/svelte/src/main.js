@@ -4,7 +4,7 @@ const app = new App({
   target: document.body,
   props: {
     // backgroundColor: "#fbfbfb",
-    navbarColor: "#7B91F0",
+    navbarColor: "#fc4445",
   },
 });
 

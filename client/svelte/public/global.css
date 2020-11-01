@@ -1,5 +1,7 @@
 :root {
-  --example: black;
+  --light: #fbfbfb;
+  --dark: #333;
+  --mainBlue: #55bcc6; 
 }
 
 html,
@@ -11,12 +13,12 @@ body {
   padding: 0;
 }
 body {
-  color: #333;
+  color: var(--dark);
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
-  background-color: #fbfbfb;
+  background-color: var(--mainBlue);
 }
 
 a {

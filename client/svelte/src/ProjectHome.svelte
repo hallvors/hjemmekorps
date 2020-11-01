@@ -4,7 +4,7 @@
     export let projectName = "Navnløs";
     export let currentRoute;
 
-    const deltakere = [
+    const members = [
         {
             navn: "Richard"
         },
@@ -17,7 +17,9 @@
 <main> 
     <div class="members">
         <h1 class="members-title">Deltakere</h1>
-        <DeltakerDisplay deltaker={deltakere[0]}/>
+        {#each members as member}
+        <DeltakerDisplay deltaker={member}/>
+        {/each}
     </div>
     <div class="project-main">
         <h1>{currentRoute.namedParams.id}</h1>

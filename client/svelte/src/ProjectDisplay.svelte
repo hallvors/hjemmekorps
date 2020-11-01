@@ -25,7 +25,7 @@
 <style>
   main {
     position: relative;
-    border: solid 1px #333;
+    border: solid 1px var(--dark);
     width: 25vw;
     height: 25vw;
     box-shadow: 0px 0px 7px 0px rgba(0,0,0,0.75);

@@ -42,7 +42,7 @@
 	}
 
 	.navbar-elm {
-		color: #6EF086;
+		color: var(--dark);
 		padding: 0 50px 0 50px;
 	}
 </style>
