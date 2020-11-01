@@ -7,6 +7,9 @@
 
   --mainColor: #55bcc6;
   --secondaryColor: #3feee6;
+
+  --border: 1px solid #333;
+
 }
 
 html,
@@ -18,13 +21,25 @@ body {
   padding: 0;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   color: var(--textColorDark);
-  box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
   background-color: var(--mainColor);
+}
+
+h1, h2, h3, h4, h5 {
+  font-weight: 300;
+  text-transform: uppercase;
+}
+
+.h1-bigger {
+  font-size: 54px;
 }
 
 a {

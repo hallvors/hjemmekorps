@@ -1,7 +1,7 @@
 
 <script>
     import DeltakerDisplay from "./DeltakerDisplay.svelte"
-    export let projectName = "Navnløs";
+    export let projectName = "Navnløst prosjekt";
     export let currentRoute;
 
     const members = [
@@ -9,7 +9,16 @@
             navn: "Richard"
         },
         {
+            navn: "Jakob Etternavn"
+        },
+        {
             navn: "Ove"
+        },
+        {
+            navn: "Veldig langt navn har vi her"
+        },
+        {
+            navn: "Kanskje best med bare fornavn?"
         },
     ]
 </script>
@@ -17,40 +26,62 @@
 <main> 
     <div class="members">
         <h1 class="members-title">Deltakere</h1>
+
+        <DeltakerDisplay newMember={true}/>
         {#each members as member}
-        <DeltakerDisplay deltaker={member}/>
+        <DeltakerDisplay member={member}/>
         {/each}
+
     </div>
+
     <div class="project-main">
-        <h1>{currentRoute.namedParams.id}</h1>
-        Dette er prosjektet</div>
+        <div class="project-info">
+            <h1 class="h1-bigger project-title">{projectName}</h1>
+        </div>
+    </div>
 </main>
 
 
 
 <style>
     :root {
-        --height: 800px;
+        --padding-top: 30px;
     }
     main {
-        padding-top: 20px;
         display: flex;
     }
+
     .members {
-        border: 1px solid black;
-        width: 30%;
-        height: var(--height);
-        /* position: fixed; */
+        border-right: 1px solid black;
+        padding: calc(var(--padding-top) + 10px) 0 0 20px;
+
+        width: 34%;
     }
 
     .members-title {
         text-align: center;
+        margin: 0;
+        padding: 0;
     }
+
+    .project-title {
+        margin: 0;
+        padding: 0;
+    }
+
+    .project-info {
+        width: 85%;
+        margin: auto;
+    }
+
     .project-main {
-        width: 70%;
-        height: var(--height);
 
-        border: 1px dashed lightcoral;
+        padding-top: var(--padding-top);
+
+        width: 66%;
+
+        /* border: 1px dashed lightcoral; */
 
     }
+
 </style>
