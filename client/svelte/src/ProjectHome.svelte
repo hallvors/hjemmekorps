@@ -23,22 +23,23 @@
             navn: "Kanskje best med bare fornavn?"
         },
     ]
+    // Todo:
+    // Tegne linjer med svg
+    // Fullføre resten 
 </script>
 
 <main> 
     <div class="members">
         <h1 class="members-title">Deltakere</h1>
 
-        <DeltakerDisplay newMember={true}/>
+        <DeltakerDisplay id="test" newMember={true}/>
         {#each members as member}
         <DeltakerDisplay member={member}/>
         {/each}
 
         <svg class="member-line">
-            <polyline points="0,100 50,100 50,0"
-            style="fill: none; stroke:var(--dark); stroke-width: 30;"
-             
-            />
+            <polyline points="0,100 50,100 50,15 100,15"
+            style="fill: none; stroke:var(--dark); stroke-width: 30;"/>
         </svg>
 
     </div>

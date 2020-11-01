@@ -9,6 +9,7 @@
   --secondaryColor: #3feee6;
 
   --border: 1px solid #333;
+  --shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
 
 }
 
@@ -36,6 +37,7 @@ body {
 h1, h2, h3, h4, h5 {
   font-weight: 300;
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .h1-bigger {

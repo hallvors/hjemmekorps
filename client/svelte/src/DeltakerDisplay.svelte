@@ -53,23 +53,28 @@
         padding: 5px 20px;
         /* text-align: center; */
         border: var(--border);
+        box-shadow: var(--shadow);
+
+        transition: 0.3s;
     }
 
     h3 {
         text-transform: none;
     }
 
-    /* main:hover {
+    main:hover {
         cursor: pointer;
-    } */
+        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+    }
 
     .new-member {
-        position: relative
+        position: relative;
     }
     
-    .new-member:hover {
+    /* .new-member:hover {
         cursor: pointer;
-    }
+        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+    } */
 
     .plus-sign {
         position: absolute;

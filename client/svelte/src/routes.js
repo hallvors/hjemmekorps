@@ -7,10 +7,6 @@ const routes = [
     component: Homepage,
   },
   {
-    name: "about",
-    component: Homepage,
-  },
-  {
     name: "project/:id",
     component: ProjectHome,
   },
