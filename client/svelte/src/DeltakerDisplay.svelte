@@ -55,6 +55,10 @@
         border: var(--border);
     }
 
+    h3 {
+        text-transform: none;
+    }
+
     /* main:hover {
         cursor: pointer;
     } */
@@ -69,7 +73,7 @@
 
     .plus-sign {
         position: absolute;
-        /* 64px is half of plus sign-width and height */
+        /* 40px is half of plus sign-width and height */
         top: calc(50% - 40px);
         left: calc(50% - 40px);
     }

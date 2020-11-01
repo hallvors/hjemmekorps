@@ -4,7 +4,7 @@ import ProjectHome from "./ProjectHome.svelte";
 const routes = [
   {
     name: "/",
-    component: ProjectHome,
+    component: Homepage,
   },
   {
     name: "about",
