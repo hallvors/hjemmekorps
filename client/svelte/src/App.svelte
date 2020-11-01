@@ -6,7 +6,7 @@
 
 	import Navbar from "./Navbar.svelte";
 
-	export let backgroundColor = "red";
+	// export let backgroundColor = "red";
 	export let navbarColor = "green";
 
 </script>
@@ -15,7 +15,10 @@
 <div class="navbar">
 	<Navbar backgroundColor={navbarColor}/>
 </div>
-<Router {routes}/>
+<div style="padding-top: 100px">
+	<Router {routes}/>
+</div>
+
 
 
 
@@ -23,6 +26,6 @@
 	.navbar {
 		position: fixed;
 		width: 100%;
-		z-index: 100;
+		z-index: 10;
 	}
 </style>

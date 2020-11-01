@@ -1,9 +1,10 @@
 import ProjectDisplay from "./ProjectDisplay.svelte";
 import Homepage from "./Homepage.svelte";
+import ProjectHome from "./ProjectHome.svelte";
 const routes = [
   {
     name: "/",
-    component: Homepage,
+    component: ProjectHome,
   },
   {
     name: "about",
