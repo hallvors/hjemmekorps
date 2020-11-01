@@ -1,24 +1,30 @@
 :root {
   --light: #fbfbfb;
   --dark: #333;
-  --mainBlue: #55bcc6; 
+
+  --textColorDark: #333;
+  --textColorLight: #fbfbfb;
+
+  --mainColor: #55bcc6;
+  --secondaryColor: #3feee6;
 }
 
 html,
 body {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  /* position: relative; */
+  /* width: 100%;
+  height: 100%; */
   margin: 0;
   padding: 0;
 }
+
 body {
-  color: var(--dark);
+  color: var(--textColorDark);
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
-  background-color: var(--mainBlue);
+  background-color: var(--mainColor);
 }
 
 a {

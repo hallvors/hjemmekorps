@@ -5,22 +5,26 @@
 
     let muted = false;
     function handleMute(e) {
+        const button = e.currentTarget;
+
         if (!muted) {
-            e.target.innerText = "Muted";
+            button.firstChild.classList.toggle("fa-volume-mute");
+            button.firstChild.classList.toggle("fa-volume-up");
+
         }
         else {
-            e.target.innerText = "Mute";
+            button.firstChild.classList.toggle("fa-volume-mute");
+            button.firstChild.classList.toggle("fa-volume-up");
         };
         muted = !muted;
+
+
     }
-    // todo:
-    // Alt det naturlige
-    // Bytte ut tekst med et ikon med mute og muted
 </script>
 <main>
     <h3>{deltaker.navn}</h3>
-    <button class="mute-btn" on:click={handleMute}>Mute</button>
-</main>
+    <button class="mute-btn" on:click={handleMute}><i class="fas fa-volume-mute"></i></button>
+</main> 
 <style>
     main {
         margin: 10px;
@@ -32,7 +36,7 @@
         /* margin-left: ; */
         border: 1px solid var(--dark);
         background: var(--dark);
-        color: var(--light);
+        color: var(--textColorLight);
         padding: 5px 10px;
         border-radius: 100px;
     }
