@@ -9,6 +9,11 @@
 	// Todo:
 	// Kanskje ha logoen i egen fil for å rydde?
 	// Fikse navbar for mobile
+
+	function handleBurger(e) {
+		console.log(e.currentTarget);
+		e.currentTarget.classList.toggle("is-active");
+	}
 </script>
 
 <div style="background-color: {backgroundColor}; height: {navbarHeight}" class="navbar-wrapper">
@@ -22,11 +27,12 @@
 		<li> <a class="navbar-elm" href="#">Placeholder</a> </li>
 		<li> <a class="navbar-elm" href="/project/{projectId}">Innstillinger</a> </li>
 	</ul>
-	<div class="mobile-nav">
-		<div></div>
-		<div></div>
-		<div></div>
-	</div>
+
+	<button on:click={handleBurger} class="hamburger hamburger--squeeze" type="button">
+	<span class="hamburger-box">
+		<span class="hamburger-inner"></span>
+	</span>
+	</button>
 </div>
 
 <style>
@@ -66,20 +72,8 @@
 		/* border: var(--border); */
 	}
 
-	.mobile-nav {
-		display: none;
-		margin-right: 20px;
-	}
-
-	.mobile-nav:hover {
-		cursor: pointer;
-	}
-
-	.mobile-nav div {
-		height: 3px;
-		width: 30px;
-		background-color: var(--dark);
-		margin: 7px;
+	button:active {
+		background-color: transparent;
 	}
 
 	@media screen and (max-width:1000px) {

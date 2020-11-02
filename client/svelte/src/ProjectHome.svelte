@@ -37,10 +37,10 @@
         <DeltakerDisplay member={member}/>
         {/each}
 
-        <svg class="member-line">
+        <!-- <svg class="member-line">
             <polyline points="0,100 50,100 50,15 100,15"
             style="fill: none; stroke:var(--dark); stroke-width: 30;"/>
-        </svg>
+        </svg> -->
 
     </div>
 
@@ -123,6 +123,7 @@
         margin-top: 30px;
         padding-bottom: 30px;
         border: var(--border);
+        box-shadow: var(--shadow);
     }
 
 
