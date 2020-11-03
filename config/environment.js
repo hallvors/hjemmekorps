@@ -1,6 +1,6 @@
 const nconf = require('nconf');
 
-const env = process.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'development';
 const port = process.env.PORT || 4444;
 
 nconf.env('__').argv();

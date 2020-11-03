@@ -5,7 +5,7 @@ const sClient = require('../lib/sanity_client');
 
 router.use(adminAuth);
 
-router.get('/projects', (req, res, next) => {
+router.get('/', (req, res, next) => {
 	return sClient.getProjects(req.user._id)
 	.then(projects => {
 		res.json(projects);
