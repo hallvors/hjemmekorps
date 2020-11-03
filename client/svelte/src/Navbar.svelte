@@ -1,4 +1,6 @@
 <script>
+	// NOTE: this module is dependent on the "hamburgers.css" file
+
 	export let backgroundColor = "red";
 	export let navbarHeight;
 
@@ -57,7 +59,8 @@
 	// Todo:
 	// Logo i egen fil?
 	// Er denne fila for stor?
-	// Rydde her
+	// Rydde
+	// Fikse bakgrunnsfarge med css-variabel
 </script>
 
 <div style="background-color: {backgroundColor}; height: {navbarHeight}" class="navbar-wrapper">
@@ -135,6 +138,7 @@
 		top: 25px;
 		display: none;
 		z-index: 3;
+		transition: 0.3; 
 	}
 
 	.mobile-menu {
@@ -144,10 +148,6 @@
 		visibility: visible;
 		z-index: 2;
 		background-color: var(--contrastColor);
-	}
-
-	.hidden {
-		visibility: hidden;
 	}
 
 	.mobile-links {
