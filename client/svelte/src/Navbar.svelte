@@ -61,6 +61,7 @@
 	// Er denne fila for stor?
 	// Rydde
 	// Fikse bakgrunnsfarge med css-variabel
+	// Fikse scrolling når mobileNav er åpen
 </script>
 
 <div style="background-color: {backgroundColor}; height: {navbarHeight}" class="navbar-wrapper">
