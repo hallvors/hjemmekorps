@@ -10,7 +10,7 @@
   display: inline-block;
   cursor: pointer;
   transition-property: opacity, filter;
-  transition-duration: 0.15s;
+  transition-duration: 0.3s;
   transition-timing-function: linear;
   font: inherit;
   color: inherit;
@@ -21,10 +21,10 @@
   overflow: visible;
 }
 .hamburger:hover {
-  opacity: 0.8;
+  opacity: 1;
 }
 .hamburger.is-active:hover {
-  opacity: 0.8;
+  opacity: 1;
 }
 .hamburger.is-active .hamburger-inner,
 .hamburger.is-active .hamburger-inner::before,
