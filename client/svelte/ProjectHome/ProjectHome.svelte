@@ -1,6 +1,6 @@
 
 <script>
-    import DeltakerDisplay from "./DeltakerDisplay.svelte";
+    import DeltakerDisplay from "./ProjectHome/DeltakerDisplay.svelte";
     // import Route from "svelte-router-spa";
     // export let currentRoute;
 
@@ -52,7 +52,7 @@
             <div class="merged-audio">
                 <h1 style="text-align: center;">Samlet lydfil</h1>
                 <span class="audio">
-                    <audio controls src="../samples/sample.mp3">
+                    <audio controls src="../global.css">
                         <track kind="captions"/>
                         Audio does not work
                     </audio>
@@ -61,7 +61,7 @@
             </div>
 
             <div class="standard-box note-box">
-                <h1>Her skal det bli noter</h1>
+                <h1>Skjer det noe?</h1>
             </div>
         </div>
         
@@ -94,7 +94,7 @@
     }
 
 
-    .member-line {
+    /* .member-line {
         height: 20%;
         width: 8%;
 
@@ -102,7 +102,7 @@
         left: calc(var(--members-width) - 21px);
         top: 300px;
         border: var(--border);
-    }
+    } */
 
     /* || Project-main */
 
