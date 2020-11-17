@@ -44,6 +44,11 @@ h5 {
   letter-spacing: 1px;
 }
 
+.standard-box {
+  border: var(--border);
+  box-shadow: var(--shadow);
+}
+
 .h1-bigger {
   font-size: 54px;
 }

@@ -52,12 +52,16 @@
             <div class="merged-audio">
                 <h1 style="text-align: center;">Samlet lydfil</h1>
                 <span class="audio">
-                    <audio controls src="../sample.mp3">
+                    <audio controls src="../samples/sample.mp3">
                         <track kind="captions"/>
                         Audio does not work
                     </audio>
                 </span>
 
+            </div>
+
+            <div class="standard-box note-box">
+                <h1>Her skal det bli noter</h1>
             </div>
         </div>
         
@@ -124,6 +128,17 @@
         padding-bottom: 30px;
         border: var(--border);
         box-shadow: var(--shadow);
+    }
+
+    .note-box {
+        margin-top: 30px;
+        padding: 5%;
+        height: 20vw;
+    }
+
+    .note-box h1 {
+        padding: 0;
+        margin: 0;
     }
 
 
