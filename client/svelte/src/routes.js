@@ -1,6 +1,7 @@
 import ProjectHome from "./ProjectHome/ProjectHome.svelte";
 // import ProjectDisplay from "./Navbar.svelte";
 import Homepage from "./Homepage/Homepage.svelte";
+
 const routes = [
 	{
 		name: "/",
