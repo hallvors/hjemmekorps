@@ -836,6 +836,10 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
+"@ctrl/tinycolor@^2.5.4":
+  version "2.6.1"
+  resolved "https://registry.npmjs.org/@ctrl/tinycolor/-/tinycolor-2.6.1.tgz#0e78cc836a1fd997a9a22fa1c26c555411882160"
+
 "@emotion/is-prop-valid@^0.8.8":
   version "0.8.8"
   resolved "https://registry.npmjs.org/@emotion/is-prop-valid/-/is-prop-valid-0.8.8.tgz#db28b1c4368a259b60a97311d6a952d4fd01ac1a"
@@ -7200,6 +7204,12 @@ sanity-diff-patch@^1.0.9:
   resolved "https://registry.npmjs.org/sanity-diff-patch/-/sanity-diff-patch-1.0.9.tgz#fb1fa3b52c27d369878af57ba02fee779b3ca8bd"
   dependencies:
     diff-match-patch "^1.0.5"
+
+sanity-plugin-color-list@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.npmjs.org/sanity-plugin-color-list/-/sanity-plugin-color-list-1.2.1.tgz#2f2f1c35b11055453f5eb202bb6cb162eecf7985"
+  dependencies:
+    "@ctrl/tinycolor" "^2.5.4"
 
 sax@~1.2.4:
   version "1.2.4"
