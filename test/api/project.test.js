@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const app = require('../../server');
 //const sClient = require('../../lib/sanity_client');
 
+const HTOKEN = jwt.sign({email: 'hallvord@hallvord.com'}, env.nconf.get('site:tokensecret'));
+
 describe('Get projects', function() {
   it('listing projects - not authorized', function(){
   	return request(app)
@@ -25,7 +27,7 @@ describe('Get projects', function() {
   it('listing projects - correct token in cookie', function(){
   	return request(app)
   	.get('/api/projects')
-  	.set('Cookie', 'token=' + jwt.sign({email: 'hallvord@hallvord.com'}, env.nconf.get('site:tokensecret')))
+  	.set('Cookie', 'token=' + HTOKEN)
   	.expect(200)
   	.then(res => {
   		expect(res.body).toHaveLength(1);
@@ -34,6 +36,20 @@ describe('Get projects', function() {
 
   		return Promise.resolve();
   	});
+  });
+
+  it('create project by upload', function(){
+    return request(app)
+    .post('/api/projects/new')
+    .set('Cookie', 'token=' + HTOKEN)
+    .attach('mxmlfile', __dirname + '/fixtures/Nu_grönskar_det.xml')
+    .expect(200)
+    .then(res => {
+
+
+      return Promise.resolve();
+    });
+
   });
 
 });
