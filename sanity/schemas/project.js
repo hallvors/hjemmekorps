@@ -7,7 +7,7 @@ export default {
       title: "Eier",
       name: "owner",
       type: "reference",
-      to: [{type: "adminUser"}]
+      to: [{ type: "adminUser" }],
     },
     {
       title: "Navn",
@@ -17,7 +17,13 @@ export default {
     {
       title: "Notefil",
       name: "sheetmusic",
-      type: "file"
+      type: "file",
     },
-  ]
+    {
+      title: "Musikanter",
+      name: "members",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "member" }] }],
+    },
+  ],
 };
