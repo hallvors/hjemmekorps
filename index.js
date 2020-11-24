@@ -1,15 +1,5 @@
-const express = require("express");
+const app = require('./server');
+const env = require('./config/environment');
 
-const app = express();
+app.listen(env.port, () => console.log(`Server running on port ${env.port}`));
 
-app.use(express.static("./client"));
-
-app.use("/api", (req, res) => {
-  res.json({
-    msg: "Hei!",
-  });
-});
-
-const PORT = 3000;
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

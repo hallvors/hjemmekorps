@@ -1,18 +1,19 @@
 {
   "root": true,
+  "api": {
+    "projectId": "5ggq2na3",
+    "dataset": "test"
+  },
   "project": {
     "name": "sanity"
-  },
-  "api": {
-    "projectId": "j3d6bih4",
-    "dataset": "production"
   },
   "plugins": [
     "@sanity/base",
     "@sanity/components",
     "@sanity/default-layout",
     "@sanity/default-login",
-    "@sanity/desk-tool"
+    "@sanity/desk-tool",
+    "color-list"
   ],
   "env": {
     "development": {
