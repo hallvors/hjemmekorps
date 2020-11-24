@@ -11,7 +11,7 @@
 	export let navbarColor = "green";
 	export let navbarHeight = "100px";
 
-	export let currentRoute;
+	// export let currentRoute;
 	const params = {}
 </script>
 

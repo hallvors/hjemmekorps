@@ -63,6 +63,7 @@
       font-size: 2em;
     }
   }
+  
   @media only screen and (max-width: 600px) {
     main {
       width: 80vw;
