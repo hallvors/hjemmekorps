@@ -9,12 +9,13 @@ app.use(bodyParser.json({ limit: '2MB' }));
 
 const apiRouter = require('./api/');
 
-app.get("/", (req, res) => {
-  res.json({
-    msg: "Hei!",
-  });
+app.use('/api', apiRouter);
+
+app.use(express.static('./svelte/public'));
+
+app.get("*", (req, res) => {
+  res.sendFile(__dirname + '/svelte/public/index.html');
 });
 
-app.use('/api', apiRouter);
 
 module.exports = app;
