@@ -7,6 +7,7 @@
 	// Ikke nødvendig
 	const projectId = 1;
 
+
 	let mobileNav, mobileLinks, burger;
 
 	function closeMobileNav() {
@@ -41,9 +42,14 @@
 		}
 	}
 
+	function handleLogoClick(e) {
+		e.preventDefault()
+		window.history.pushState({test: "test"}, "", "/")
+	}
+
 	window.addEventListener("resize", (e) => {
-		if (innerWidth > 760 && mobileNavIsOpen) {
-			toggleMobileNav()
+		if (innerWidth > 760 && mobileIsOpen) {
+			closeMobileNav()
 		}
 	})
 
@@ -97,9 +103,9 @@
 
 <div bind:this={mobileNav} style="top: {navbarHeight};" class="mobile-menu">
 		<ul bind:this={mobileLinks} class="mobile-links">
-			<!-- <li class="mobile-link"><a on:click={toggleMobileNav} class="navbar-elm mobileNav-text" href="/">Home</a></li> -->
+			<li class="mobile-link"><a on:click={toggleMobileNav} class="navbar-elm mobile-menu-text" href="/">Home</a></li>
 			{#each navbarElms as navbarElm}
-			<li class="mobile-link"><a on:click={toggleMobileNav} class="navbar-elm mobileNav-text" href={navbarElm.href}>{navbarElm.text}</a></li>
+			<li class="mobile-link"><a on:click={toggleMobileNav} class="navbar-elm mobile-menu-text" href={navbarElm.href}>{navbarElm.text}</a></li>
 			{/each}
 		</ul>
 </div>
@@ -129,7 +135,6 @@
 
 	.navbar-ul {
 		width: 60%;
-
 		display: flex;
 		justify-content: space-around;
 	}
@@ -151,22 +156,25 @@
 		top: 25px;
 		display: none;
 		z-index: 3;
-		transition: 0.3; 
+		transition: 0.3;
 	}
 
 	.mobile-menu {
+		/* Visible, but 0% height therefore not showing */
 		height: 0%;
 		width: 100%;
 		position: fixed;
 		visibility: visible;
 		z-index: 2;
 		background-color: var(--contrastColor);
+		transition-duration: 500ms;
 	}
 
 	.mobile-links {
 		transition: all 0.5s ease;
 		transform: scale(0);
 		visibility: hidden;
+
 		margin-top: 100px;
 		text-align: center;
 	}
@@ -175,7 +183,7 @@
 		padding: 10px;
 	}
 
-	.mobileNav-text {
+	.mobile-menu-text {
 		font-size: 25px;
 	}
 
@@ -192,11 +200,6 @@
 
 		.hamburger {
 			display: block;
-		}
-
-		.mobile-menu {
-			/* visibility: visible; */
-			transition: 0.5s;
 		}
 
 	}
