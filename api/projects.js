@@ -6,7 +6,7 @@ const multerUpload = multer({ storage: storage });
 
 const adminAuth = require("../lib/adminAuth");
 const sClient = require("../lib/sanity_client");
-const { parse, getName, getMemberNames } = require("./lib/mxml_helpers");
+const { parse, getName, getMemberNames } = require("../lib/mxml_helpers");
 
 router.use(adminAuth);
 
