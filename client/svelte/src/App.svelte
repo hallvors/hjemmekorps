@@ -15,8 +15,6 @@
 	const params = {}
 </script>
 
-
-
 <Navbar backgroundColor={navbarColor} navbarHeight={navbarHeight}/>
 <div style="padding-top: {navbarHeight}">
 	<Router {routes}/>

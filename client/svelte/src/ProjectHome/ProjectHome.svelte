@@ -1,6 +1,7 @@
 
 <script>
     import DeltakerDisplay from "./DeltakerDisplay.svelte";
+    import NoteBox from "./NoteBox.svelte"
     // import Route from "svelte-router-spa";
     // export let currentRoute;
 
@@ -60,9 +61,7 @@
 
             </div>
 
-            <div class="standard-box note-box">
-                <h1>Ja?</h1>
-            </div>
+            <NoteBox/>
         </div>
         
 
@@ -86,6 +85,7 @@
 
         width: var(--members-width);
     }
+
 
     .members-title {
         text-align: center;
