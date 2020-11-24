@@ -1,6 +1,6 @@
 <script>
     // Hjemskjermen for et prosjekt
-    import NoteBox from "./Notebox.svelte"
+    import NoteBox from "./NoteBox.svelte"
 </script>
 <main class="merged-audio">
 
