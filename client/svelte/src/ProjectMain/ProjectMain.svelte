@@ -1,27 +1,32 @@
 
 <script>
     import DeltakerDisplay from "./DeltakerDisplay.svelte";
-    import NoteBox from "./NoteBox.svelte"
+    import ProjectHome from "./ProjectHome.svelte"
     // import Route from "svelte-router-spa";
     // export let currentRoute;
 
     export let projectName = "Navnløst prosjekt";
-
+    const id = "3"
     const members = [
         {
-            navn: "Richard"
+            navn: "Richard",
+            href: `/:${id}`
         },
         {
-            navn: "Jakob Etternavn"
+            navn: "Jakob Etternavn",
+            href: `/:${id}`
         },
         {
-            navn: "Ove"
+            navn: "Ove",
+            href: `/:${id}`
         },
         {
-            navn: "Veldig langt navn har vi her"
+            navn: "Veldig langt navn har vi her",
+            href: `/:${id}`
         },
         {
-            navn: "Kanskje best med bare fornavn?"
+            navn: "Kanskje best med bare fornavn?",
+            href: `/:${id}`
         },
     ]
     // Todo:
@@ -33,9 +38,11 @@
     <div class="members">
         <h1 class="members-title">Deltakere</h1>
 
-        <DeltakerDisplay id="test" newMember={true}/>
+        <DeltakerDisplay newMember={true}/>
         {#each members as member}
-        <DeltakerDisplay member={member}/>
+        <a href={member.id}>
+            <DeltakerDisplay member={member}/>
+        </a>
         {/each}
 
         <!-- <svg class="member-line">
@@ -50,18 +57,7 @@
             <h1 class="h1-bigger project-title">{projectName}</h1>
 
             <!-- Her bør det routes -->
-            <div class="merged-audio">
-                <h1 style="text-align: center;">Samlet lydfil</h1>
-                <span class="audio">
-                    <audio controls src="../samples/sample.mp3">
-                        <track kind="captions"/>
-                        Audio does not work
-                    </audio>
-                </span>
-
-            </div>
-
-            <NoteBox/>
+            <ProjectHome />
         </div>
         
 
@@ -93,7 +89,8 @@
         padding: 0;
     }
 
-
+    /* || CSS for possible lines between stuff */
+    
     /* .member-line {
         height: 20%;
         width: 8%;
@@ -120,27 +117,6 @@
         width: 85%;
         margin: auto;
     }
-
-    .merged-audio {
-        text-align: center;
-
-        margin-top: 30px;
-        padding-bottom: 30px;
-        border: var(--border);
-        box-shadow: var(--shadow);
-    }
-
-    .note-box {
-        margin-top: 30px;
-        padding: 5%;
-        height: 20vw;
-    }
-
-    .note-box h1 {
-        padding: 0;
-        margin: 0;
-    }
-
 
     /* .audio {
 

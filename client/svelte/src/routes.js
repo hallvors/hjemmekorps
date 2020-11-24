@@ -1,4 +1,4 @@
-import ProjectHome from "./ProjectHome/ProjectHome.svelte";
+import ProjectHome from "./ProjectMain/ProjectMain.svelte";
 // import ProjectDisplay from "./Navbar.svelte";
 import Homepage from "./Homepage/Homepage.svelte";
 

@@ -2,7 +2,7 @@
 
     let muted = false;
 
-    function handleMute(e) {
+    function toggleMute(e) {
         const button = e.currentTarget;
 
         if (!muted) {
@@ -30,7 +30,7 @@
 {#if !newMember}
 <main>
     <h3>{member.navn}</h3>
-    <button class="mute-btn" on:click={handleMute}><i class="fas fa-volume-up"></i></button>
+    <button class="mute-btn" on:click={toggleMute}><i class="fas fa-volume-up"></i></button>
 </main>
 
 {:else}

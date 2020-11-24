@@ -45,6 +45,7 @@ h5 {
 }
 
 .standard-box {
+  padding: 2vw;
   border: var(--border);
   box-shadow: var(--shadow);
 }
@@ -63,7 +64,7 @@ a:hover {
 }
 
 a:visited {
-  color: rgb(0, 80, 160);
+  color: rgb(96, 119, 143);
 }
 
 label {

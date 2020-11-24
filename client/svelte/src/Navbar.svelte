@@ -89,7 +89,7 @@
 	<ul class="navbar-ul">
 
 		{#each navbarElms as navbarElm}
-		<li><a class="navbar-elm" href={navbarElm.href}>{navbarElm.text}</a></li>
+		<li><a class="navbar-elm link" href={navbarElm.href}>{navbarElm.text}</a></li>
 		{/each}
 	</ul>
 
@@ -103,9 +103,8 @@
 
 <div bind:this={mobileNav} style="top: {navbarHeight};" class="mobile-menu">
 		<ul bind:this={mobileLinks} class="mobile-links">
-			<li class="mobile-link"><a on:click={toggleMobileNav} class="navbar-elm mobile-menu-text" href="/">Home</a></li>
 			{#each navbarElms as navbarElm}
-			<li class="mobile-link"><a on:click={toggleMobileNav} class="navbar-elm mobile-menu-text" href={navbarElm.href}>{navbarElm.text}</a></li>
+			<li class="mobile-link link"><a on:click={toggleMobileNav} class="navbar-elm mobile-menu-text" href={navbarElm.href}>{navbarElm.text}</a></li>
 			{/each}
 		</ul>
 </div>
@@ -134,7 +133,7 @@
 	}
 
 	.navbar-ul {
-		width: 60%;
+		width: 80%;
 		display: flex;
 		justify-content: space-around;
 	}
@@ -187,13 +186,7 @@
 		font-size: 25px;
 	}
 
-
-	@media screen and (max-width:1000px) {
-		.navbar-ul {
-			width: 80%;
-		}
-	}
-	@media screen and (max-width:760px) {
+	@media screen and (max-width:900px) {
 		.navbar-ul {
 			display: none;
 		}
