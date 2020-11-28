@@ -7,12 +7,15 @@
   let projectDisplays = [
     {
       title: 'Star Wars main theme',
+      href: "/project/1"
     },
     {
       title: 'Norge i rødt, hvitt og blått',
+      href: "/project/1"
     },
     {
       title: 'Game of thrones',
+      href: "/project/1"
     },
   ]
 
@@ -22,7 +25,7 @@
 <div class="main-wrapper">
   <div class="display">
     <ProjectDisplay newProject={true} />
-
+    <!-- Trenger navigering! -->
     {#each projectDisplays as display}
       <ProjectDisplay title={display.title} />
     {/each}

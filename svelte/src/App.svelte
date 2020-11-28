@@ -1,9 +1,16 @@
 
 <script>
-	import { Router } from "svelte-router-spa";
-	import { routes } from "./routes.js";
+	import { Router, Route } from "svelte-routing";
+	import Homepage from "./Homepage/Homepage.svelte";
+	import ProjectMain from "./ProjectMain/ProjectMain.svelte";
 
-	import Route from "svelte-router-spa";
+	// OLD ROUTER
+	// import { Router } from "svelte-router-spa";
+	// import { routes } from "./routes.js";
+	// import { Navigate } from "svelte-router-spa";
+	// import Route from "svelte-router-spa";
+	// export let currentRoute;
+	// const params = {}
 
 	import Navbar from "./Navbar.svelte";
 
@@ -11,16 +18,17 @@
 	export let navbarColor = "green";
 	export let navbarHeight = "100px";
 
-	// export let currentRoute;
-	const params = {}
+	// NEW ROUTER
+	export let url = "";
+
 </script>
-
-<Navbar backgroundColor={navbarColor} navbarHeight={navbarHeight}/>
-<div style="padding-top: {navbarHeight}">
-	<Router {routes}/>
-</div>
-
-
+<Router url={url}>
+	<Navbar backgroundColor={navbarColor} navbarHeight={navbarHeight}/>
+	<div style="padding-top: {navbarHeight}">
+		<Route path="/" component={Homepage}/>
+		<Route path="/project/:id" component={ProjectMain}/>
+	</div>
+</Router>
 
 
 <style>

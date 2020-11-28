@@ -40,7 +40,7 @@
 
         <DeltakerDisplay newMember={true}/>
         {#each members as member}
-        <a href={member.id}>
+        <a href="/">
             <DeltakerDisplay member={member}/>
         </a>
         {/each}
