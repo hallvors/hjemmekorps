@@ -3,7 +3,10 @@
 	import { Router, Route } from "svelte-routing";
 	import Homepage from "./Homepage/Homepage.svelte";
 	import ProjectMain from "./ProjectMain/ProjectMain.svelte";
-
+	import {user, projects, bands} from './stores.js';
+	fetch('/api/users/me').then(result => result.json().then(user.set));
+	fetch('/api/bands/').then(result => result.json().then(bands.set));
+	fetch('/api/projects/').then(result => result.json().then(projects.set));
 	// OLD ROUTER
 	// import { Router } from "svelte-router-spa";
 	// import { routes } from "./routes.js";
