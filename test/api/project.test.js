@@ -38,7 +38,7 @@ describe('Get projects', function() {
   	});
   });
 
-  it('create project by upload', function(){
+  xit('create project by upload', function(){
     return request(app)
     .post('/api/projects/new')
     .set('Cookie', 'token=' + HTOKEN)
