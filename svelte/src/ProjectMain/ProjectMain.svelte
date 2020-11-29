@@ -1,45 +1,24 @@
-
 <script>
     import DeltakerDisplay from "./DeltakerDisplay.svelte";
-    import ProjectHome from "./ProjectHome.svelte"
-    // import Route from "svelte-router-spa";
-    // export let currentRoute;
+    import ProjectHome from "./ProjectHome.svelte";
+    import {projects} from "../stores.js";
 
-    export let projectName = "Navnløst prosjekt";
-    const id = "3"
-    const members = [
-        {
-            navn: "Richard",
-            href: `/:${id}`
-        },
-        {
-            navn: "Jakob Etternavn",
-            href: `/:${id}`
-        },
-        {
-            navn: "Ove",
-            href: `/:${id}`
-        },
-        {
-            navn: "Veldig langt navn har vi her",
-            href: `/:${id}`
-        },
-        {
-            navn: "Kanskje best med bare fornavn?",
-            href: `/:${id}`
-        },
-    ]
+    export let id;
+    let currentProject;
+    let unsubProjects = projects.subscribe(theProjects => {
+        currentProject = theProjects.find(project => project._id === id) || {};
+    });
+
     // Todo:
     // Tegne linjer med svg
-    // Fullføre resten 
+    // Fullføre resten
 </script>
-
-<main> 
+<main>
     <div class="members">
         <h1 class="members-title">Deltakere</h1>
 
         <DeltakerDisplay newMember={true}/>
-        {#each members as member}
+        {#each currentProject.members || [] as member}
         <a href="/">
             <DeltakerDisplay member={member}/>
         </a>
@@ -54,12 +33,12 @@
 
     <div class="project-main">
         <div class="project-info">
-            <h1 class="h1-bigger project-title">{projectName}</h1>
+            <h1 class="h1-bigger project-title">{currentProject.name}</h1>
 
             <!-- Her bør det routes -->
             <ProjectHome />
         </div>
-        
+
 
     </div>
 </main>
@@ -90,7 +69,7 @@
     }
 
     /* || CSS for possible lines between stuff */
-    
+
     /* .member-line {
         height: 20%;
         width: 8%;

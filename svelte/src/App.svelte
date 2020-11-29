@@ -17,18 +17,19 @@
 
 	import Navbar from "./Navbar.svelte";
 
-	// export let backgroundColor = "red";
-	export let navbarColor = "green";
-	export let navbarHeight = "100px";
+	let navbarColor = "green";
+	let navbarHeight = "100px";
 
 	// NEW ROUTER
 	export let url = "";
 
 </script>
 <Router url={url}>
-	<Navbar backgroundColor={navbarColor} navbarHeight={navbarHeight}/>
+	<Navbar backgroundColor={navbarColor} navbarHeight={navbarHeight} user={$user}/>
 	<div style="padding-top: {navbarHeight}">
-		<Route path="/" component={Homepage}/>
+		<Route path="/">
+			<Homepage projects={$projects} />
+		</Route>
 		<Route path="/project/:id" component={ProjectMain}/>
 	</div>
 </Router>

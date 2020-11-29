@@ -29,7 +29,7 @@
 
 {#if !newMember}
 <main>
-    <h3>{member.navn}</h3>
+    <h3>{member.name}</h3>
     <button class="mute-btn" on:click={toggleMute}><i class="fas fa-volume-up"></i></button>
 </main>
 
@@ -70,7 +70,7 @@
     .new-member {
         position: relative;
     }
-    
+
     /* .new-member:hover {
         cursor: pointer;
         box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);

@@ -1,11 +1,14 @@
 <script>
+  import { Link } from "svelte-routing";
+
   export let title = "Prosjekt uten navn"
   export let newProject = false;
+  export let id = '';
 </script>
 
 {#if !newProject}
 <main>
-  <h2>{title}</h2>
+  <h2><Link to={'/project/' + id}>{title}</Link></h2>
 </main>
 
 
@@ -63,7 +66,7 @@
       font-size: 2em;
     }
   }
-  
+
   @media only screen and (max-width: 600px) {
     main {
       width: 80vw;

@@ -3,31 +3,17 @@
 
   // export let backgroundColor = 'red';
 
-  // Dette får man fra backend, bilde?
-  let projectDisplays = [
-    {
-      title: 'Star Wars main theme',
-      href: "/project/1"
-    },
-    {
-      title: 'Norge i rødt, hvitt og blått',
-      href: "/project/1"
-    },
-    {
-      title: 'Game of thrones',
-      href: "/project/1"
-    },
-  ]
+  // Dette får man fra backend
+  export let projects = [];
 
-  // window.addEventListener("resize", (e)=> console.log(e.target.innerWidth))
 </script>
 
 <div class="main-wrapper">
   <div class="display">
     <ProjectDisplay newProject={true} />
     <!-- Trenger navigering! -->
-    {#each projectDisplays as display}
-      <ProjectDisplay title={display.title} />
+    {#each projects as project}
+      <ProjectDisplay title={project.name} id={project._id} />
     {/each}
   </div>
 </div>
@@ -49,7 +35,7 @@
 
   /* || Media queries */
 
-  @media only screen and (min-width: 1200px) {    
+  @media only screen and (min-width: 1200px) {
     .main-wrapper {
       width: 1200px;
     }
