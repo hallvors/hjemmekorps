@@ -16,7 +16,13 @@ router.get("/", (req, res, next) => {
 	});
 });
 
-router.post("/new", multerUpload.single("mxmlfile"), (req, res, next) => {
+router.get("/:id", (req, res, next) => {
+	return sClient.getProject(req.user._id, req.params.id).then((project) => {
+		res.json(project);
+	});
+});
+
+router.post("/new", multerUpload.single("file"), (req, res, next) => {
 	if (!req.file) {
 		return res.status(400).json({ error: "Missing files" });
 	}
@@ -24,9 +30,9 @@ router.post("/new", multerUpload.single("mxmlfile"), (req, res, next) => {
 	const mxlmData = parse(req.file);
 	const bandMembers = getMemberNames(mxlmData);
 	const projName = getName(mxlmData);
-	return ensureMembersExist(req.user._id, bandName, bandMembers).then(() => {
+	return sClient.ensureMembersExist(req.user._id, bandName, bandMembers).then(memberData => {
 		return sClient
-			.addProject(req.user._id, projName, req.file)
+			.addProject(req.user._id, projName, req.file, memberData)
 			.then((project) => {
 				res.json(project);
 			});

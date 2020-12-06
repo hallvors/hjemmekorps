@@ -1239,6 +1239,11 @@ clone-response@^1.0.2:
   dependencies:
     mimic-response "^1.0.0"
 
+clone@2.x:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/clone/-/clone-2.1.2.tgz#1b7f4b9f591f1e8f83670401600345a02887435f"
+  integrity sha1-G39Ln1kfHo+DZwQBYANFoCiHQ18=
+
 co@^4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
@@ -3552,10 +3557,10 @@ nano-pubsub@^1.0.2:
   resolved "https://registry.yarnpkg.com/nano-pubsub/-/nano-pubsub-1.0.2.tgz#34ce776f7af959915b8f7acfe8dd6b9c66f3bde9"
   integrity sha1-NM53b3r5WZFbj3rP6N1rnGbzvek=
 
-nanoid@^3.1.15:
-  version "3.1.16"
-  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.16.tgz#b21f0a7d031196faf75314d7c65d36352beeef64"
-  integrity sha512-+AK8MN0WHji40lj8AEuwLOvLSbWYApQpre/aFJZD71r43wVRLrOYS4FmJOPQYon1TqB462RzrrxlfA74XRES8w==
+nanoid@^3.1.20:
+  version "3.1.20"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.20.tgz#badc263c6b1dcf14b71efaa85f6ab4c1d6cfc788"
+  integrity sha512-a1cQNyczgKbLX9jwbS/+d7W8fX/RfgYR7lVWwWOGIPNgK2m0MWvrGF6/m4kk6U3QcFMnZf3RIhL0v2Jgh/0Uxw==
 
 nanomatch@^1.2.9:
   version "1.2.13"
@@ -3608,6 +3613,13 @@ nock@^13.0.4:
     json-stringify-safe "^5.0.1"
     lodash.set "^4.3.2"
     propagate "^2.0.0"
+
+node-cache@^5.1.2:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/node-cache/-/node-cache-5.1.2.tgz#f264dc2ccad0a780e76253a694e9fd0ed19c398d"
+  integrity sha512-t1QzWwnk4sjLWaQAS8CHgOJ+RAfmHpxFWmc36IWTiWHQfs0w5JDMBS1b1ZxQteo0vVVuWJvIUKHDkkeK7vIGCg==
+  dependencies:
+    clone "2.x"
 
 node-int64@^0.4.0:
   version "0.4.0"
@@ -4896,12 +4908,10 @@ supports-hyperlinks@^2.0.0:
     has-flag "^4.0.0"
     supports-color "^7.0.0"
 
-svelte-router-spa@^5.7.4:
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/svelte-router-spa/-/svelte-router-spa-5.8.0.tgz#b511290fe70f78b484d9b3984c8348e2eac251f1"
-  integrity sha512-o+N+rlpC+Qb9ILdCk0p+UQb8NnY9q46C7iT4DIY1CEAshbnX4WUtVkCD8eausEHW5XTmiyJf3D262RF2mOmD5g==
-  dependencies:
-    url-params-parser "^1.0.3"
+svelte-routing@^1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/svelte-routing/-/svelte-routing-1.4.2.tgz#291160b537c9c73e711731eb099c48bb24cc3419"
+  integrity sha512-CSCKRLeOp9vjsDGGOEgL9DPm9HZLgZuTNehyTCl3K+6fCVH1Aw/K/WicavAVNcbsHmdR4wgF//0YVR9hrcdvGA==
 
 svelte@^3.0.0:
   version "3.29.7"
@@ -5126,6 +5136,11 @@ undefsafe@^2.0.3:
   dependencies:
     debug "^2.2.0"
 
+underscore@^1.12.0:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.12.0.tgz#4814940551fc80587cef7840d1ebb0f16453be97"
+  integrity sha512-21rQzss/XPMjolTiIezSu3JAjgagXKROtNrYFEOWK109qY1Uv2tVjPTZ1ci2HgvQDA16gHYSthQIJfB+XId/rQ==
+
 union-value@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/union-value/-/union-value-1.0.1.tgz#0b6fe7b835aecda61c6ea4d4f02c14221e109847"
@@ -5186,11 +5201,6 @@ urix@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/urix/-/urix-0.1.0.tgz#da937f7a62e21fec1fd18d49b35c2935067a6c72"
   integrity sha1-2pN/emLiH+wf0Y1Js1wpNQZ6bHI=
-
-url-params-parser@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/url-params-parser/-/url-params-parser-1.0.3.tgz#f99940c575705835049ab223b349fe2575a78ee5"
-  integrity sha512-PLyEzfi+ymsvG8FYSNwvUG6LT/AM7ApWcRgF4EVEb+4Vlf7MkIEbdMjunLaXuTRl7YwZDRoyZaez8Y1AGLuALA==
 
 url-parse-lax@^3.0.0:
   version "3.0.0"
