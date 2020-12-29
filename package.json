@@ -1,15 +1,26 @@
 {
-  "name": "TODO",
-  "description": "TODO",
-  "version": "0.0.1",
+
+  "name": "hjemmekorps",
+  "version": "1.0.0",
+  "description": "Hjemmekorps skal inspirere til hjemmeøving ved å gjøre leksene til en del av felles prosjekter.",
   "scripts": {
     "dev": "sapper dev",
     "build": "sapper build --legacy",
     "export": "sapper export --legacy",
     "start": "node __sapper__/build",
-    "test": "jest ",
+    "test": "NODE_ENV=test jest ",
     "test:watch": "npm run test -- --watch"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hallvors/hjemmekorps.git"
+  },
+  "author": "HallRic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hallvors/hjemmekorps/issues"
+  },
+  "homepage": "https://github.com/hallvors/hjemmekorps#readme",
   "dependencies": {
     "@rollup/plugin-json": "^4.1.0",
     "@sanity/client": "^2.0.9",
@@ -22,6 +33,7 @@
     "nanoid": "^3.1.20",
     "nconf": "^0.11.0",
     "node-cache": "^5.1.2",
+    "opensheetmusicdisplay": "^0.8.7",
     "polka": "next",
     "sirv": "^1.0.0",
     "underscore": "^1.12.0"
