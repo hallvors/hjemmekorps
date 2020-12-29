@@ -1,16 +1,25 @@
 <script>
 	import { stores } from '@sapper/app';
 	const { session } = stores();
+	/* TODO: this navigation is used for
+		1. pages that do not need a user session (/feil/*, /om/*)
+			if (!user)
+		2. Normal users (musicians)
+			if (user && user._type === 'member')
+		3. Admin users
+			if (user && user._type === 'adminUser')
+		Rewrite the file to adapt to  the type of user logged in.
 
+	*/
 	// NOTE: this module is dependent on the "hamburgers.css" file
 	import {bands} from '../../stores.js';
 	export let backgroundColor = "red";
 	export let navbarHeight;
-	export let user = {};
 	export let segment;
 	// Ikke nødvendig
 	const projectId = 1;
 
+	let user;
 	let logo;
 	session.subscribe(data => {
 		if (data.bands.length) {
