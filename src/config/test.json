@@ -1,0 +1,9 @@
+{
+	"sanity": {
+		"dataset": "test",
+		"token": "skEmSeVTBs1vhTwhTlib08u5Gw6TGgZmkCYCXBtVjQVvzVZF0lMJQCpU2LVwQNVBln9GBYvdDUQKnKNHGhMsbanw3MqmPXPK5opspTqwEL29VhtNGRJL65SG1jVI26KGuFUu8KICiKe7a2KKZT0PE8osIystE5BKqntYg7b4QGRjQFfOozOG"
+	},
+	"site": {
+		"tokensecret": "test-test-test"
+	}
+}
