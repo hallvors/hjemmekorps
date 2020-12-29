@@ -2,7 +2,7 @@
   import { stores } from '@sapper/app';
   const { session } = stores();
 
-  import ProjectDisplay from './ProjectDisplay.svelte'
+  import ProjectDisplay from '../ProjectDisplay/ProjectDisplay.svelte'
 
   // Dette får man fra backend
   let projects = [];
