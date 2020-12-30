@@ -14,7 +14,7 @@
         </span>
 
 </main>
-<NoteBox/>
+<NoteBox project={project} />
 
 
 <style>
