@@ -20,7 +20,6 @@
 
 <div class="main-wrapper">
   <div class="display">
-    <!-- Trenger navigering! -->
     {#each projects as project}
       <ProjectDisplay title={project.name} id={project._id} />
     {/each}

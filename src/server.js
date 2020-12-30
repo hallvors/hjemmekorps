@@ -17,16 +17,16 @@ const app = polka();
 app
 .use(json(), urlencoded({ extended: false }), cookieParser())
 .use(utils.jsonSender, utils.parseUrl) // Some stuff Express does by default.
-.use('/', authenticate) // set req.user if cookie or URL token exists, redirects to error message otherwise
+//.use('/', authenticate) // set req.user if cookie or URL token exists, redirects to error message otherwise
 .use(
 	compression({ threshold: 0 }), // enable gzip compression of transferred data
 	sirv("static", { dev }), // serve files in "static" dir (in root) as-is
+	authenticate,
 	sapper.middleware({ // enable Sapper - Svelte's server-side rendering lib
 		session: async (req, res) => { // this adds session data to the page
 			// data will be available to routes that do export let session
 			let bands = [];
 			let projects = [];
-			console.log(req.user)
 			if (req.user && req.user._type === 'adminUser') { // admin is loading this page, list bands and projects
 				bands = await getBandsForUser(req.user._id);
 				projects = await getProjects(req.user._id);

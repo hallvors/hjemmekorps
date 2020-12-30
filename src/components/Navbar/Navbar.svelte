@@ -139,7 +139,9 @@
 <!-- MobileNav. Only shows when burger is active -->
 <div bind:this={mobileNav} style="top: {navbarHeight};" class="mobile-menu">
 		<ul bind:this={mobileLinks} class="mobile-links">
+			{#if user}
 			<li>Hei, {user.friendly_name}</li>
+			{/if}
 			<!-- {#each navbarElms as navbarElm}
 			<li><a on:click={toggleMobileNav} href={navbarElm.href}>{navbarElm.text}</a></li>
 			{/each} -->

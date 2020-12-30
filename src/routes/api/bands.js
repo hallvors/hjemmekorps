@@ -6,6 +6,6 @@ export async function get(req, res, next) {
 		.then(result => res.json(result));
 	}
 	// should never get here..
-	res.status(401);
+	res.statusCode = 401;
 	res.end();
 }

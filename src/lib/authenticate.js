@@ -5,6 +5,11 @@ const jwt = require('jsonwebtoken');
 const sClient = require('./sanity_client');
 
 const authenticate = async function(req, res, next) {
+	if (req.url && /^\/client\//.test(req.url)) {
+		// Static files from /client are shown without a user session
+		return next();
+	}
+
 	if (req.url && /^\/feil\//.test(req.url)) {
 		// Error messages are shown without a user session
 		return next();
@@ -13,9 +18,13 @@ const authenticate = async function(req, res, next) {
 		// A few other pages are shown without a user session too - /om/personvern for example
 		return next();
 	}
+
+	console.log('authenticate for ' + req.url);
 	if (!(req.query.t || req.cookies.token)) {
-		res.status(302);
-		res.redirect(302, '/feil/tilgang');
+		console.log('no token in URL or cookie')
+		res.statusCode = 302;
+		res.setHeader('Location', '/feil/tilgang');
+		res.end();
 		return;
 	}
 	let token = req.query.t || req.cookies.token;
@@ -33,8 +42,8 @@ const authenticate = async function(req, res, next) {
 			user.project = await sClient.getProject(tokenData.userId, tokenData.projectId);
 		}
 		if (!(data && data.length === 1)) {
-			res.status(302);
-			res.redirect(302, '/feil/nyreg');
+			res.statusCode = 302;
+			res.setHeader('Location', '/feil/nyreg');
 			return;
 		}
 		req.user = user;
@@ -43,7 +52,7 @@ const authenticate = async function(req, res, next) {
 		}
 		return next();
 	} catch(e) {
-		res.redirect(302, '/feil/ukjent');
+		res.setHeader('Location', '/feil/ukjent');
 		return;
 	}
 };
