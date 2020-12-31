@@ -4,24 +4,31 @@ const jwt = require('jsonwebtoken');
 
 const sClient = require('./sanity_client');
 
+function isOkWithoutSession(url) {
+	if (url && /^\/feil\//.test(url)) {
+		// Error messages are shown without a user session
+		return true;
+	}
+	if (url && /^\/om\//.test(url)) {
+		// A few other pages are shown without a user session too - /om/personvern for example
+		return true;
+	}
+	return false;
+}
+
 const authenticate = async function(req, res, next) {
 	if (req.url && /^\/client\//.test(req.url)) {
 		// Static files from /client are shown without a user session
 		return next();
 	}
 
-	if (req.url && /^\/feil\//.test(req.url)) {
-		// Error messages are shown without a user session
-		return next();
-	}
-	if (req.url && /^\/om\//.test(req.url)) {
-		// A few other pages are shown without a user session too - /om/personvern for example
-		return next();
-	}
-
 	console.log('authenticate for ' + req.url);
 	if (!(req.query.t || req.cookies.token)) {
-		console.log('no token in URL or cookie')
+		console.log('no token in URL or cookie');
+
+		if (isOkWithoutSession(req.url)) {
+			return next();
+		}
 		res.statusCode = 302;
 		res.setHeader('Location', '/feil/tilgang');
 		res.end();
