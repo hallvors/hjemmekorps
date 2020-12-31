@@ -11,9 +11,12 @@
 	*/
 
 	import AdminHome from "../AdminHome/AdminHome.svelte";
+	import UserHome from "../UserHome/UserHome.svelte";
 </script>
 <div>
 	{#if user && user._type === 'adminUser'}
 		<AdminHome />
+	{:else if user && user._type === 'member'}
+		<UserHome />
 	{/if}
 </div>
