@@ -25,9 +25,9 @@ For å kjøre et lokalt test/utviklings-miljø må du gjøre følgende:
 	}
 }
 ```
+1. Kjør `./prep-files.sh` for å kopiere noen JS-filer som må serveres statisk fra node_modules til korrekt plass
 1. Nå skal du kunne kjøre `npm run dev` eller `yarn run dev`
 
 ## Test admin-tilgang
 
 For å bruke admin-sidene må du lage en innloggings-lenke med å kjøre `node scripts/make-login-link.js EPOST` der EPOST er epostadressa til en admin-bruker som er opprettet under "Innhold > Admin" i Sanity. Du får opp to lenker, kopier den med `localhost:5000` og kjør `npm start dev` og gå til lenka.
-
