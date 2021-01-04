@@ -49,17 +49,25 @@ const authenticate = async function(req, res, next) {
 			user.project = await sClient.getProject(tokenData.userId, tokenData.projectId);
 		}
 		if (!(data && data.length === 1)) {
+			console.error('go to /feil/nyreg')
 			res.statusCode = 302;
 			res.setHeader('Location', '/feil/nyreg');
+			res.end();
 			return;
 		}
+		console.log('setting req.user', user)
 		req.user = user;
-		if (req.query.t && !req.cookies.token) {
-			res.cookie('token', token);
+		// if token does not exist or is not the value we use for auth now,
+		// make a new cookie.
+		if (req.query.t && (!req.cookies.token || req.cookies.token !== token)) {
+			res.setCookie('token', token);
 		}
 		return next();
 	} catch(e) {
+		console.error(e);
+		res.statusCode = 302;
 		res.setHeader('Location', '/feil/ukjent');
+		res.end();
 		return;
 	}
 };
