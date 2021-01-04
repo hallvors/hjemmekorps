@@ -18,4 +18,13 @@ function parseUrl(req, res, next) {
 	next();
 }
 
-module.exports = {jsonSender, parseUrl};
+function setCookie(req, res, next) {
+	res.setCookie = function(name, value, options) {
+		console.log('will set c ' + name)
+		let exp = options && options.expires ? '; Expires=' + options.expires.toGMTString() : '';
+		res.setHeader('Set-Cookie', `${encodeURIComponent(name)}=${encodeURIComponent(value)}${exp}`);
+	};
+	next();
+}
+
+module.exports = {jsonSender, parseUrl, setCookie};

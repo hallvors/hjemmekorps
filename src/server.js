@@ -16,7 +16,7 @@ const dev = NODE_ENV === "development";
 const app = polka();
 app
 .use(json(), urlencoded({ extended: false }), cookieParser())
-.use(utils.jsonSender, utils.parseUrl) // Some stuff Express does by default.
+.use(utils.jsonSender, utils.parseUrl, utils.setCookie) // Some stuff Express does by default.
 //.use('/', authenticate) // set req.user if cookie or URL token exists, redirects to error message otherwise
 .use(
 	compression({ threshold: 0 }), // enable gzip compression of transferred data
