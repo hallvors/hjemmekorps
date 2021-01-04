@@ -9,7 +9,7 @@ console.log(email)
 const token = jwt.sign({email}, env.nconf.get('site:tokensecret'));
 
 console.log('\n');
-console.log('(KOMMER!) https://hjemmekorps.herokuapp.com/api/auth/login?t=' + token)
+console.log('(KOMMER!) https://hjemmekorps.herokuapp.com/?t=' + token)
 console.log('\n\n');
-console.log(`http://localhost:${env.port}/api/auth/login?t=${token}`);
+console.log(`http://localhost:${env.port}/?t=${token}`);
 console.log('\n');
