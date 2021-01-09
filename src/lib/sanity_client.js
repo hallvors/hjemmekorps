@@ -1,5 +1,7 @@
 const sanity = require("@sanity/client");
 const fs = require("fs");
+const jwt = require('jsonwebtoken');
+
 const env = require("../config/environment");
 const { nanoid } = require("nanoid");
 const NodeCache = require("node-cache");
@@ -97,8 +99,9 @@ function getProject(userId, projectId) {
 	// userId can be either an admin user or a regular band member user ID
 	// admin user will get more data from this method, however: no members details
 	// for a non-admin
-	return getSanityClient().fetch(
-		`*[_type == $type && _id == $projectId][0] {
+	return getSanityClient()
+		.fetch(
+			`*[_type == $type && _id == $projectId][0] {
 			name, _id, sheetmusic,
 			"sheetmusicFile": sheetmusic.asset->url,
 			owner,
@@ -106,27 +109,45 @@ function getProject(userId, projectId) {
 				_id, name, phone, email, "band": band->name, "portraitUrl": portrait.asset->url
 			}
 		}`,
-		{
-			type: "project",
-			userId,
-			projectId,
-		}
-	).then(result => {
-		if (!result) {
-			return null;
-		}
-		if (result.owner._ref !== userId) {
-			// not requested by the admin user who owns this project..
-			if (!result.members.find(member => member._id === userId)) {
-				// the user is not a musician for this project.. odd!
-				console.error('user not musician for requested project');
+			{
+				type: "project",
+				userId,
+				projectId,
+			}
+		)
+		.then((result) => {
+			if (!result) {
+				console.error('no result!?')
 				return null;
 			}
-			// privacy etc.. remove the members data
-			delete result.members;
-		}
-		return result;
-	});
+			if (result.owner._ref !== userId) {
+				console.log('not requested by owner?', result.owner._ref)
+				// not requested by the admin user who owns this project..
+				if (!result.members.find((member) => member._id === userId)) {
+					// the user is not a musician for this project.. odd!
+					console.error("user not musician for requested project");
+					return null;
+				}
+				// privacy etc.. remove the members data
+				delete result.members;
+				// Here comes the hard part: remove non-useful parts of this score
+				// we want to send only the relevant part for this person
+				// TODO: is there a usable XML parser / serializer for node.js? Should we attempt to do this here,
+				// or push this work to the browser? Or can we use AlphaTab and just tell it to render a certain track?
+				// To be continued..
+			} else {
+				console.log('project owner requests project')
+				// Project owner is requesting data. We should also include the secret links for all members
+				result.members.forEach((member) => {
+					console.log('make link for ', member)
+					member.token = jwt.sign(
+						{ userId: member._id, projectId },
+						env.nconf.get("site:tokensecret")
+					);
+				});
+			}
+			return result;
+		});
 }
 
 function addProject(userId, name, mxmlFile, members) {

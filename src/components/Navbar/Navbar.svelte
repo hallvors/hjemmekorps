@@ -12,10 +12,8 @@
 
 	*/
 	// NOTE: this module is dependent on the "hamburgers.css" file
-	import {bands} from '../../stores.js';
 	export let backgroundColor = "red";
-	export let navbarHeight;
-	export let segment;
+	export let navbarHeight = 100;
 	// Ikke nødvendig
 	const projectId = 1;
 

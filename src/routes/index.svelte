@@ -1,8 +1,6 @@
 <script>
-	import { stores } from '@sapper/app';
-	const { session } = stores();
-
 	import App from '../components/App/App.svelte';
+	export let segment;
 </script>
 
 
@@ -44,4 +42,4 @@
 	<title>Hjemmekorps</title>
 </svelte:head>
 
-<App session={$session} />
+<App />

@@ -1,7 +1,6 @@
 <script>
     import DeltakerDisplay from "./DeltakerDisplay.svelte";
     import ProjectHome from "./ProjectHome.svelte";
-    import {projects} from "../../stores.js";
 
     export let project;
 

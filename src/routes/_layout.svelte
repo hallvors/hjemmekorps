@@ -26,7 +26,7 @@
 	}
 </style>
 
-<Navbar {segment} />
+<Navbar />
 
 <main>
 	<slot></slot>
