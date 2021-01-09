@@ -8,7 +8,7 @@ import { json, urlencoded } from "body-parser";
 
 import authenticate from "./lib/authenticate"; // code to check if we have a user or admin session
 import utils from "./lib/utils";
-import {getBandsForUser, getProjects} from "./lib/sanity_client";
+import {getBandsForAdminUser, getProjects} from "./lib/sanity_client";
 
 const { PORT, NODE_ENV } = process.env;
 const dev = NODE_ENV === "development";
@@ -28,7 +28,7 @@ app
 			let bands = [];
 			let projects = [];
 			if (req.user && req.user._type === 'adminUser') { // admin is loading this page, list bands and projects
-				bands = await getBandsForUser(req.user._id);
+				bands = await getBandsForAdminUser(req.user._id);
 				projects = await getProjects(req.user._id);
 			} else if (req.user) { // this a regular, non-admin user
 				projects = [req.user.project];

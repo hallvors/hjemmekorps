@@ -35,7 +35,7 @@ function getAdminUserData(email) {
 	}
 	return getSanityClient()
 		.fetch(
-			`*[_type == $type && email == $email && !(_id in path("drafts.**"))]{
+			`*[_type == $type && email == $email && !(_id in path("drafts.**"))][0]{
 		name, email, friendly_name, phone, portrait, _id, _type,
 		"portraitUrl": portrait.asset->url
 	}`,
@@ -51,15 +51,18 @@ function getAdminUserData(email) {
 }
 
 function getUserData(id) {
-	// we want user data for most API requests from non-admins, cache it..
+	// we want user data for most API requests from non-admins too, cache it..
 	if (sanityCache.has(id)) {
 		return Promise.resolve(sanityCache.get(id));
 	}
 	return getSanityClient()
 		.fetch(
-			`*[_type == $type && _id == $id && !(_id in path("drafts.**"))]{
+			`*[_type == $type && _id == $id && !(_id in path("drafts.**"))][0]{
 		name, email, phone, "portrait": portrait.asset->, _id, _type,
-		"band": band->{name, "logo": logo.asset->}
+		"band": band->{name, 
+			"palette": logo.asset->metadata.palette, 
+			"logoUrl": logo.asset->url
+		}
 	}`,
 			{
 				type: "member",
@@ -72,7 +75,7 @@ function getUserData(id) {
 		});
 }
 
-function getBandsForUser(userId) {
+function getBandsForAdminUser(userId) {
 	return getSanityClient().fetch(
 		`*[_type == $type && references($userId) && !(_id in path("drafts.**"))]{
 		..., "logoUrl": logo.asset->url,
@@ -99,6 +102,11 @@ function getProject(userId, projectId) {
 	// userId can be either an admin user or a regular band member user ID
 	// admin user will get more data from this method, however: no members details
 	// for a non-admin
+	let id = `project-${userId}-${projectId}`;
+	if (sanityCache.has(id)) {
+		return Promise.resolve(sanityCache.get(id));
+	}
+
 	return getSanityClient()
 		.fetch(
 			`*[_type == $type && _id == $projectId][0] {
@@ -146,6 +154,7 @@ function getProject(userId, projectId) {
 					);
 				});
 			}
+			sanityCache.set(id, result);
 			return result;
 		});
 }
@@ -322,7 +331,7 @@ module.exports = {
 	getSanityClient,
 	getAdminUserData,
 	getUserData,
-	getBandsForUser,
+	getBandsForAdminUser,
 	getProjects,
 	ensureMembersExist,
 

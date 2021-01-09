@@ -6,12 +6,10 @@
 
   // Dette får man fra backend
   let project;
-  let band;
   let user;
 
   session.subscribe(data => {
-    if (data.bands) {
-      band = data.bands[0];
+    if (data.projects) {
       project = data.projects[0];
     }
     user = data.user;
@@ -20,7 +18,11 @@
 
 <div class="main-wrapper">
   <div class="display">
-    <RecordUi project user />
+    {#if project && user}
+    <RecordUI {project} {user} />
+    {:else}
+       <p>Vennligst vent..</p>
+    {/if}
   </div>
 </div>
 
@@ -30,6 +32,5 @@
     width: 90%;
     margin: 0 auto;
   }
-
 
 </style>

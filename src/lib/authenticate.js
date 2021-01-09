@@ -37,25 +37,26 @@ const authenticate = async function(req, res, next) {
 	let token = req.query.t || req.cookies.token;
 	try {
 		let tokenData = jwt.verify(token, env.nconf.get('site:tokensecret'));
-		let user, data;
+		let user;
 		// admins are authenticated by email
 		if (tokenData.email) {
 			console.log('will get data for ' + tokenData.email)
-			data = await sClient.getAdminUserData(tokenData.email);
-			user = data[0];
+			user = await sClient.getAdminUserData(tokenData.email);
 		} else if (tokenData.userId) {
-			data = await sClient.getUserData(tokenData.userId);
-			user = data[0];
+			user = await sClient.getUserData(tokenData.userId); // user, user.band
 			user.project = await sClient.getProject(tokenData.userId, tokenData.projectId);
 		}
-		if (!(data && data.length === 1)) {
+		if (!user) {
+			if (isOkWithoutSession(req.url)) { 
+				// avoid redirect loops /feil/* if token is wrong
+				return next();
+			}
 			console.error('go to /feil/nyreg')
 			res.statusCode = 302;
 			res.setHeader('Location', '/feil/nyreg');
 			res.end();
 			return;
 		}
-		console.log('setting req.user', user)
 		req.user = user;
 		// if token does not exist or is not the value we use for auth now,
 		// make a new cookie.
