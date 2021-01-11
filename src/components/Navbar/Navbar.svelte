@@ -22,7 +22,7 @@
 	session.subscribe(data => {
 		if (data.bands.length) {
 			logo = data.bands[0].logoUrl;
-			backgroundColor = data.bands[0].palette.darkVibrant.background;
+			backgroundColor = data.bands[0].palette ? data.bands[0].palette.darkVibrant.background : '#fff';
 		}
 		user = data.user;
 	});
