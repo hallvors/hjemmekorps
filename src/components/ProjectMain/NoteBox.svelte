@@ -1,16 +1,9 @@
 <script>
     import LibLoader from "../utils/LibLoader.svelte";
-    import { createEventDispatcher } from "svelte";
-
-    const dispatch = createEventDispatcher();
 
     // Box for displaying notes from musicXML
-    // optionally has a "play" button to show
-    // countdown and highlight notes in right
-    // tempo
 
     export let project;
-    export let showPlayButton = false;
     export let trackForPerson = null;
 
     let sheetmusic;
@@ -75,10 +68,9 @@
         });
     }
 
-function initPlaythrough() {
+export function initPlaythrough() {
     alphaTabInstance.changeTrackSolo(); 
     alphaTabInstance.play(); 
-    dispatch('play')
 }
 
 
@@ -117,10 +109,3 @@ function initPlaythrough() {
     libraryDetectionObject="alphaTab" />
 
 <div class="standard-box note-box" bind:this={sheetmusic} id="sheetmusic" />
-
-{#if showPlayButton}
-    <button
-        type="button"
-        on:click="{initPlaythrough}"
-    >Start</button>
-{/if}
