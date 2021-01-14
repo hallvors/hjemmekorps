@@ -1,0 +1,134 @@
+<html>
+<head>
+
+<script src="https://cdn.jsdelivr.net/npm/@coderline/alphatab@1.1.0/dist/alphaTab.min.js"></script>
+<style type="text/css">
+      .at-cursor-bar {
+        /* Defines the color of the bar background when a bar is played */
+        background: rgba(255, 242, 0, 0.25);
+      }
+
+      .at-selection div {
+        /* Defines the color of the selection background */
+        background: rgba(64, 64, 255, 0.1);
+      }
+
+      .at-cursor-beat {
+        /* Defines the beat cursor */
+        background: rgba(64, 64, 255, 0.75);
+        width: 3px;
+      }
+
+      .at-highlight * {
+        /* Defines the color of the music symbols when they are being played (svg) */
+        fill: #0078ff;
+        stroke: #0078ff;
+      }
+
+</style>
+
+</head>
+<body>
+<input type="button" onclick="api.changeTrackSolo(); api.play()" value="play">
+
+<div id="alphaTab" data-tex="true">
+
+</div>
+<script src="https://kit.fontawesome.com/b43f0e512e.js"></script>
+<!-- Changed sidebar -->
+<div class="at-sidebar">
+  <div class="at-sidebar-content">
+    <div class="at-track-list"></div>
+  </div>
+</div>
+<div id="at-track-template">
+  <div class="at-track">
+    <div class="at-track-icon">
+      <i class="fas fa-guitar"></i>
+    </div>
+    <div class="at-track-details">
+      <div class="at-track-name"></div>
+      </div>
+    </div>
+</div>
+<!-- Initialize alphaTab -->
+<script type="text/javascript">
+const element = document.getElementById("alphaTab");
+var api = new alphaTab.AlphaTabApi(element, {
+	file:
+		"https://cdn.sanity.io/files/5ggq2na3/test/2dde429edadfe34222376bab7a32676508d85ca8.xml",
+	player: {
+		enablePlayer: true,
+		soundFont:
+			"https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2",
+		scrollElement: document.body, // this is the element to scroll during playback
+	},
+	notation: {
+		elements: {
+			GuitarTuning: false,
+			EffectTempo: false,
+		},
+	},
+});
+
+api.load(
+	"https://cdn.sanity.io/files/5ggq2na3/test/2dde429edadfe34222376bab7a32676508d85ca8.xml"
+);
+//const api = new alphaTab.AlphaTabApi(element);
+api.countInVolume = 1;
+api.metronomeVolume = 1;
+api.masterVolume = 0.0;
+console.log(api)
+api.player.playbackSpeed = 0.5;
+
+// helper function to create individual items
+function createTrackItem(track) {
+	const trackItem = document
+		.querySelector("#at-track-template")
+		.cloneNode(true).firstElementChild;
+	trackItem.querySelector(".at-track-name").innerText = track.name;
+	trackItem.track = track;
+	trackItem.onclick = (e) => {
+		e.stopPropagation();
+		// here we use some API function of alphaTab.
+		// check the reference docs for the details.
+		api.renderTracks([track]);
+	};
+	return trackItem;
+}
+
+const trackList = document.body.querySelector(".at-track-list");
+// fill track list when the score is loaded
+api.scoreLoaded.on((score) => {
+	api.render();
+
+	// clear items
+	trackList.innerHTML = "";
+	// generate a track item for all tracks of the score
+	score.tracks.forEach((track) => {
+		trackList.appendChild(createTrackItem(track));
+	});
+});
+
+// mark the rendered track as active in the list
+api.renderStarted.on(() => {
+	// collect tracks being rendered
+	const tracks = new Map();
+	// here we access the currently rendered tracks of alphaTab
+	api.tracks.forEach((t) => {
+		console.log(t);
+		tracks.set(t.index, t);
+	});
+	// mark the item as active or not
+	const trackItems = trackList.querySelectorAll(".at-track");
+	trackItems.forEach((trackItem) => {
+		if (tracks.has(trackItem.track.index)) {
+			trackItem.classList.add("active");
+		} else {
+			trackItem.classList.remove("active");
+		}
+	});
+});
+</script>
+</body>
+</html>

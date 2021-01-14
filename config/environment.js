@@ -1,7 +1,7 @@
 const nconf = require('nconf');
 
 const env = process.env.NODE_ENV || 'development';
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 
 nconf.env('__').argv();
 nconf.add('overrides', {type: 'file', file: `${__dirname}/overrides.json`});
