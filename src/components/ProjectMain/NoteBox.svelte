@@ -1,60 +1,67 @@
 <script>
-    import LibLoader from "../utils/LibLoader.svelte";
+  import { createEventDispatcher } from "svelte";
 
-    // Box for displaying notes from musicXML
+  const dispatch = createEventDispatcher();
 
-    export let project;
-    export let trackForPerson = null;
+  import LibLoader from "../utils/LibLoader.svelte";
 
-    let sheetmusic;
-    let alphaTabInstance;
-    function renderMusic() {
-        console.log({project}); console.log({trackForPerson})
-        alphaTabInstance = new alphaTab.AlphaTabApi(sheetmusic, {
-            file: project.sheetmusicFile,
-            player: {
-                enablePlayer: true,
-                soundFont: "/js/alphatab/soundfont/sonivox.sf2",
-                scrollElement: sheetmusic, // this is the element to scroll during playback
-            },
-            notation: {
-                elements: {
-                    GuitarTuning: false,
-                    EffectTempo: false,
-                },
-            },
+  // Box for displaying notes from musicXML
+
+  export let project;
+  export let trackForPerson = null;
+
+  let sheetmusic;
+  let alphaTabInstance;
+  let scrollControlInterval;
+
+  function renderMusic() {
+    console.log({ project });
+    console.log({ trackForPerson });
+    alphaTabInstance = new alphaTab.AlphaTabApi(sheetmusic, {
+      file: project.sheetmusicFile,
+      player: {
+        enablePlayer: true,
+        soundFont: "/js/alphatab/soundfont/sonivox.sf2",
+        //scrollElement: sheetmusic, // this is the element to scroll during playback
+      },
+      notation: {
+        elements: {
+          GuitarTuning: false,
+          EffectTempo: false,
+        },
+      },
+    });
+
+    alphaTabInstance.load(project.sheetmusicFile);
+    alphaTabInstance.countInVolume = 1;
+    alphaTabInstance.metronomeVolume = 1;
+    alphaTabInstance.masterVolume = 0.0;
+    alphaTabInstance.scoreLoaded.on((score) => {
+      if (trackForPerson) {
+        // generate a track item for all tracks of the score
+        score.tracks.forEach((track) => {
+          console.log(track);
+          if (track.name && track.name.indexOf(trackForPerson) > -1) {
+            // TODO: where is player info in trackdata ???
+            alphaTabInstance.renderTracks([track]);
+          }
+          //trackList.appendChild(createTrackItem(track));
         });
+      } else {
+        alphaTabInstance.render();
+      }
+    });
 
-        alphaTabInstance.load(project.sheetmusicFile);
-        alphaTabInstance.countInVolume = 1;
-        alphaTabInstance.metronomeVolume = 1;
-        alphaTabInstance.masterVolume = 0.0;
-        alphaTabInstance.scoreLoaded.on((score) => {
-            if (trackForPerson) {
-                // generate a track item for all tracks of the score
-                score.tracks.forEach((track) => {
-                    console.log(track);
-                    if (track.name && track.name.indexOf(trackForPerson) > -1) {
-                        // TODO: where is player info in trackdata ???
-                        alphaTabInstance.renderTracks([track]);
-                    }
-                    //trackList.appendChild(createTrackItem(track));
-                });
-            } else {
-                alphaTabInstance.render();
-            }
-        });
-
-        // mark the rendered track as active in the list
-        alphaTabInstance.renderStarted.on(() => {
-            // collect tracks being rendered
-            const tracks = new Map();
-            // here we access the currently rendered tracks of alphaTab
-            alphaTabInstance.tracks.forEach((t) => {
-                console.log(t);
-                tracks.set(t.index, t);
-            });
-            /*
+    // mark the rendered track as active in the list
+    alphaTabInstance.renderStarted.on(() => {
+      // collect tracks being rendered
+      const tracks = new Map();
+      // here we access the currently rendered tracks of alphaTab
+      alphaTabInstance.tracks.forEach((t) => {
+        console.log(t);
+        tracks.set(t.index, t);
+      });
+      /*
 	// mark the item as active or not
 	const trackItems = trackList.querySelectorAll(".at-track");
 	trackItems.forEach((trackItem) => {
@@ -65,16 +72,31 @@
 		}
     });
     */
-        });
-    }
+    });
+    alphaTabInstance.playerFinished.on(() => {
+      dispatch("finished", {});
+    });
+  }
 
-export function initPlaythrough() {
-    alphaTabInstance.changeTrackSolo(); 
-    alphaTabInstance.play(); 
-}
+  export function initPlaythrough() {
+    alphaTabInstance.changeTrackSolo();
+    alphaTabInstance.play();
+    scrollControlInterval = setInterval(function () {
+      document.getElementsByClassName("at-cursor-beat")[0].scrollIntoView();
+    }, 200);
+  }
 
+  export function pausePlaythrough() {
+    clearInterval(scrollControlInterval);
+    alphaTabInstance.pause();
+  }
 
-/* Old OSMD - code for rendering score:
+  export function stopPlaythrough() {
+    clearInterval(scrollControlInterval);
+    alphaTabInstance.stop();
+  }
+
+  /* Old OSMD - code for rendering score:
         const module = await import('opensheetmusicdisplay');
 
         sheetMusicRenderer = new module.default.OpenSheetMusicDisplay('sheetmusic', {
@@ -85,27 +107,27 @@ export function initPlaythrough() {
         .then(() => sheetMusicRenderer.render());
 
 */
-
 </script>
 
+<LibLoader
+  src="/js/alphatab/alphaTab.min.js"
+  on:loaded={renderMusic}
+  libraryDetectionObject="alphaTab"
+/>
+
+<div class="standard-box note-box" bind:this={sheetmusic} id="sheetmusic" />
+
 <style>
-    .note-box {
-        margin-top: 30px;
-        padding: 5%;
-        height: 20vw;
-        overflow: auto;
-    }
-/*
+  .note-box {
+    margin-top: 30px;
+    padding: 5%;
+    height: 100%;
+    overflow: auto;
+  }
+  /*
     .note-box h2 {
         padding: 0;
         margin: 0;
     }
     */
 </style>
-
-<LibLoader
-    src="/js/alphatab/alphaTab.min.js"
-    on:loaded={renderMusic}
-    libraryDetectionObject="alphaTab" />
-
-<div class="standard-box note-box" bind:this={sheetmusic} id="sheetmusic" />
