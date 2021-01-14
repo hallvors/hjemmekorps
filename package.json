@@ -2,6 +2,9 @@
   "name": "hjemmekorps",
   "version": "1.0.0",
   "description": "Hjemmekorps skal inspirere til hjemmeøving ved å gjøre leksene til en del av felles prosjekter.",
+  "engines": {
+    "node": "12.8.x"
+  },
   "scripts": {
     "dev": "sapper dev",
     "build": "sapper build --legacy",
