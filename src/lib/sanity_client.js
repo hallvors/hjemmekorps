@@ -90,7 +90,8 @@ function getProjects(userId) {
 		`*[_type == $type && owner._ref == $userId && !(_id in path("drafts.**"))] {
 			name, _id, sheetmusic,
 			"sheetmusicFile": sheetmusic->url,
-		}`,
+		}
+		| order(_createdAt desc)`,
 		{
 			type: "project",
 			userId,
