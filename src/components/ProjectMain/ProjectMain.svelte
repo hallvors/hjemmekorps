@@ -31,7 +31,6 @@
         <div class="project-info">
             <h1 class="h1-bigger project-title">{project.name}</h1>
 
-            <!-- Her bør det routes -->
             <ProjectHome project={project} />
         </div>
 

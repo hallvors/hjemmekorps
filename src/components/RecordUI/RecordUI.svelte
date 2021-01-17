@@ -180,6 +180,7 @@
 <NoteBox
   {project}
   trackForPerson={user.name}
+  showTracker={true}
   bind:this={theBox}
   on:finished={endOfNote}
 />

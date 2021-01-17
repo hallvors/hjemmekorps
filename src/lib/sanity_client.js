@@ -147,7 +147,6 @@ function getProject(userId, projectId) {
 				console.log('project owner requests project')
 				// Project owner is requesting data. We should also include the secret links for all members
 				result.members.forEach((member) => {
-					console.log('make link for ', member)
 					member.token = jwt.sign(
 						{ userId: member._id, projectId },
 						env.nconf.get("site:tokensecret")

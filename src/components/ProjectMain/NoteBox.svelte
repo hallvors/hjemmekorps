@@ -9,7 +9,7 @@
 
   export let project;
   export let trackForPerson = null;
-
+  export let showTracker = false;
   let sheetmusic;
   let alphaTabInstance;
   let scrollControlInterval;
@@ -20,9 +20,10 @@
     alphaTabInstance = new alphaTab.AlphaTabApi(sheetmusic, {
       file: project.sheetmusicFile,
       player: {
-        enablePlayer: true,
+        enablePlayer: showTracker,
         soundFont: "/js/alphatab/soundfont/sonivox.sf2",
-        //scrollElement: sheetmusic, // this is the element to scroll during playback
+        // this is the element to scroll during playback - disabled because it is buggy and scrolls too much!
+        //scrollElement: sheetmusic, 
       },
       notation: {
         elements: {
@@ -61,17 +62,6 @@
         console.log(t);
         tracks.set(t.index, t);
       });
-      /*
-	// mark the item as active or not
-	const trackItems = trackList.querySelectorAll(".at-track");
-	trackItems.forEach((trackItem) => {
-		if (tracks.has(trackItem.track.index)) {
-			trackItem.classList.add("active");
-		} else {
-			trackItem.classList.remove("active");
-		}
-    });
-    */
     });
     alphaTabInstance.playerFinished.on(() => {
       dispatch("finished", {});
