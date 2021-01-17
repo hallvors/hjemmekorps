@@ -11,7 +11,7 @@
 <script>
 export let project;
 
-import ProjectMain from '../../components/ProjectMain/ProjectMain.svelte'
+import ProjectMain from '../../../components/ProjectMain/ProjectMain.svelte'
 </script>
 
 
