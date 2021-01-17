@@ -80,12 +80,6 @@
   function sendRecording() {
     var xhr = new XMLHttpRequest();
     xhr.open("post", "/api/submit", true);
-    if (user) {
-      xhr.setRequestHeader("X-hjemmekorps-name", user._id);
-    }
-    if (project) {
-      xhr.setRequestHeader("X-hjemmekorps-project", project._id);
-    }
     xhr.onload = function () {
       document.body.className = "";
       document.getElementById("state-indicator").src = "/images/rec.png";
@@ -93,6 +87,8 @@
     };
     var fd = new FormData();
     fd.append("mp3", recordingData, "opptak.mp3");
+    fd.append("memberId", user._id);
+    fd.append("projectId", project._id);
     fd.append("meta", JSON.stringify(meta));
     meta = [];
     startTime = null;
