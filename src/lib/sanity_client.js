@@ -184,19 +184,18 @@ function addProject(userId, name, mxmlFile, members) {
 		});
 }
 
-function ensureMembersExist(userId, bandName, members) {
+function ensureMembersExist(userId, bandId, members) {
 	const client = getSanityClient();
 	return client
-		.fetch(`*[_type == $type && name == $name && references($uid)]`, {
+		.fetch(`*[_type == $type && _id == $id && references($uid)]`, {
 			type: "band",
-			name: bandName,
+			id: bandId,
 			uid: userId,
 		})
 		.then((band) => {
 			if (!band.length) {
 				return Promise.reject({ message: "Band not found" });
 			}
-			let bandId = band[0]._id;
 			return Promise.all(
 				members.map((member) => {
 					member = member.trim();

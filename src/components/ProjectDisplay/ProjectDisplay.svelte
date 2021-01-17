@@ -1,26 +1,42 @@
 <script>
-  export let title = "Prosjekt uten navn"
+  export let title = "Prosjekt uten navn";
   export let newProject = false;
-  export let id = '';
+  export let id = "";
 </script>
 
 {#if !newProject}
-<main>
-  <h2><a href={'/project/' + id}>{title}</a></h2>
-</main>
-
-
+  <main>
+    <h2><a href={"/prosjekt/" + id}>{title}</a></h2>
+  </main>
 {:else}
-<main>
-  <div class="plus-sign">
-    <svg xmlns="http://www.w3.org/2000/svg" class="iconic-plus-thin injected-svg iconic iconic-lg iconic-main" width="128" height="128" viewBox="0 0 128 128" data-src="/iconic/svg/plus-thin.svg">
-      <g class="iconic-plus-thin-lg iconic-container iconic-lg" data-width="128" data-height="128" display="inline">
-        <path stroke="#000" stroke-width="2" stroke-linecap="square" class="iconic-property-stroke" d="M64 4v120m60-60h-120" fill="none"></path>
-      </g>
-    </svg>
-  </div>
-
-</main>
+  <main>
+    <div class="plus-sign">
+      <a href="/prosjekt/nytt">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="iconic-plus-thin injected-svg iconic iconic-lg iconic-main"
+          width="128"
+          height="128"
+          viewBox="0 0 128 128"
+          data-src="/iconic/svg/plus-thin.svg">
+          <g
+            class="iconic-plus-thin-lg iconic-container iconic-lg"
+            data-width="128"
+            data-height="128"
+            display="inline">
+            <path
+              stroke="#000"
+              stroke-width="2"
+              stroke-linecap="square"
+              class="iconic-property-stroke"
+              d="M64 4v120m60-60h-120"
+              fill="none"
+            />
+          </g>
+        </svg>
+      </a>
+    </div>
+  </main>
 {/if}
 
 <style>
@@ -29,7 +45,7 @@
     border: solid 1px var(--dark);
     width: 25vw;
     height: 25vw;
-    box-shadow: 0px 0px 7px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 7px 0px rgba(0, 0, 0, 0.75);
     transition: 0.3s;
   }
   h2 {
@@ -46,14 +62,14 @@
     left: calc(50% - 64px);
   }
   main:hover {
-    box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.75);
     cursor: pointer;
   }
   @media only screen and (min-width: 1200px) {
-      main {
-    width: 300px;
-    height: 300px;
-  }
+    main {
+      width: 300px;
+      height: 300px;
+    }
   }
   @media only screen and (max-width: 820px) {
     main {
@@ -70,5 +86,5 @@
       width: 80vw;
       height: 70vw;
     }
-    }
+  }
 </style>
