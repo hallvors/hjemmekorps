@@ -21,7 +21,7 @@ const authenticate = async function(req, res, next) {
 		// Static files from /client are shown without a user session
 		return next();
 	}
-
+	console.log('hi token', env.nconf.get('site:tokensecret'))
 	console.log('authenticate for ' + req.url);
 	if (!(req.query.t || req.cookies.token)) {
 		console.log('no token in URL or cookie');
