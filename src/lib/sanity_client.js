@@ -115,7 +115,8 @@ function getProject(userId, projectId) {
 			"sheetmusicFile": sheetmusic.asset->url,
 			owner,
 			"members": members[]->{
-				_id, name, phone, email, "band": band->name, "portraitUrl": portrait.asset->url
+				_id, name, phone, email, "band": band->name, "portraitUrl": portrait.asset->url,
+				"recording": *[_type == 'recording' && references(^._id)][0]
 			}
 		}`,
 			{
