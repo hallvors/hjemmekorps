@@ -31,7 +31,7 @@
 <main>
     <h3>{member.name}</h3>
     <button class="mute-btn" on:click|preventDefault={toggleMute}><i class="fas fa-volume-up"></i></button>
-    <a href={'/?t=' + member.token}>{member.name} hemmelig lenke</a>
+    {member.name}
 </main>
 
 {:else}

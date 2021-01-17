@@ -15,9 +15,7 @@
 
         <DeltakerDisplay newMember={true}/>
         {#each project.members || [] as member}
-        <a href="/">
             <DeltakerDisplay member={member}/>
-        </a>
         {/each}
 
         <!-- <svg class="member-line">
