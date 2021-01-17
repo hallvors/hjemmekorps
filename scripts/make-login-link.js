@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const env = require('../config/environment');
+const env = require('../src/config/environment');
 const email = process.argv[2];
 if (!email) {
 	console.error('missing argument: email');
