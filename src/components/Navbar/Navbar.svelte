@@ -81,7 +81,7 @@
 		},
 		{
 			text: "Nytt prosjekt",
-			href: `project/${projectId}`,
+			href: `prosjekt/nytt`,
 		},
 /*		{
 			text: "Instillinger",

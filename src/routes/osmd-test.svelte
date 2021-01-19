@@ -9,7 +9,7 @@ let project = {
     _id: '80d2f2a9-69a3-4623-8bbe-e5c6b0842d2e'
 }
 let bpm = 100;
-let memberName = 'Alej';
+let memberName = 'Peter';
 
 let sheetMusicRenderer;
 let playing = false;

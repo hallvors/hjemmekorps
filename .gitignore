@@ -1,4 +1,4 @@
-config/overrides.json
+src/config/overrides.json
 __sapper__
 # Logs
 logs

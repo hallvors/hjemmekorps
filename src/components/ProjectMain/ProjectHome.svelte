@@ -1,29 +1,33 @@
 <script>
-    // Hjemskjermen for et prosjekt
-    export let project;
-    import NoteBox from "./NoteBox.svelte"
+  // Hjemskjermen for et prosjekt
+  export let project;
+  import NoteBox from "./NoteBox.svelte";
 </script>
-<main class="merged-audio">
 
-        <h1 style="text-align: center;">Samlet lydfil</h1>
-        <span class="audio">
-            <audio controls src="../samples/sample.mp3">
-                <track kind="captions"/>
-                Audio does not work
-            </audio>
-        </span>
+{#if project.generated_soundfile}
+  <main class="merged-audio">
+    <h1 style="text-align: center;">Samlet lydfil</h1>
+    <span class="audio">
+      <!-- svelte-ignore a11y-media-has-caption -->
+      <!-- We can not create captions for user-generated music files :) -->
+      <audio controls src={project.generated_soundfile}>
+        Audio does not work
+      </audio>
+    </span>
+  </main>
+{/if}
 
-</main>
-<NoteBox project={project} />
+<p><a href="/prosjekt/{project._id}/liste">Lenker til musikantenes sider</a></p>
 
+<NoteBox {project} />
 
 <style>
-    .merged-audio {
-        text-align: center;
+  .merged-audio {
+    text-align: center;
 
-        margin-top: 30px;
-        padding-bottom: 30px;
-        border: var(--border);
-        box-shadow: var(--shadow);
-    }
+    margin-top: 30px;
+    padding-bottom: 30px;
+    border: var(--border);
+    box-shadow: var(--shadow);
+  }
 </style>

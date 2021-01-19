@@ -14,16 +14,16 @@ export async function get(req, res, next) {
 }
 
 export async function post(req, res, next) {
-	multerUpload.single("file")(req, res, (req, res) => {
+	multerUpload.single("file")(req, res, () => {
 		if (!req.file) {
 			return res.statusCode = 400;
 			res.json({ error: "Missing files" });
 		}
-		const bandName = req.body.band;
+		const bandId = req.body.band;
 		const mxlmData = parse(req.file);
 		const bandMembers = getMemberNames(mxlmData);
 		const projName = getName(mxlmData);
-		return sClient.ensureMembersExist(req.user._id, bandName, bandMembers).then(memberData => {
+		return sClient.ensureMembersExist(req.user._id, bandId, bandMembers).then(memberData => {
 			return sClient
 				.addProject(req.user._id, projName, req.file, memberData)
 				.then((project) => {

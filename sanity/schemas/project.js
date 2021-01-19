@@ -25,5 +25,11 @@ export default {
       type: "array",
       of: [{ type: "reference", to: [{ type: "member" }] }],
     },
+    {
+      title: "Generert lydfil",
+      name: "generated_soundfile",
+      type: "file",
+    },
+
   ],
 };
