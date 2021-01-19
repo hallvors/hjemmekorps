@@ -21,4 +21,10 @@ export default {
       type: 'file',
     },
   ],
+  preview: {
+    select: {
+      title: 'project.name',
+      subtitle: 'member.name',
+    }
+  }
 }
