@@ -1,6 +1,8 @@
 # node:12.18.4-stretch
 FROM node@sha256:8cfe7e8dc60095a4f9d25a3f0f208503559fa033a15e2ddd87dee85bec101a2e
 
+RUN apt-get update -y && apt-get install -y ffmpeg
+
 RUN mkdir -p /home/node/app && \
     chown -R node:node /home/node/app
 WORKDIR /home/node/app
