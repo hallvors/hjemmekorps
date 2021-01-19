@@ -15,8 +15,6 @@
   let scrollControlInterval;
 
   function renderMusic() {
-    console.log({ project });
-    console.log({ trackForPerson });
     alphaTabInstance = new alphaTab.AlphaTabApi(sheetmusic, {
       file: project.sheetmusicFile,
       player: {
@@ -41,7 +39,6 @@
       if (trackForPerson) {
         // generate a track item for all tracks of the score
         score.tracks.forEach((track) => {
-          console.log(track);
           if (track.name && track.name.indexOf(trackForPerson) > -1) {
             // TODO: where is player info in trackdata ???
             alphaTabInstance.renderTracks([track]);
