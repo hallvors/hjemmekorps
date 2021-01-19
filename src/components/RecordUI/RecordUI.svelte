@@ -22,9 +22,10 @@
   var recorder, input, theStream;
 
   // variables for metronome countdown before recording
-  var count = 1;
-  var countdown = false;
-  var countDelay = 1000;
+  let count = 1;
+  let countdown = false;
+  let firstCount = true;
+  let countDelay = 1000; // TODO!!
 
   // recording states
   const STOPPED = 0;
@@ -37,15 +38,18 @@
   var recordingData;
   // audio element for playback
   let audioElm;
+  let snapElm;
 
   var meta = [];
   var startTime;
 
   var audioContext;
+  var volumeInterval;
+  let volumePercElm;
+  let volumeLoud = false;
 
   onMount(async () => {
     AudioContext = window.AudioContext || window.webkitAudioContext;
-    console.log(user.name, project.sheetmusicFile);
   });
 
   function start() {
@@ -55,8 +59,32 @@
       .then(function (stream) {
         theStream = stream;
         audioContext = new AudioContext();
-        input = audioContext.createMediaStreamSource(stream);
-        recorder = new WebAudioRecorder(input, {
+        input = audioContext.createMediaStreamTrackSource(
+          stream.getAudioTracks()[0]
+        );
+        let snapSource = audioContext.createMediaElementSource(snapElm);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        analyser.minDecibels = -127;
+        analyser.maxDecibels = 0;
+        analyser.smoothingTimeConstant = 0.4;
+        snapSource.connect(audioContext.destination);
+        snapSource.connect(analyser);
+        input.connect(analyser);
+
+        const volumes = new Uint8Array(analyser.frequencyBinCount);
+        const volumeCallback = () => {
+          analyser.getByteFrequencyData(volumes);
+          let volume = 0;
+          for (const vol of volumes) volume += vol;
+          const averageVolume = parseInt(
+            ((volume / volumes.length) * 100) / 127
+          );
+          volumePercElm.style.width = averageVolume + "%";
+          volumeLoud = averageVolume > 90 ? true : false;
+        };
+        volumeInterval = setInterval(volumeCallback, 200);
+        recorder = new WebAudioRecorder(analyser, {
           workerDir: "/js/web-audio-recorder/lib-minified/",
           encoding: "wav",
         });
@@ -98,12 +126,18 @@
   function startCountdown() {
     countdown = true;
     recState = RECORDING;
+    snapElm.play();
     setTimeout(metronomeCounter, countDelay);
   }
   function metronomeCounter() {
-    if (count < 3) {
+    if (count === 2 && firstCount) {
+      count = 0;
+      firstCount = false;
+    }
+    if (count < 4) {
       count++;
-      setTimeout(metronomeCounter, countDelay);
+      snapElm.play();
+      setTimeout(metronomeCounter, firstCount ? countDelay : countDelay / 2);
     } else {
       countdown = false;
       theBox.initPlaythrough();
@@ -116,6 +150,8 @@
       startTime = null;
       recordingData = null;
       meta = [];
+      firstCount = true;
+      count = 1;
       recState = STOPPED;
     }
   }
@@ -126,6 +162,7 @@
       theBox.stopPlaythrough();
       recorder.finishRecording();
       recState = RECORDED_AUDIO;
+      clearInterval(volumeInterval);
     }
   }
 
@@ -173,16 +210,11 @@
   libraryDetectionObject="WebAudioRecorder"
 />
 
-<NoteBox
-  {project}
-  trackForPerson={user.name}
-  showTracker={true}
-  bind:this={theBox}
-  on:finished={endOfNote}
-/>
-
 <!-- svelte-ignore a11y-media-has-caption -->
 <audio bind:this={audioElm} on:ended={pausePlayRecording} />
+
+<!-- svelte-ignore a11y-media-has-caption -->
+<audio bind:this={snapElm} src="/samples/snap.mp3" preload />
 
 {#if countdown}
   <div id="countdown">{count}</div>
@@ -195,6 +227,8 @@
   {:else if recState === RECORDING}
     <!-- pause button?, stop button -->
     <button on:click={stop}>Stopp opptak</button>
+    <br />
+    <div id="volume"><span bind:this={volumePercElm} class:volumeLoud /></div>
   {:else if recState === PAUSED}
     <!-- resume button, stop button -->
   {:else if recState === RECORDED_AUDIO}
@@ -217,6 +251,14 @@
 -->
 </nav>
 
+<NoteBox
+  {project}
+  trackForPerson={user.name}
+  showTracker={true}
+  bind:this={theBox}
+  on:finished={endOfNote}
+/>
+
 <style>
   #countdown {
     position: fixed;
@@ -229,5 +271,20 @@
     font-size: 6em;
     text-align: center;
     padding-top: 3em;
+  }
+  #volume {
+    width: 200px;
+    height: 20px;
+    position: relative;
+    border: 1px solid grey;
+  }
+  #volume span {
+    position: absolute;
+    height: 100%;
+    border-top: 10px dotted green;
+    display: inline-block;
+  }
+  #volume span.volumeLoud {
+    border-top-color: red;
   }
 </style>
