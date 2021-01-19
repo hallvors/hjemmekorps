@@ -284,9 +284,7 @@ function getRecordings(projectId) {
 		{
 		  type: 'recording',
 		  projectId: projectId,
-		},
-	  )
-	})
+		});
   }
   
 
