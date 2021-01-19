@@ -11,7 +11,6 @@ RUN npm ci --no-optional
 
 COPY --chown=node:node ./static/* ./static/
 COPY --chown=node:node ./src/* ./src/
-COPY --chown=node:node ./config/* ./config/
 COPY --chown=node:node ./rollup.config.js ./rollup.config.js
 COPY --chown=node:node ./prep-files.sh ./prep-files.sh
 # Some files from node_modules will be used as web workers,
