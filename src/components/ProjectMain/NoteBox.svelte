@@ -59,7 +59,6 @@
       const tracks = new Map();
       // here we access the currently rendered tracks of alphaTab
       alphaTabInstance.tracks.forEach((t) => {
-        console.log(t);
         tracks.set(t.index, t);
       });
     });
