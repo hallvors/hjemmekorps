@@ -107,14 +107,14 @@
 
   function sendRecording() {
     var xhr = new XMLHttpRequest();
-    xhr.open("post", "/api/submit", true);
+    xhr.open("post", "/api/project/" + project._id + "/recordings", true);
     xhr.onload = function () {
       document.body.className = "";
-      document.getElementById("state-indicator").src = "/images/rec.png";
+      //document.getElementById("state-indicator").src = "/images/rec.png";
       alert("Ferdig! Opptaket er sendt. Tusen takk :)");
     };
     var fd = new FormData();
-    fd.append("mp3", recordingData, "opptak.mp3");
+    fd.append("file", recordingData, "opptak.wav");
     fd.append("memberId", user._id);
     fd.append("projectId", project._id);
     fd.append("meta", JSON.stringify(meta));

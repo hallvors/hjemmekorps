@@ -1,7 +1,7 @@
 import multer from 'multer'
+import { compose } from 'compose-middleware'
 
-const storage = multer.memoryStorage()
-const multerUpload = multer({ storage: storage })
+const multerUpload = multer({ dest: '/tmp' })
 
 import sClient from '../../../../lib/sanity_client'
 
@@ -11,12 +11,13 @@ export async function get(req, res, next) {
   })
 }
 
-export async function post(req, res, next) {
-  multerUpload.single('file')(req, res, (req, res) => {
+export const post = compose([
+  multerUpload.single('file'),
+  function (req, res, next) {
     return sClient
       .addProjectRecording(req.body.projectId, req.body.memberId, req.file.path)
       .then((project) => {
         res.json(project)
       })
-  })
-}
+  },
+])

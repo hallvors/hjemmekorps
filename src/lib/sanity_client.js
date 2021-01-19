@@ -240,10 +240,9 @@ function addProjectRecording(projectId, memberId, filepath) {
     .then((oldRecordings) => {
       return Promise.all(
         oldRecordings.map((recording) => {
-          return Promise.all([
-            cl.delete(recording.file.asset._ref),
-            cl.delete(recording._id),
-          ])
+          return cl
+            .delete(recording._id)
+            .then(() => cl.delete(recording.file.asset._ref))
         }),
       )
     })
@@ -270,23 +269,22 @@ function addProjectRecording(projectId, memberId, filepath) {
                 },
               },
             })
-			.commit()
-			.then(() => getProject(memberId, projectId));
+            .then(() => getProject(memberId, projectId))
         })
     })
 }
 
 function getRecordings(projectId) {
-	return getSanityClient().fetch(
-		`*[
+  return getSanityClient().fetch(
+    `*[
 			  _type == $type && references($projectId)
 		  ] {_id, _createdAt, member, "url": file.asset->url}`,
-		{
-		  type: 'recording',
-		  projectId: projectId,
-		});
-  }
-  
+    {
+      type: 'recording',
+      projectId: projectId,
+    },
+  )
+}
 
 // OLD code
 
