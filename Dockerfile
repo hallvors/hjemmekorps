@@ -20,6 +20,4 @@ COPY --chown=node:node ./prep-files.sh ./prep-files.sh
 # browsers
 RUN ./prep-files.sh
 
-ENV PORT=8001
-EXPOSE $PORT
 CMD ["npm", "start"]
