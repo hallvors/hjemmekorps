@@ -11,6 +11,7 @@ if (env === 'development') {
 	nconf.env(require('./production.json'));
 
 }
+nconf.defaults(require('./instruments.json'));
 nconf.defaults(require('./defaults.json'));
 
 module.exports = {
