@@ -12,6 +12,7 @@ if (env === 'development') {
 
 }
 nconf.defaults(require('./instruments.json'));
+nconf.defaults(require('./instruments-icons.json'));
 nconf.defaults(require('./defaults.json'));
 
 module.exports = {
