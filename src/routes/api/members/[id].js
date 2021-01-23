@@ -1,8 +1,26 @@
-import sClient from "../../../lib/sanity_client";
+import multer from 'multer'
+import _ from 'underscore'
+import { compose } from 'compose-middleware'
 
-export async function post(req, res, next) {
-	sClient.updateOrCreateMember(
-		Object.assign({}, req.body.member, { _id: req.params.id }),
-		req.body.bandId
-	);
-}
+import sClient from '../../../lib/sanity_client'
+
+const multerUpload = multer({ dest: '/tmp' })
+
+// Updating a single member, perhaps also add photo
+// Expects a typical multipart form with name, phone, email, instrument
+// Instrument value should be pre-vetted
+
+export const post = compose([
+  multerUpload.single('photo'),
+  async function post(req, res, next) {
+    const data = await sClient.updateOrCreateMember(
+      Object.assign(_pick(req.body, 'name', 'phone', 'email', 'instrument'), {
+        _id: req.params.id,
+      }),
+      req.body.bandId,
+      req.file ? req.file.path : null,
+    )
+
+    res.json(data)
+  },
+])
