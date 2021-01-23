@@ -362,6 +362,7 @@ function addProjectRecording(projectId, memberId, filepath) {
                   _ref: doc._id,
                 },
               },
+              volume: 100
             })
             .then(() => getProject(memberId, projectId));
         });
@@ -372,7 +373,7 @@ function getRecordings(projectId) {
   return getSanityClient().fetch(
     `*[
         _type == $type && references($projectId)
-      ] {_id, _createdAt, member, "url": file.asset->url}`,
+      ] {_id, _createdAt, member, "url": file.asset->url, volume}`,
     {
       type: 'recording',
       projectId: projectId,
