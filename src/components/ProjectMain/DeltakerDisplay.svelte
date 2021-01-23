@@ -5,11 +5,11 @@
     const button = e.currentTarget;
 
     if (!muted) {
-      button.firstChild.classList.toggle("fa-volume-mute");
-      button.firstChild.classList.toggle("fa-volume-up");
+      button.firstChild.classList.toggle('fa-volume-mute');
+      button.firstChild.classList.toggle('fa-volume-up');
     } else {
-      button.firstChild.classList.toggle("fa-volume-mute");
-      button.firstChild.classList.toggle("fa-volume-up");
+      button.firstChild.classList.toggle('fa-volume-mute');
+      button.firstChild.classList.toggle('fa-volume-up');
     }
     muted = !muted;
   }
@@ -17,7 +17,7 @@
   export let newMember = false;
 
   export let member = {
-    navn: "Navnløs",
+    navn: 'Navnløs',
   };
 </script>
 
