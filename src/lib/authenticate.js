@@ -13,6 +13,10 @@ function isOkWithoutSession(url) {
 		// A few other pages are shown without a user session too - /om/personvern for example
 		return true;
 	}
+	if (url === '/') {
+		// there is some front page content for non-session guests
+		return true;
+	}
 	return false;
 }
 
