@@ -23,7 +23,26 @@
 
 {#if !newMember}
   <main>
+    {#if member.instrument}
+      <figure>
+        <img
+          src={'/images/instruments/' + member.instrument + '.png'}
+          alt={member.instrument}
+          class="instrument-icon"
+        />
+        <figcaption>{member.instrument}</figcaption>
+      </figure>
+    {/if}
+
+    {#if member.portraitUrl}
+      <figure>
+        <img src={member.portraitUrl} alt={member.name} />
+        <figcaption>{member.name}</figcaption>
+      </figure>
+    {/if}
     <h3>{member.name}</h3>
+    {#if member.subgroup}<p>{member.subgroup}</p>{/if}
+    {#if member.part}<p>{member.part}</p>{/if}
     {#if member.recording}
       <button class="mute-btn" on:click|preventDefault={toggleMute}
         ><i class="fas fa-volume-up" /></button
@@ -71,6 +90,10 @@
     transition: 0.3s;
   }
 
+  figcaption {
+    visibility: hidden;
+  }
+
   h3 {
     text-transform: none;
   }
@@ -78,6 +101,11 @@
   main:hover {
     cursor: pointer;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
+  }
+
+  .instrument-icon {
+    max-width: 64px;
+    float:right;
   }
 
   .new-member {
