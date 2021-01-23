@@ -112,17 +112,13 @@ function getProject(userId, projectId) {
   if (sanityCache.has(id)) {
     return Promise.resolve(sanityCache.get(id));
   }
-
-  return getSanityClient()
+  const client = getSanityClient();
+  return client
     .fetch(
       `*[_type == $type && _id == $projectId][0] {
       name, _id, sheetmusic,
       "sheetmusicFile": sheetmusic.asset->url,
-      owner, partslist,
-      "members": members[]->{
-        _id, name, phone, email, "band": band->name, "portraitUrl": portrait.asset->url,
-        "recording": *[_type == 'recording' && references(^._id)][0]
-      }
+      owner, partslist, generated_soundfile,
     }`,
       {
         type: 'project',
@@ -138,13 +134,15 @@ function getProject(userId, projectId) {
       if (result.owner._ref !== userId) {
         console.log('not requested by owner?', result.owner._ref);
         // not requested by the admin user who owns this project..
-        if (!result.members.find(member => member._id === userId)) {
+        if (
+          !result.partslist.find(part =>
+            part.members.find(member => member._id === userId)
+          )
+        ) {
           // the user is not a musician for this project.. odd!
           console.error('user not musician for requested project');
           return null;
         }
-        // privacy etc.. remove the members data
-        delete result.members;
         // Here comes the hard part: remove non-useful parts of this score
         // we want to send only the relevant part for this person
         // TODO: is there a usable XML parser / serializer for node.js? Should we attempt to do this here,
@@ -153,15 +151,40 @@ function getProject(userId, projectId) {
       } else {
         console.log('project owner requests project');
         // Project owner is requesting data. We should also include the secret links for all members
-        result.members.forEach(member => {
-          member.token = jwt.sign(
-            { userId: member._id, projectId },
-            env.nconf.get('site:tokensecret')
-          );
-        });
+        const memberIds = _.flatten(
+          result.partslist.map(part => part.members.map(member => member._ref))
+        );
+        return client
+          .fetch(
+            `*[
+          _type == "member" && _id in $memberIds
+        ]{
+          _id, name, phone, email, subgroup, instrument,
+          "band": band->name, "portraitUrl": portrait.asset->url,
+            "recording": *[_type == 'recording' && references(^._id) && references($projectId)][0]{
+              "url": file.asset->url, volume
+            }
+        }`, {memberIds, projectId}
+          )
+          .then(members => {
+            result.members = members;
+
+            result.members.forEach(member => {
+              member.token = jwt.sign(
+                { userId: member._id, projectId },
+                env.nconf.get('site:tokensecret')
+              );
+              let part = result.partslist.find(part =>
+                part.members.find(partMem => partMem._ref === member._id)
+              );
+              if (part) {
+                member.part = part.part;
+              }
+            });
+            sanityCache.set(id, result);
+            return result;
+          });
       }
-      sanityCache.set(id, result);
-      return result;
     });
 }
 
@@ -170,11 +193,31 @@ function addProject(userId, name, mxmlFile, partslist, members) {
   return client.assets
     .upload('file', mxmlFile.buffer, { filename: mxmlFile.originalname })
     .then(filedoc => {
-      members = members.map(member => ({
-        _type: 'reference',
-        _ref: member._id,
-        _key: nanoid(),
-      }));
+      const tempMapping = {};
+      partslist = partslist
+        .map(part => {
+          // The name of the part might be "Trumpet 1" etc
+          // but it might also mention the name of a member,
+          // in the latter case we can complete the assignment
+          const member = members.find(member => {
+            return part.toLowerCase().indexOf(member.name.toLowerCase()) > -1;
+          });
+          if (member) { // this score part mentions a name
+            if (tempMapping[part]) { // We have assigned somebody else already, add to the list
+              tempMapping[part].push({ _type: 'reference', _ref: member._id });
+              return;
+            }
+            const assignmentObj = {
+              part,
+              members: [{ _type: 'reference', _ref: member._id }],
+            };
+            tempMapping[part] = assignmentObj.members;
+            return assignmentObj;
+          }
+          // This is a generic part name, no musician assigned (which we know about)
+          return { part };
+        })
+        .filter(obj => obj); // remove any nulls
       return client
         .create({
           _type: 'project',
@@ -184,7 +227,6 @@ function addProject(userId, name, mxmlFile, partslist, members) {
             _type: 'file',
             asset: { _type: 'reference', _ref: filedoc._id },
           },
-          members,
           partslist,
         })
         .then(project => getProject(userId, project._id));

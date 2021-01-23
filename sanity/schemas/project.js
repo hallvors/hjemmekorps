@@ -23,13 +23,7 @@ export default {
       title: "Stemmer",
       name: "partslist",
       type: "array",
-      of: [{type: "string"}]
-    },
-    {
-      title: "Musikanter",
-      name: "members",
-      type: "array",
-      of: [{ type: "reference", to: [{ type: "member" }] }],
+      of: [{type: "projectassignment"}]
     },
     {
       title: "Generert lydfil",
