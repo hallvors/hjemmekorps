@@ -1,17 +1,17 @@
 {
   "instruments": [
-    { "title": "Fløyte", "value": "flute" },
-    { "title": "Baryton", "value": "baritone" },
-    { "title": "Klarinett", "value": "clarinet" },
-    { "title": "Kornett", "value": "cornet" },
-    { "title": "Melodisk slagverk", "value": "pitched_percussion" },
-    { "title": "Perkusjon", "value": "percussion" },
-    { "title": "Saxofon", "value": "saxophone" },
-    { "title": "Trombone", "value": "trombone" },
-    { "title": "Tromme", "value": "drum" },
-    { "title": "Trumpet", "value": "trumpet" },
-    { "title": "Tuba", "value": "bass" },
-    { "title": "Waldhorn", "value": "waldhorn" },
-    { "title": "Xylophone", "value": "xylophone" }
+    { "title": "Fløyte", "value": "flute", "icon": "flute-2" },
+    { "title": "Baryton", "value": "baritone", "icon": "tuba" },
+    { "title": "Klarinett", "value": "clarinet", "icon": "clarinet" },
+    { "title": "Kornett", "value": "cornet" , "icon": "trumpet" },
+    { "title": "Melodisk slagverk", "value": "pitched_percussion", "icon": "marimba" },
+    { "title": "Perkusjon", "value": "percussion", "icon": "percussion-instruments" },
+    { "title": "Saxofon", "value": "saxophone", "icon": "saxophone" },
+    { "title": "Trombone", "value": "trombone", "icon": "trombone" },
+    { "title": "Tromme", "value": "drum", "icon": "drumsticks" },
+    { "title": "Trumpet", "value": "trumpet", "icon": "trumpet" },
+    { "title": "Tuba", "value": "bass", "icon": "tuba" },
+    { "title": "Waldhorn", "value": "french-horn", "icon": "french-horn" },
+    { "title": "Xylophone", "value": "xylophone", "icon": "marimba" }
   ]
 }
