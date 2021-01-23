@@ -135,8 +135,9 @@ function getProject(userId, projectId) {
         console.log('not requested by owner?', result.owner._ref);
         // not requested by the admin user who owns this project..
         if (
-          !result.partslist.find(part =>
-            part.members.find(member => member._id === userId)
+          !result.partslist.find(
+            part =>
+              part.members && part.members.find(member => member._id === userId)
           )
         ) {
           // the user is not a musician for this project.. odd!
@@ -152,7 +153,9 @@ function getProject(userId, projectId) {
         console.log('project owner requests project');
         // Project owner is requesting data. We should also include the secret links for all members
         const memberIds = _.flatten(
-          result.partslist.map(part => part.members.map(member => member._ref))
+          result.partslist.map(
+            part => part.members && part.members.map(member => member._ref)
+          )
         );
         return client
           .fetch(
@@ -164,7 +167,8 @@ function getProject(userId, projectId) {
             "recording": *[_type == 'recording' && references(^._id) && references($projectId)][0]{
               "url": file.asset->url, volume
             }
-        }`, {memberIds, projectId}
+        }`,
+            { memberIds, projectId }
           )
           .then(members => {
             result.members = members;
@@ -202,12 +206,15 @@ function addProject(userId, name, mxmlFile, partslist, members) {
           const member = members.find(member => {
             return part.toLowerCase().indexOf(member.name.toLowerCase()) > -1;
           });
-          if (member) { // this score part mentions a name
-            if (tempMapping[part]) { // We have assigned somebody else already, add to the list
+          if (member) {
+            // this score part mentions a name
+            if (tempMapping[part]) {
+              // We have assigned somebody else already, add to the list
               tempMapping[part].push({ _type: 'reference', _ref: member._id });
               return;
             }
             const assignmentObj = {
+              _key: nanoid(),
               part,
               members: [{ _type: 'reference', _ref: member._id }],
             };
@@ -215,7 +222,7 @@ function addProject(userId, name, mxmlFile, partslist, members) {
             return assignmentObj;
           }
           // This is a generic part name, no musician assigned (which we know about)
-          return { part };
+          return { _key: nanoid(), part };
         })
         .filter(obj => obj); // remove any nulls
       return client
@@ -362,7 +369,7 @@ function addProjectRecording(projectId, memberId, filepath) {
                   _ref: doc._id,
                 },
               },
-              volume: 100
+              volume: 100,
             })
             .then(() => getProject(memberId, projectId));
         });

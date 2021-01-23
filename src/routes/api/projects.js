@@ -20,8 +20,8 @@ export async function get(req, res, next) {
 export async function post(req, res, next) {
 	multerUpload.single("file")(req, res, () => {
 		if (!req.file) {
-			return (res.statusCode = 400);
-			res.json({ error: "Missing files" });
+			res.statusCode = 400;
+			return res.json({ error: "Missing files" });
 		}
 		const bandId = req.body.band;
 		const mxlmData = parseFile(req.file);

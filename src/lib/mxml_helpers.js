@@ -54,14 +54,15 @@ function getMemberNames(mxmlData) {
             });
             return names;
           });
-        members = _.flatten(members);
+        names = _.flatten(names);
         let instrument = part['score-instrument']
           ? part['score-instrument']['instrument-name']
           : '';
-        members = members.map(name => ({ name, instrument }));
+        names = names.map(name => ({ name, instrument }));
+        return names;
       }
     );
-    return members;
+    return members.filter(part => part && part.length);
   }
   throw new Error('unexpected MXML data');
 }
