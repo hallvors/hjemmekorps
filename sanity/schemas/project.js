@@ -20,6 +20,12 @@ export default {
       type: "file",
     },
     {
+      title: "Stemmer",
+      name: "partslist",
+      type: "array",
+      of: [{type: "string"}]
+    },
+    {
       title: "Musikanter",
       name: "members",
       type: "array",
