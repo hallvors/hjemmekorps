@@ -1,23 +1,23 @@
-const env = require("../config/environment");
+const env = require('../config/environment');
 
-const sanity = require("@sanity/client");
-const fs = require("fs");
-const jwt = require("jsonwebtoken");
-const _ = require("underscore");
-const { nanoid } = require("nanoid");
-const NodeCache = require("node-cache");
+const sanity = require('@sanity/client');
+const fs = require('fs');
+const jwt = require('jsonwebtoken');
+const _ = require('underscore');
+const { nanoid } = require('nanoid');
+const NodeCache = require('node-cache');
 
-const { filterInstrumentName } = require("./utils");
+const { filterInstrumentName } = require('./utils');
 
 const sanityCache = new NodeCache({
   stdTTL: 60 * 60 * 24 * 7,
   useClones: true,
 });
 
-const PROJECT = env.nconf.get("sanity:project");
-const TOKEN = env.nconf.get("sanity:token") || process.env.SANITY_TOKEN;
-const DATASET = env.nconf.get("sanity:dataset");
-const instruments = env.nconf.get("instruments");
+const PROJECT = env.nconf.get('sanity:project');
+const TOKEN = env.nconf.get('sanity:token') || process.env.SANITY_TOKEN;
+const DATASET = env.nconf.get('sanity:dataset');
+const instruments = env.nconf.get('instruments');
 
 var sanityClient = null;
 function getSanityClient() {
@@ -27,7 +27,7 @@ function getSanityClient() {
       dataset: DATASET,
       token: TOKEN,
       useCdn: false,
-      ignoreBrowserTokenWarning: DATASET === "test",
+      ignoreBrowserTokenWarning: DATASET === 'test',
     });
   }
   return sanityClient;
@@ -45,11 +45,11 @@ function getAdminUserData(email) {
     "portraitUrl": portrait.asset->url
   }`,
       {
-        type: "adminUser",
+        type: 'adminUser',
         email,
       }
     )
-    .then((userData) => {
+    .then(userData => {
       sanityCache.set(email, userData);
       return userData;
     });
@@ -70,11 +70,11 @@ function getUserData(id) {
     }
   }`,
       {
-        type: "member",
+        type: 'member',
         id,
       }
     )
-    .then((userData) => {
+    .then(userData => {
       sanityCache.set(id, userData);
       return userData;
     });
@@ -86,7 +86,7 @@ function getBandsForAdminUser(userId) {
     ..., "logoUrl": logo.asset->url,
     "palette": logo.asset->metadata.palette
   }`,
-    { type: "band", userId }
+    { type: 'band', userId }
   );
 }
 
@@ -98,7 +98,7 @@ function getProjects(userId) {
     }
     | order(_createdAt desc)`,
     {
-      type: "project",
+      type: 'project',
       userId,
     }
   );
@@ -125,22 +125,22 @@ function getProject(userId, projectId) {
       }
     }`,
       {
-        type: "project",
+        type: 'project',
         userId,
         projectId,
       }
     )
-    .then((result) => {
+    .then(result => {
       if (!result) {
-        console.error("no result!?");
+        console.error('no result!?');
         return null;
       }
       if (result.owner._ref !== userId) {
-        console.log("not requested by owner?", result.owner._ref);
+        console.log('not requested by owner?', result.owner._ref);
         // not requested by the admin user who owns this project..
-        if (!result.members.find((member) => member._id === userId)) {
+        if (!result.members.find(member => member._id === userId)) {
           // the user is not a musician for this project.. odd!
-          console.error("user not musician for requested project");
+          console.error('user not musician for requested project');
           return null;
         }
         // privacy etc.. remove the members data
@@ -151,12 +151,12 @@ function getProject(userId, projectId) {
         // or push this work to the browser? Or can we use AlphaTab and just tell it to render a certain track?
         // To be continued..
       } else {
-        console.log("project owner requests project");
+        console.log('project owner requests project');
         // Project owner is requesting data. We should also include the secret links for all members
-        result.members.forEach((member) => {
+        result.members.forEach(member => {
           member.token = jwt.sign(
             { userId: member._id, projectId },
-            env.nconf.get("site:tokensecret")
+            env.nconf.get('site:tokensecret')
           );
         });
       }
@@ -168,84 +168,108 @@ function getProject(userId, projectId) {
 function addProject(userId, name, mxmlFile, partslist, members) {
   const client = getSanityClient();
   return client.assets
-    .upload("file", mxmlFile.buffer, { filename: mxmlFile.originalname })
-    .then((filedoc) => {
-      members = members.map((member) => ({
-        _type: "reference",
+    .upload('file', mxmlFile.buffer, { filename: mxmlFile.originalname })
+    .then(filedoc => {
+      members = members.map(member => ({
+        _type: 'reference',
         _ref: member._id,
         _key: nanoid(),
       }));
       return client
         .create({
-          _type: "project",
+          _type: 'project',
           owner: { _ref: userId },
           name,
           sheetmusic: {
-            _type: "file",
-            asset: { _type: "reference", _ref: filedoc._id },
+            _type: 'file',
+            asset: { _type: 'reference', _ref: filedoc._id },
           },
           members,
           partslist,
         })
-        .then((project) => getProject(userId, project._id));
+        .then(project => getProject(userId, project._id));
     });
 }
 
-function updateOrCreateMember(data, bandId) {
+async function updateOrCreateMember(data, bandId, portraitFile) {
   const client = getSanityClient();
 
-  ["phone", "email"].forEach((prop) => {
-    if (typeof data[prop] === "string") {
-      data[prop].split(/,/g);
+  ['phone', 'email'].forEach(prop => {
+    // probably not relevant if we get JSON data, but just in case..
+    if (typeof data[prop] === 'string') {
+      data[prop] = data[prop].split(/,/g);
     }
   });
 
-  let update = { _type: "member" };
+  let oldData;
+  if (data._id) {
+    oldData = await client.getDocument(data._id);
+  }
+
+  let portraitDoc;
+  if (portraitFile) {
+    portraitDoc = await client.upload('image', fs.createReadStream(filepath));
+  }
+
+  let update = { _type: 'member' };
   Object.assign(
     update,
-    _.pick(data, "_id", "name", "phone", "email", "instrument")
+    _.pick(data, '_id', 'name', 'phone', 'email', 'instrument')
   );
-  update.band = { type: "reference", _ref: bandId };
+  update.band = { type: 'reference', _ref: bandId };
+  if (portraitDoc) {
+    update.portrait = {
+      _type: 'image',
+      asset: { _type: 'reference', _ref: portraitDoc._id },
+    };
+  }
+  const result = await (update._id
+    ? client.createOrReplace(update)
+    : client.create(update));
 
-  return client.createOrReplace(update);
+  // Clean up: remove the old image file if we have a new one
+  if (oldData && oldData.portrait && portraitFile) {
+    await client.delete(oldData.portrait.asset._ref);
+  }
+  return result;
 }
 
 function ensureMembersExist(userId, bandId, members) {
   const client = getSanityClient();
   return client
     .fetch(`*[_type == $type && _id == $id && references($uid)]`, {
-      type: "band",
+      type: 'band',
       id: bandId,
       uid: userId,
     })
-    .then((band) => {
+    .then(band => {
       if (!band.length) {
-        return Promise.reject({ message: "Band not found" });
+        return Promise.reject({ message: 'Band not found' });
       }
       return Promise.all(
-        members.map((member) => {
+        members.map(member => {
           const name = member.name.trim();
           return client
             .fetch(
-              "*[_type == $type && name == $name && references($bandId)]",
+              '*[_type == $type && name == $name && references($bandId)]',
               {
-                type: "member",
+                type: 'member',
                 name,
                 bandId,
               }
             )
-            .then((result) => {
+            .then(result => {
               if (!result.length) {
                 return client.create({
-                  _type: "member",
+                  _type: 'member',
                   band: {
-                    _type: "reference",
+                    _type: 'reference',
                     _ref: bandId,
                   },
                   name,
                   instrument: member.instrument
                     ? filterInstrumentName(member.instrument, instruments)
-                    : "",
+                    : '',
                 });
               } else {
                 return result[0];
@@ -263,11 +287,11 @@ function addProjectRecording(projectId, memberId, filepath) {
       `*[_type == $type &&
     references($projectId) &&
     references($memberId)]`,
-      { type: "recording", projectId, memberId }
+      { type: 'recording', projectId, memberId }
     )
-    .then((oldRecordings) => {
+    .then(oldRecordings => {
       return Promise.all(
-        oldRecordings.map((recording) => {
+        oldRecordings.map(recording => {
           return cl
             .delete(recording._id)
             .then(() => cl.delete(recording.file.asset._ref));
@@ -276,23 +300,23 @@ function addProjectRecording(projectId, memberId, filepath) {
     })
     .then(() => {
       return cl.assets
-        .upload("file", fs.createReadStream(filepath))
-        .then((doc) => {
+        .upload('file', fs.createReadStream(filepath))
+        .then(doc => {
           return cl
             .create({
-              _type: "recording",
+              _type: 'recording',
               project: {
-                _type: "reference",
+                _type: 'reference',
                 _ref: projectId,
               },
               member: {
-                _type: "reference",
+                _type: 'reference',
                 _ref: memberId,
               },
               file: {
-                _type: "file",
+                _type: 'file',
                 asset: {
-                  _type: "reference",
+                  _type: 'reference',
                   _ref: doc._id,
                 },
               },
@@ -308,7 +332,7 @@ function getRecordings(projectId) {
         _type == $type && references($projectId)
       ] {_id, _createdAt, member, "url": file.asset->url}`,
     {
-      type: "recording",
+      type: 'recording',
       projectId: projectId,
     }
   );
@@ -318,32 +342,30 @@ function getRecordings(projectId) {
 
 function addHelpRecording(projectName, filepath) {
   const cl = getSanityClient();
-  return getProject(projectName).then((project) => {
-    return cl.assets
-      .upload("file", fs.createReadStream(filepath))
-      .then((doc) => {
-        return cl
-          .patch(project._id)
-          .set({
-            helprecording: {
-              _type: "file",
-              asset: {
-                _type: "reference",
-                _ref: doc._id,
-              },
+  return getProject(projectName).then(project => {
+    return cl.assets.upload('file', fs.createReadStream(filepath)).then(doc => {
+      return cl
+        .patch(project._id)
+        .set({
+          helprecording: {
+            _type: 'file',
+            asset: {
+              _type: 'reference',
+              _ref: doc._id,
             },
-          })
-          .commit();
-      });
+          },
+        })
+        .commit();
+    });
   });
 }
 
 function removeHelpRecording(projectName, fileId) {
   const cl = getSanityClient();
-  return getProject(projectName).then((project) => {
+  return getProject(projectName).then(project => {
     return cl
       .transaction()
-      .patch(cl.patch(project._id).unset(["helprecording"]))
+      .patch(cl.patch(project._id).unset(['helprecording']))
       .delete(fileId)
       .commit();
   });
@@ -351,18 +373,18 @@ function removeHelpRecording(projectName, fileId) {
 
 function addImage(projectName, filepath) {
   const cl = getSanityClient();
-  return getProject(projectName).then((project) => {
+  return getProject(projectName).then(project => {
     return cl.assets
-      .upload("image", fs.createReadStream(filepath))
-      .then((doc) => {
+      .upload('image', fs.createReadStream(filepath))
+      .then(doc => {
         return cl
           .patch(project._id)
           .setIfMissing({ images: [] })
-          .append("images", [
+          .append('images', [
             {
-              _type: "image",
+              _type: 'image',
               asset: {
-                _type: "reference",
+                _type: 'reference',
                 _ref: doc._id,
               },
             },
@@ -374,22 +396,22 @@ function addImage(projectName, filepath) {
 
 function addRecording(projectName, pupil, meta, filepath) {
   const cl = getSanityClient();
-  return getProject(projectName).then((project) => {
+  return getProject(projectName).then(project => {
     return cl.assets
-      .upload("file", fs.createReadStream(filepath), {
-        filename: pupil + "-opptak.mp3",
+      .upload('file', fs.createReadStream(filepath), {
+        filename: pupil + '-opptak.mp3',
       })
-      .then((doc) => {
+      .then(doc => {
         return cl.create({
-          _type: "recording",
+          _type: 'recording',
           pupil,
           project: {
             _ref: project._id,
           },
           recording: {
-            _type: "file",
+            _type: 'file',
             asset: {
-              _type: "reference",
+              _type: 'reference',
               _ref: doc._id,
             },
           },

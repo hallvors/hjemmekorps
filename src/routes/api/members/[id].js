@@ -1,10 +1,10 @@
-import multer from 'multer'
-import _ from 'underscore'
-import { compose } from 'compose-middleware'
+import multer from 'multer';
+import _ from 'underscore';
+import { compose } from 'compose-middleware';
 
-import sClient from '../../../lib/sanity_client'
+import sClient from '../../../lib/sanity_client';
 
-const multerUpload = multer({ dest: '/tmp' })
+const multerUpload = multer({ dest: '/tmp' });
 
 // Updating a single member, perhaps also add photo
 // Expects a typical multipart form with name, phone, email, instrument
@@ -18,9 +18,9 @@ export const post = compose([
         _id: req.params.id,
       }),
       req.body.bandId,
-      req.file ? req.file.path : null,
-    )
+      req.file ? req.file.path : null
+    );
 
-    res.json(data)
+    res.json(data);
   },
-])
+]);
