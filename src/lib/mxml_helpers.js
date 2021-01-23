@@ -31,7 +31,7 @@ function getPartsList(mxmlData) {
 }
 
 function getMemberNames(mxmlData) {
-  const instruments = nconf.get('instruments');
+  const instruments = env.instruments;
 
   if (
     mxmlData['score-partwise'] &&

@@ -11,11 +11,12 @@ if (env === 'development') {
 	nconf.env(require('./production.json'));
 
 }
-nconf.defaults(require('./instruments.json'));
-nconf.defaults(require('./instruments-icons.json'));
+
 nconf.defaults(require('./defaults.json'));
 
 module.exports = {
+  instruments: require('./instruments.json').instruments,
+  icons: require('./instrument-icons.json').icons,
   name: env,
   test: env === 'test',
   development: env === 'development',

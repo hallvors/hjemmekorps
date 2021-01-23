@@ -17,7 +17,7 @@ const sanityCache = new NodeCache({
 const PROJECT = env.nconf.get('sanity:project');
 const TOKEN = env.nconf.get('sanity:token') || process.env.SANITY_TOKEN;
 const DATASET = env.nconf.get('sanity:dataset');
-const instruments = env.nconf.get('instruments');
+const instruments = env.instruments;
 
 var sanityClient = null;
 function getSanityClient() {
