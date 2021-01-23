@@ -42,5 +42,10 @@ export default {
       type: "reference",
       to: [{ type: "band" }],
     },
+    {
+      title: "Undergruppe",
+      name: "subgroup",
+      type: "string",
+    }
   ],
 };

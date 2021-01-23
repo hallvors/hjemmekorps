@@ -214,7 +214,7 @@ async function updateOrCreateMember(data, bandId, portraitFile) {
   let update = { _type: 'member' };
   Object.assign(
     update,
-    _.pick(data, '_id', 'name', 'phone', 'email', 'instrument')
+    _.pick(data, '_id', 'name', 'phone', 'email', 'instrument', 'subgroup')
   );
   update.band = { type: 'reference', _ref: bandId };
   if (portraitDoc) {

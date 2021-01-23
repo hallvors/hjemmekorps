@@ -14,6 +14,12 @@ export default {
       type: "image",
     },
     {
+      title: "Undergrupper",
+      name: "groups",
+      type: "array",
+      of: [{type: "string"}]
+    },
+    {
       title: "Ansvarlig(e) person(er)",
       name: "owner",
       type: "array",
