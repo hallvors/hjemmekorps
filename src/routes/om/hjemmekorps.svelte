@@ -4,3 +4,5 @@ Hjemmekorps skal inspirere til hjemmeøving ved å gjøre leksene til en del av 
 <p>
 For å få bruke Hjemmekorps til ditt korps eller orkester, ta kontakt.
 </p>
+
+<div>Instrument-ikoner er lagd av <a href="http://www.freepik.com" title="Freepik">Freepik</a> og hentet fra <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
