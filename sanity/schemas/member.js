@@ -12,13 +12,16 @@ export default {
     },
     {
       title: "Telefon",
+      description: "Norske mobilnumre støttes",
       name: "phone",
-      type: "string",
+      type: "array",
+      of: [{type: "string"}]
     },
     {
       title: "E-post",
       name: "email",
-      type: "email",
+      type: "array",
+      of: [{type: "email"}]
     },
     {
       title: "Portrett",
