@@ -3,10 +3,11 @@ const env = require("../config/environment");
 const sanity = require("@sanity/client");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
+const _ = require("underscore");
 const { nanoid } = require("nanoid");
 const NodeCache = require("node-cache");
 
-const {filterInstrumentName} = require('./utils');
+const { filterInstrumentName } = require("./utils");
 
 const sanityCache = new NodeCache({
   stdTTL: 60 * 60 * 24 * 7,
@@ -190,6 +191,25 @@ function addProject(userId, name, mxmlFile, partslist, members) {
     });
 }
 
+function updateOrCreateMember(data, bandId) {
+  const client = getSanityClient();
+
+  ["phone", "email"].forEach((prop) => {
+    if (typeof data[prop] === "string") {
+      data[prop].split(/,/g);
+    }
+  });
+
+  let update = { _type: "member" };
+  Object.assign(
+    update,
+    _.pick(data, "_id", "name", "phone", "email", "instrument")
+  );
+  update.band = { type: "reference", _ref: bandId };
+
+  return client.createOrReplace(update);
+}
+
 function ensureMembersExist(userId, bandId, members) {
   const client = getSanityClient();
   return client
@@ -223,7 +243,9 @@ function ensureMembersExist(userId, bandId, members) {
                     _ref: bandId,
                   },
                   name,
-                  instrument: filterInstrumentName(member.instrument, instruments)
+                  instrument: member.instrument
+                    ? filterInstrumentName(member.instrument, instruments)
+                    : "",
                 });
               } else {
                 return result[0];
@@ -383,6 +405,7 @@ module.exports = {
   getUserData,
   getBandsForAdminUser,
   getProjects,
+  updateOrCreateMember,
   ensureMembersExist,
 
   getProject,
