@@ -4,7 +4,7 @@ const fxp = require("fast-xml-parser");
 const fs = require("fs");
 const _ = require("underscore");
 
-function parse(file) {
+function parseFile(file) {
 	return fxp.parse(file.buffer.toString("utf-8"));
 }
 
@@ -15,6 +15,19 @@ function getName(mxmlData) {
 			mxmlData["score-partwise"]["work"]["work-title"]) ||
 		null
 	);
+}
+
+function getPartsList(mxmlData) {
+	if (
+		mxmlData["score-partwise"] &&
+		mxmlData["score-partwise"]["part-list"] &&
+		mxmlData["score-partwise"]["part-list"]["score-part"]
+	) {
+		return mxmlData["score-partwise"]["part-list"]["score-part"].map(
+			(part) => part["part-name"]
+		);
+	}
+	return [];
 }
 
 function getMemberNames(mxmlData) {
@@ -49,7 +62,7 @@ function getMemberNames(mxmlData) {
 				let instrument = part["score-instrument"]
 					? part["score-instrument"]["instrument-name"]
 					: "";
-				members = members.map(name => ({name, instrument}))
+				members = members.map((name) => ({ name, instrument }));
 			}
 		);
 		return members;
@@ -58,7 +71,8 @@ function getMemberNames(mxmlData) {
 }
 
 module.exports = {
-	parse,
+	parseFile,
 	getName,
+	getPartsList,
 	getMemberNames,
 };

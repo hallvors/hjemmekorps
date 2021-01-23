@@ -117,7 +117,7 @@ function getProject(userId, projectId) {
       `*[_type == $type && _id == $projectId][0] {
       name, _id, sheetmusic,
       "sheetmusicFile": sheetmusic.asset->url,
-      owner,
+      owner, partslist,
       "members": members[]->{
         _id, name, phone, email, "band": band->name, "portraitUrl": portrait.asset->url,
         "recording": *[_type == 'recording' && references(^._id)][0]
@@ -164,7 +164,7 @@ function getProject(userId, projectId) {
     });
 }
 
-function addProject(userId, name, mxmlFile, members) {
+function addProject(userId, name, mxmlFile, partslist, members) {
   const client = getSanityClient();
   return client.assets
     .upload("file", mxmlFile.buffer, { filename: mxmlFile.originalname })
@@ -184,6 +184,7 @@ function addProject(userId, name, mxmlFile, members) {
             asset: { _type: "reference", _ref: filedoc._id },
           },
           members,
+          partslist,
         })
         .then((project) => getProject(userId, project._id));
     });
