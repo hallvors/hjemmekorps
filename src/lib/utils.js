@@ -27,4 +27,13 @@ function setCookie(req, res, next) {
 	next();
 }
 
-module.exports = {jsonSender, parseUrl, setCookie};
+function filterInstrumentName(someName, instrumentList) {
+	let instrumentFromList = instrumentList.find(instrument => {
+		return someName.toLowerCase().indexOf(instrument.value) > -1
+	});
+	if (instrumentFromList) {
+		return instrumentFromList.value;
+	}
+}
+
+module.exports = {jsonSender, parseUrl, setCookie, filterInstrumentName};

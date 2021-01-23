@@ -29,20 +29,29 @@ function getMemberNames(mxmlData) {
 			(part) => {
 				let names = part["part-name"]
 					.split(/, */g)
-					.map((name) => name.replace(/\(.*$/, "")); // remove (JK) or (1) annotations
-				return names;
+					.map((name) => name.replace(/\(.*$/, "")) // remove (JK) or (1) annotations
+					// some conductors will label the musical parts with the names of the kids playing
+					// others will however leave the instruments - we remove any names that match instruments
+					.filter((name) => {
+						return !instruments.find((instrument) => {
+							return (
+								name
+									.toLowerCase()
+									.indexOf(instrument.title.toLowerCase()) >
+									-1 ||
+								name.toLowerCase().indexOf(instrument.value) >
+									-1
+							);
+						});
+						return names;
+					});
+				members = _.flatten(members);
+				let instrument = part["score-instrument"]
+					? part["score-instrument"]["instrument-name"]
+					: "";
+				members = members.map(name => ({name, instrument}))
 			}
 		);
-		// some conductors will label the musical parts with the names of the kids playing
-		// others will however leave the instruments - we remove any names that match instruments
-		members = _.flatten(members).filter((name) => {
-			return !instruments.find((instrument) => {
-				return (
-					name.toLowerCase().indexOf(instrument.title.toLowerCase()) >
-						-1 || name.toLowerCase().indexOf(instrument.value) > -1
-				);
-			});
-		});
 		return members;
 	}
 	throw new Error("unexpected MXML data");

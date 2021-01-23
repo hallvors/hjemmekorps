@@ -1,10 +1,13 @@
+const env = require("../config/environment");
+
 const sanity = require("@sanity/client");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
-
-const env = require("../config/environment");
 const { nanoid } = require("nanoid");
 const NodeCache = require("node-cache");
+
+const {filterInstrumentName} = require('./utils');
+
 const sanityCache = new NodeCache({
   stdTTL: 60 * 60 * 24 * 7,
   useClones: true,
@@ -13,6 +16,7 @@ const sanityCache = new NodeCache({
 const PROJECT = env.nconf.get("sanity:project");
 const TOKEN = env.nconf.get("sanity:token") || process.env.SANITY_TOKEN;
 const DATASET = env.nconf.get("sanity:dataset");
+const instruments = env.nconf.get("instruments");
 
 var sanityClient = null;
 function getSanityClient() {
@@ -199,13 +203,13 @@ function ensureMembersExist(userId, bandId, members) {
       }
       return Promise.all(
         members.map((member) => {
-          member = member.trim();
+          const name = member.name.trim();
           return client
             .fetch(
               "*[_type == $type && name == $name && references($bandId)]",
               {
                 type: "member",
-                name: member,
+                name,
                 bandId,
               }
             )
@@ -217,7 +221,8 @@ function ensureMembersExist(userId, bandId, members) {
                     _type: "reference",
                     _ref: bandId,
                   },
-                  name: member,
+                  name,
+                  instrument: filterInstrumentName(member.instrument, instruments)
                 });
               } else {
                 return result[0];
