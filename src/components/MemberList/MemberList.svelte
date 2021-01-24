@@ -10,63 +10,6 @@
   export let instruments;
   export let icons;
 
-  let showDataInput = false;
-  let importData = '';
-  let parsedImportData;
-
-  function parseData() {
-    if (importData) {
-      let tmp = importData.split(/\r?\n/g);
-      if (tmp.length) {
-        parsedImportData = tmp
-          .map(row => {
-            let rowData = row.split(/[\t;]/g);
-            let data;
-            if (rowData.length) {
-              data = { name: rowData[0], phone: [], email: [] };
-              for (let i = 1; i < rowData.length; i++) {
-                if (/^[0-9 +]{8,}$/.test(rowData[i])) {
-                  data.phone.push(rowData[i]);
-                } else if (/@/.test(rowData[i])) {
-                  data.email.push(rowData[i]);
-                }
-              }
-            }
-            return data;
-          })
-          .filter(row => row);
-      }
-    }
-  }
-  function getByName(name) {
-    return document.querySelector('input[value="' + name + '"]');
-  }
-  function submitParsedData() {
-    let submitData = parsedImportData.filter(item => {
-      if (getByName(item.name).checked) {
-        item.phone = item.phone.filter(num => getByName(num).checked);
-        item.email = item.email.filter(mail => getByName(mail).checked);
-        return true;
-      }
-      return false;
-    });
-    fetch('/api/members', {
-      method: 'POST',
-      body: JSON.stringify({ members: submitData, bandId: band._id }),
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    }).then(response => {
-      let statusCode = response.status;
-      if (statusCode === 200) {
-        showDataInput = false;
-        importData = '';
-        parsedImportData = null;
-        response.json().then(data => dispatch('dataupdate', data));
-      }
-    });
-  }
 
   let activeTagValue, activeTagName;
 
