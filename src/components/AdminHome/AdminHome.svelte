@@ -20,11 +20,14 @@
 
 <div class="main-wrapper">
   <div class="display">
+    <ProjectDisplay newProject={true} />
     {#each projects as project}
       <ProjectDisplay title={project.name} id={project._id} />
     {/each}
-    <ProjectDisplay newProject={true} />
   </div>
+  <p>
+    Første steg er å <a href="/musikanter/import">importer musikanter</a>.
+  </p>
 </div>
 
 <style>
