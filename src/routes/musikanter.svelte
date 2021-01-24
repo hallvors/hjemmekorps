@@ -1,17 +1,8 @@
 <script context="module">
   export async function preload(page, session) {
     const bands = session.bands;
-    const members = {};
-    for (let i = 0; i < bands.length; i++) {
-      let band = bands[i];
-      const res = await this.fetch(
-        `/api/members/byband/${encodeURIComponent(band._id)}`
-      );
-      members[band._id] = await res.json();
-    }
     return {
       bands,
-      members,
       instruments: session.instruments,
     };
   }
@@ -21,27 +12,24 @@
   import MemberList from '../components/MemberList/MemberList.svelte';
   // TODO: UI for selecting a different band?
 
-  export let members;
   export let bands;
   export let instruments;
 
-  console.log({ bands, members });
   let selectedBand = bands[0];
 
   function onUpdate(data) {
     data.detail.forEach(item => {
       let existing =
-        members &&
-        members[selectedBand._id] &&
-        members[selectedBand._id].find(member => member.name === item.name);
+        selectedBand.members &&
+        selectedBand.members.find(member => member.name === item.name);
       if (existing) {
         Object.assign(existing, item);
       } else {
-        members[selectedBand._id].push(item);
+        selectedBand.members.push(item);
       }
     });
     // assignment triggers updating - array.push() etc does not (sorry, hack)
-    members = Object.assign({}, members);
+    selectedBand.members = Object.assign({}, members);
   }
 </script>
 
@@ -50,7 +38,7 @@
 <h1>Musikanter</h1>
 <p>Her er oversikten over musikanter. Bruk verktøyene for å tilordne gruppe og instrument.</p>
 <MemberList
-  members={members[selectedBand._id]}
+  members={selectedBand.members}
   band={selectedBand}
   instruments={instruments}
   on:dataupdate={onUpdate}

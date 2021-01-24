@@ -84,18 +84,12 @@ function getBandsForAdminUser(userId) {
   return getSanityClient().fetch(
     `*[_type == $type && references($userId) && !(_id in path("drafts.**"))]{
     ..., "logoUrl": logo.asset->url,
-    "palette": logo.asset->metadata.palette
+    "palette": logo.asset->metadata.palette,
+    "members": *[_type == "member" && references(^._id)] {
+      ..., "portraitUrl": portrait.asset->url
+    }
   }`,
     { type: 'band', userId }
-  );
-}
-
-function getMembersOfBand(bandId) {
-  return getSanityClient().fetch(
-    `*[_type == $type && references($bandId) && !(_id in path("drafts.**")) && visible]{
-    ..., "portraitUrl": portrait.asset->url,
-  }`,
-    { type: 'member', bandId }
   );
 }
 
@@ -498,7 +492,6 @@ module.exports = {
   getAdminUserData,
   getUserData,
   getBandsForAdminUser,
-  getMembersOfBand,
   getProjects,
   updateOrCreateMember,
   ensureMembersExist,
