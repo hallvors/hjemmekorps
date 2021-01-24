@@ -90,11 +90,20 @@ function getBandsForAdminUser(userId) {
   );
 }
 
+function getMembersOfBand(bandId) {
+  return getSanityClient().fetch(
+    `*[_type == $type && references($bandId) && !(_id in path("drafts.**")) && visible]{
+    ..., "portraitUrl": portrait.asset->url,
+  }`,
+    { type: 'member', bandId }
+  );
+}
+
 function getProjects(userId) {
   return getSanityClient().fetch(
     `*[_type == $type && owner._ref == $userId && !(_id in path("drafts.**"))] {
       name, _id, sheetmusic,
-      "sheetmusicFile": sheetmusic->url,
+      "sheetmusicFile": sheetmusic->url
     }
     | order(_createdAt desc)`,
     {
@@ -260,12 +269,24 @@ async function updateOrCreateMember(data, bandId, portraitFile) {
     portraitDoc = await client.upload('image', fs.createReadStream(filepath));
   }
 
-  let update = { _type: 'member' };
+  let update = { _type: 'member', visible: true };
   Object.assign(
     update,
-    _.pick(data, '_id', 'name', 'phone', 'email', 'instrument', 'subgroup')
+    oldData || {},
+    _.pick(
+      data,
+      '_id',
+      'name',
+      'phone',
+      'email',
+      'instrument',
+      'subgroup',
+      'visible'
+    )
   );
-  update.band = { type: 'reference', _ref: bandId };
+  if (bandId) {
+    update.band = { _type: 'reference', _ref: bandId };
+  }
   if (portraitDoc) {
     update.portrait = {
       _type: 'image',
@@ -319,6 +340,7 @@ function ensureMembersExist(userId, bandId, members) {
                   instrument: member.instrument
                     ? filterInstrumentName(member.instrument, instruments)
                     : '',
+                  visible: true,
                 });
               } else {
                 return result[0];
@@ -476,6 +498,7 @@ module.exports = {
   getAdminUserData,
   getUserData,
   getBandsForAdminUser,
+  getMembersOfBand,
   getProjects,
   updateOrCreateMember,
   ensureMembersExist,

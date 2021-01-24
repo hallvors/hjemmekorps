@@ -1,3 +1,4 @@
+import * as env from './config/environment';
 import sirv from "sirv"; // sirv is a fast and basic server for static files
 import polka from "polka"; // polka is a slightly simpler Express-like server module
 import compression from "compression";
@@ -38,6 +39,8 @@ app
 				user: req.user,
 				bands,
 				projects,
+				instruments: env.instruments,
+				icons: env.icons
 			};
 		},
 	})

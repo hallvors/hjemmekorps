@@ -1,5 +1,9 @@
 <script>
-  let muted = false;
+  import { createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher();
+
+let muted = false;
 
   function toggleMute(e) {
     const button = e.currentTarget;
@@ -14,15 +18,17 @@
     muted = !muted;
   }
 
+function dispatchClick() {
+  dispatch('click', member)
+}
+
   export let newMember = false;
 
-  export let member = {
-    navn: 'Navnløs',
-  };
+  export let member;
 </script>
 
 {#if !newMember}
-  <main>
+  <main on:click={dispatchClick}>
     {#if member.instrument}
       <figure>
         <img

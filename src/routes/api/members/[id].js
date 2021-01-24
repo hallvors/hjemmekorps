@@ -14,7 +14,7 @@ export const post = compose([
   multerUpload.single('photo'),
   async function post(req, res, next) {
     const data = await sClient.updateOrCreateMember(
-      Object.assign(_pick(req.body, 'name', 'phone', 'email', 'instrument', 'subgroup'), {
+      Object.assign(_.pick(req.body, 'name', 'phone', 'email', 'instrument', 'subgroup'), {
         _id: req.params.id,
       }),
       req.body.bandId,

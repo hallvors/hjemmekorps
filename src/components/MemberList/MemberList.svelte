@@ -1,49 +1,203 @@
 <script>
-  export let project;
-  let ulElement;
-  let copied;
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher();
 
-  function triggerSelectAndCopy() {
-    let ok = false;
-    if (document.body.createTextRange) {
-      const range = document.body.createTextRange();
-      range.moveToElementText(ulElement);
-      range.select();
-      ok = true;
-    } else if (window.getSelection) {
-      const selection = window.getSelection();
-      const range = document.createRange();
-      range.selectNodeContents(ulElement);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      ok = true;
+  import DeltakerDisplay from '../DeltakerDisplay/DeltakerDisplay.svelte';
+  import TagTrigger from '../TagTrigger/TagTrigger.svelte';
+
+  export let members;
+  export let band;
+  export let instruments;
+  export let icons;
+
+  let showDataInput = false;
+  let importData = '';
+  let parsedImportData;
+
+  function parseData() {
+    if (importData) {
+      let tmp = importData.split(/\r?\n/g);
+      if (tmp.length) {
+        parsedImportData = tmp
+          .map(row => {
+            let rowData = row.split(/[\t;]/g);
+            let data;
+            if (rowData.length) {
+              data = { name: rowData[0], phone: [], email: [] };
+              for (let i = 1; i < rowData.length; i++) {
+                if (/^[0-9 +]{8,}$/.test(rowData[i])) {
+                  data.phone.push(rowData[i]);
+                } else if (/@/.test(rowData[i])) {
+                  data.email.push(rowData[i]);
+                }
+              }
+            }
+            return data;
+          })
+          .filter(row => row);
+      }
     }
-    if (ok && document.execCommand("copy")) {
-      copied = true;
-    } else {
-      copied = false;
-    }
-    setTimeout(() => {
-      copied = undefined;
-    }, 2500);
+  }
+  function getByName(name) {
+    return document.querySelector('input[value="' + name + '"]');
+  }
+  function submitParsedData() {
+    let submitData = parsedImportData.filter(item => {
+      if (getByName(item.name).checked) {
+        item.phone = item.phone.filter(num => getByName(num).checked);
+        item.email = item.email.filter(mail => getByName(mail).checked);
+        return true;
+      }
+      return false;
+    });
+    fetch('/api/members', {
+      method: 'POST',
+      body: JSON.stringify({ members: submitData, bandId: band._id }),
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }).then(response => {
+      let statusCode = response.status;
+      if (statusCode === 200) {
+        showDataInput = false;
+        importData = '';
+        parsedImportData = null;
+        response.json().then(data => dispatch('dataupdate', data));
+      }
+    });
+  }
+
+  let activeTagValue, activeTagName;
+
+  function memberClicked(evt) {
+    let member = members.find(item => item._id === evt.detail._id);
+    dispatch('dataupdate', [
+      Object.assign(member, { [activeTagName]: activeTagValue }),
+    ]);
+    fetch('/api/members/' + evt.detail._id, {
+      method: 'POST',
+      body: JSON.stringify({
+        [activeTagName]: activeTagValue,
+        bandId: band.id,
+      }),
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }).then(result => {
+      result.json().then(data => dispatch('dataupdate', [data]));
+    });
+  }
+
+  function getIconUrl(instrument) {
+    let iconData = icons.find(item => item[instrument]);
+    return iconData ? `/images/instruments/${iconData[instrument]}.png` : null;
   }
 </script>
 
-<div>
-  <ul bind:this={ulElement}>
-    {#each project.members as member}
-      <li>
-        <a href={"/?t=" + member.token}>{member.name}</a>
-      </li>
-    {/each}
-  </ul>
-  
-  {#if copied === true}
-    <p>Liste kopiert!</p>
-  {:else if copied === false}
-    <p>Kunne ikke kopiere, støttes ikke i din nettleser</p>
-  {/if}
-
-  <button on:click={triggerSelectAndCopy}>Kopier</button>
-  <a href="/prosjekt/{project._id}">Tilbake</a>
+<div class="tagging-tools">
+  {#each band.groups as subgroup}
+    <TagTrigger
+      tagName="subgroup"
+      tagValue={subgroup}
+      active={activeTagValue === subgroup}
+      on:activate={evt => {
+        activeTagValue = evt.detail.tagValue;
+        activeTagName = evt.detail.tagName;
+      }}
+      on:deactivate={evt => (activeTagValue = null)}
+    />
+  {/each}
+  {#each instruments as instrument}
+    <TagTrigger
+      tagName="instrument"
+      tagValue={instrument.value}
+      tagRendered={instrument.title}
+      tagIcon={getIconUrl(instrument.value)}
+      active={activeTagValue === instrument.value}
+      on:activate={evt => {
+        activeTagValue = evt.detail.tagValue;
+        activeTagName = evt.detail.tagName;
+      }}
+      on:deactivate={evt => (activeTagValue = null)}
+    />
+  {/each}
 </div>
+
+<div>
+  {#if members}
+    {#each members as member}
+      <DeltakerDisplay {member} on:click={memberClicked} />
+    {/each}
+  {/if}
+</div>
+
+<p>
+  <label
+    ><input type="checkbox" bind:checked={showDataInput} />Vis boks for
+    dataimport</label
+  >
+</p>
+
+{#if showDataInput}
+  <p>
+    For å importere data, kopier en tabell fra et regneark og lim inn her.
+    Musikantens navn må stå i første kolonne:
+  </p>
+  <textarea
+    bind:value={importData}
+    on:input={parseData}
+    on:paste={parseData}
+    on:blur={parseData}
+  />
+{/if}
+{#if parsedImportData && parsedImportData.length}
+  <p>
+    Følgende telefonnumre og epost-adresser ble funnet. Alle som er valgt blir
+    importert. Importerte numre og epost-adresser kan brukes til å sende ut
+    innspillings-lenker.
+  </p>
+  <table>
+    {#each parsedImportData as data}
+      <tr>
+        <td>
+          <label
+            ><input
+              type="checkbox"
+              value={data.name}
+              checked
+            />{data.name}</label
+          >
+        </td>
+        <td>
+          {#each data.phone as num}
+            <label><input type="checkbox" value={num} checked />{num}</label>
+          {/each}
+        </td>
+        <td>
+          {#each data.email as mail}
+            <label><input type="checkbox" value={mail} checked />{mail}</label>
+          {/each}
+        </td>
+      </tr>
+    {/each}
+  </table>
+  <button on:click={submitParsedData}>Importer valgte</button>
+{/if}
+
+<style>
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #bbb;
+  }
+  td {
+    vertical-align: top;
+    border: 1px solid #bbb;
+    padding: 12px;
+  }
+  .tagging-tools {
+    position: sticky;
+  }
+</style>

@@ -1,5 +1,5 @@
 <script>
-    import DeltakerDisplay from "./DeltakerDisplay.svelte";
+    import DeltakerDisplay from "../DeltakerDisplay/DeltakerDisplay.svelte";
     import ProjectHome from "./ProjectHome.svelte";
 
     export let project;
@@ -13,7 +13,6 @@
     <div class="members">
         <h1 class="members-title">Deltakere</h1>
 
-        <DeltakerDisplay newMember={true}/>
         {#each project.members || [] as member}
             <DeltakerDisplay member={member}/>
         {/each}

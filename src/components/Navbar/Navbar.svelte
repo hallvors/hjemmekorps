@@ -76,11 +76,11 @@
 
 	const navbarElms = [
 		{
-			text: "Home",
-			href: "/",
+			text: "Musikanter",
+			href: "/musikanter",
 		},
 		{
-			text: "Nytt prosjekt",
+			text: "Ny låt",
 			href: `prosjekt/nytt`,
 		},
 /*		{

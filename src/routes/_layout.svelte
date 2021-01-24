@@ -11,7 +11,7 @@
 
 	// segment will be automatically set to last part of the URL in case
 	// of nested routes - https://sapper.svelte.dev/docs#Nested_routes
-	export let segment;
+	//export let segment;
 
 </script>
 

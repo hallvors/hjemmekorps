@@ -46,6 +46,15 @@ export default {
       title: "Undergruppe",
       name: "subgroup",
       type: "string",
+    }, 
+    {
+      title: "Aktiv",
+      description: "Musikanter som permitteres eller slutter kan de-aktiveres her",
+      name: "visible",
+      type: "boolean"
     }
   ],
+  initialValue: {
+    visible: true
+  }
 };
