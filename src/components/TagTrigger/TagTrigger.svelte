@@ -4,9 +4,9 @@
 
   export let tagName;
   export let tagValue;
-  export let tagRendered;
-  export let tagIcon;
-  export let active;
+  export let tagRendered = '';
+  export let tagIcon = '';
+  export let active = false;
 
   function toggle() {
     if (active) {
