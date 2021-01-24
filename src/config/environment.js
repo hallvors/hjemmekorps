@@ -16,7 +16,6 @@ nconf.defaults(require('./defaults.json'));
 
 module.exports = {
   instruments: require('./instruments.json').instruments,
-  icons: require('./instrument-icons.json').icons,
   name: env,
   test: env === 'test',
   development: env === 'development',

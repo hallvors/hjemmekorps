@@ -13,7 +13,6 @@
       bands,
       members,
       instruments: session.instruments,
-      icons: session.icons,
     };
   }
 </script>
@@ -25,7 +24,6 @@
   export let members;
   export let bands;
   export let instruments;
-  export let icons;
 
   console.log({ bands, members });
   let selectedBand = bands[0];
@@ -55,6 +53,5 @@
   members={members[selectedBand._id]}
   band={selectedBand}
   instruments={instruments}
-  icons={icons}
   on:dataupdate={onUpdate}
 />

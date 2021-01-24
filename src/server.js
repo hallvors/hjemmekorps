@@ -40,7 +40,6 @@ app
 				bands,
 				projects,
 				instruments: env.instruments,
-				icons: env.icons
 			};
 		},
 	})
