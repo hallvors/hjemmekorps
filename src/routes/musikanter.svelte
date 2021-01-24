@@ -48,7 +48,7 @@
 <svelte:head><title>Musikanter</title></svelte:head>
 
 <h1>Musikanter</h1>
-
+<p>Her er oversikten over musikanter. Bruk verktøyene for å tilordne gruppe og instrument.</p>
 <MemberList
   members={members[selectedBand._id]}
   band={selectedBand}
