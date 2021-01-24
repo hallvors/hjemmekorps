@@ -80,8 +80,8 @@
 			href: "/musikanter",
 		},
 		{
-			text: "Ny låt",
-			href: `prosjekt/nytt`,
+			text: "Låter",
+			href: `/`,
 		},
 /*		{
 			text: "Instillinger",
