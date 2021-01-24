@@ -4,11 +4,11 @@
 
   import DeltakerDisplay from '../DeltakerDisplay/DeltakerDisplay.svelte';
   import TagTrigger from '../TagTrigger/TagTrigger.svelte';
+  import ScrollableListToolsRight from '../../structure/ScrollableListAndTools/ScrollableListToolsRight.svelte';
 
   export let members;
   export let band;
   export let instruments;
-  export let icons;
 
 
   let activeTagValue, activeTagName;
@@ -34,113 +34,47 @@
   }
 
   function getIconUrl(instrument) {
-    let iconData = icons.find(item => item[instrument]);
-    return iconData ? `/images/instruments/${iconData[instrument]}.png` : null;
+    return instrument ? `/images/instruments/${instrument}.png` : null;
   }
 </script>
 
-<div class="tagging-tools">
-  {#each band.groups as subgroup}
-    <TagTrigger
-      tagName="subgroup"
-      tagValue={subgroup}
-      active={activeTagValue === subgroup}
-      on:activate={evt => {
-        activeTagValue = evt.detail.tagValue;
-        activeTagName = evt.detail.tagName;
-      }}
-      on:deactivate={evt => (activeTagValue = null)}
-    />
-  {/each}
-  {#each instruments as instrument}
-    <TagTrigger
-      tagName="instrument"
-      tagValue={instrument.value}
-      tagRendered={instrument.title}
-      tagIcon={getIconUrl(instrument.value)}
-      active={activeTagValue === instrument.value}
-      on:activate={evt => {
-        activeTagValue = evt.detail.tagValue;
-        activeTagName = evt.detail.tagName;
-      }}
-      on:deactivate={evt => (activeTagValue = null)}
-    />
-  {/each}
-</div>
+<ScrollableListToolsRight>
+  <div>
+    {#if members}
+      {#each members as member}
+        <DeltakerDisplay {member} on:click={memberClicked} />
+      {/each}
+    {/if}
+  </div>
 
-<div>
-  {#if members}
-    {#each members as member}
-      <DeltakerDisplay {member} on:click={memberClicked} />
+  <div class="tagging-tools" slot="aside">
+    <h3>Grupper</h3>
+    {#each band.groups as subgroup}
+      <TagTrigger
+        tagName="subgroup"
+        tagValue={subgroup}
+        active={activeTagValue === subgroup}
+        on:activate={evt => {
+          activeTagValue = evt.detail.tagValue;
+          activeTagName = evt.detail.tagName;
+        }}
+        on:deactivate={evt => (activeTagValue = null)}
+      />
     {/each}
-  {/if}
-</div>
-
-<p>
-  <label
-    ><input type="checkbox" bind:checked={showDataInput} />Vis boks for
-    dataimport</label
-  >
-</p>
-
-{#if showDataInput}
-  <p>
-    For å importere data, kopier en tabell fra et regneark og lim inn her.
-    Musikantens navn må stå i første kolonne:
-  </p>
-  <textarea
-    bind:value={importData}
-    on:input={parseData}
-    on:paste={parseData}
-    on:blur={parseData}
-  />
-{/if}
-{#if parsedImportData && parsedImportData.length}
-  <p>
-    Følgende telefonnumre og epost-adresser ble funnet. Alle som er valgt blir
-    importert. Importerte numre og epost-adresser kan brukes til å sende ut
-    innspillings-lenker.
-  </p>
-  <table>
-    {#each parsedImportData as data}
-      <tr>
-        <td>
-          <label
-            ><input
-              type="checkbox"
-              value={data.name}
-              checked
-            />{data.name}</label
-          >
-        </td>
-        <td>
-          {#each data.phone as num}
-            <label><input type="checkbox" value={num} checked />{num}</label>
-          {/each}
-        </td>
-        <td>
-          {#each data.email as mail}
-            <label><input type="checkbox" value={mail} checked />{mail}</label>
-          {/each}
-        </td>
-      </tr>
+    <h3>Instrumenter</h3>
+    {#each instruments as instrument}
+      <TagTrigger
+        tagName="instrument"
+        tagValue={instrument.value}
+        tagRendered={instrument.title}
+        tagIcon={getIconUrl(instrument.value)}
+        active={activeTagValue === instrument.value}
+        on:activate={evt => {
+          activeTagValue = evt.detail.tagValue;
+          activeTagName = evt.detail.tagName;
+        }}
+        on:deactivate={evt => (activeTagValue = null)}
+      />
     {/each}
-  </table>
-  <button on:click={submitParsedData}>Importer valgte</button>
-{/if}
-
-<style>
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    border: 1px solid #bbb;
-  }
-  td {
-    vertical-align: top;
-    border: 1px solid #bbb;
-    padding: 12px;
-  }
-  .tagging-tools {
-    position: sticky;
-  }
-</style>
+  </div>
+</ScrollableListToolsRight>
