@@ -24,19 +24,18 @@
         selectedBand.members.find(member => member.name === item.name);
       if (existing) {
         Object.assign(existing, item);
+        selectedBand.members = [...selectedBand.members];
       } else {
-        selectedBand.members.push(item);
+        selectedBand.members = [...selectedBand.members, item];
       }
     });
-    // assignment triggers updating - array.push() etc does not (sorry, hack)
-    selectedBand.members = Object.assign({}, members);
   }
 </script>
 
 <svelte:head><title>Musikanter</title></svelte:head>
 
 <h1>Musikanter</h1>
-<p>Her er oversikten over musikanter. Bruk verktøyene for å tilordne gruppe og instrument.</p>
+<p>Her er oversikten over musikanter. Bruk verktøyene for å tilordne gruppe og instrument. Mangler det noen? Gå til <a href="/musikanter/import">importer musikanter</a>.</p>
 <MemberList
   members={selectedBand.members}
   band={selectedBand}
