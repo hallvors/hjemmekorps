@@ -2,7 +2,7 @@
   import { stores } from '@sapper/app';
   const { session } = stores();
 
-  import ProjectDisplay from '../ProjectDisplay/ProjectDisplay.svelte'
+  import ProjectDisplay from '../ProjectDisplay/ProjectDisplay.svelte';
 
   // Dette får man fra backend
   let projects = [];
@@ -20,14 +20,17 @@
 
 <div class="main-wrapper">
   <div class="display">
-    <ProjectDisplay newProject={true} />
-    {#each projects as project}
-      <ProjectDisplay title={project.name} id={project._id} />
-    {/each}
+    {#if bands[0].members && bands[0].members.length}
+      <ProjectDisplay newProject={true} />
+      {#each projects as project}
+        <ProjectDisplay title={project.name} id={project._id} />
+      {/each}
+    {:else}
+      <p>
+        Første steg er å <a href="/musikanter/import">importere musikanter</a>.
+      </p>
+    {/if}
   </div>
-  <p>
-    Første steg er å <a href="/musikanter/import">importer musikanter</a>.
-  </p>
 </div>
 
 <style>
@@ -56,11 +59,11 @@
   @media only screen and (max-width: 820px) {
     .display {
       grid-template-columns: 1fr 1fr;
-  }
     }
+  }
   @media only screen and (max-width: 600px) {
     .display {
       grid-template-columns: 1fr;
-  }
     }
+  }
 </style>

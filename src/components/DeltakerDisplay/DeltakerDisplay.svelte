@@ -3,7 +3,7 @@
 
   const dispatch = createEventDispatcher();
 
-let muted = false;
+  let muted = false;
 
   function toggleMute(e) {
     const button = e.currentTarget;
@@ -18,19 +18,17 @@ let muted = false;
     muted = !muted;
   }
 
-function dispatchClick() {
-  dispatch('click', member)
-}
-
-  export let newMember = false;
+  function dispatchClick() {
+    dispatch('click', member);
+  }
 
   export let member;
+  export let registerAudioElement = () => {};
 </script>
 
-{#if !newMember}
   <main on:click={dispatchClick}>
     {#if member.instrument}
-      <figure>
+      <figure class="instrument">
         <img
           src={'/images/instruments/' + member.instrument + '.png'}
           alt={member.instrument}
@@ -41,7 +39,7 @@ function dispatchClick() {
     {/if}
 
     {#if member.portraitUrl}
-      <figure>
+      <figure class="portrait">
         <img src={member.portraitUrl} alt={member.name} />
         <figcaption>{member.name}</figcaption>
       </figure>
@@ -53,36 +51,10 @@ function dispatchClick() {
       <button class="mute-btn" on:click|preventDefault={toggleMute}
         ><i class="fas fa-volume-up" /></button
       >
+      <!-- svelte-ignore a11y-media-has-caption -->
+      <audio src={member.recording.url} use:registerAudioElement {muted} />
     {/if}
   </main>
-{:else}
-  <main class="new-member">
-    <div class="plus-sign">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="iconic-plus-thin injected-svg iconic iconic-lg iconic-main"
-        width="80"
-        height="80"
-        viewBox="0 0 128 128"
-        data-src="/iconic/svg/plus-thin.svg">
-        <g
-          class="iconic-plus-thin-lg iconic-container iconic-lg"
-          data-width="128"
-          data-height="128"
-          display="inline">
-          <path
-            stroke="#000"
-            stroke-width="2"
-            stroke-linecap="square"
-            class="iconic-property-stroke"
-            d="M64 4v120m60-60h-120"
-            fill="none"
-          />
-        </g>
-      </svg>
-    </div>
-  </main>
-{/if}
 
 <style>
   main {
@@ -102,6 +74,7 @@ function dispatchClick() {
 
   h3 {
     text-transform: none;
+    vertical-align: top;
   }
 
   main:hover {
@@ -111,24 +84,15 @@ function dispatchClick() {
 
   .instrument-icon {
     max-width: 64px;
-    float:right;
+    float: right;
   }
 
-  .new-member {
-    position: relative;
+  .portrait {
+    max-width: 20%;
+    vertical-align: bottom;
+    margin-left: -20px;
   }
 
-  /* .new-member:hover {
-        cursor: pointer;
-        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
-    } */
-
-  .plus-sign {
-    position: absolute;
-    /* 40px is half of plus sign-width and height */
-    top: calc(50% - 40px);
-    left: calc(50% - 40px);
-  }
   .mute-btn {
     border: 1px solid var(--dark);
     background: var(--dark);
