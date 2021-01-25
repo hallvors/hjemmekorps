@@ -1,19 +1,11 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount } from 'svelte';
   //import DeltakerDisplay from "../ProjectMain/DeltakerDisplay.svelte";
-  import LibLoader from "../utils/LibLoader.svelte";
-  import NoteBox from "../ProjectMain/NoteBox.svelte";
+  import LibLoader from '../utils/LibLoader.svelte';
+  import NoteBox from '../ProjectMain/NoteBox.svelte';
   // TODO:
-  //  - la bruker lytte til opptaket før det sendes, evt. ta på nytt
   //  - velge korrekt del av notene for akkurat den brukeren (!)
-  //  - cursor, vis hvilken note som skal spilles
-  //  - nedtelling ved start, korrekt tempoangivelse
-
-  // På gang, kjente feil akkurat nå:
-  // - nedtelling før start vises ikke, hvorfor? metronomeCounter et al
-  // - notene ruller ned alt for fort, før "her er du"-indikator trenger det
-  // - relatert: "her er du"-indikator pauser ikke når en pauser/stopper opptaket
-  // - "her er du"-indikator må oppdate slutten av notene og stoppe opptaket automatisk
+  //  - nedtelling ved start ignorerer opptakt :(
   // - trengs mere CSS og pynt
   // -
 
@@ -91,13 +83,13 @@
           const averageVolume = parseInt(
             ((volume / volumes.length) * 100) / 127
           );
-          volumePercElm.style.width = averageVolume + "%";
+          volumePercElm.style.width = averageVolume + '%';
           volumeLoud = averageVolume > 90 ? true : false;
         };
         volumeInterval = setInterval(volumeCallback, 200);
         recorder = new WebAudioRecorder(analyser, {
-          workerDir: "/js/web-audio-recorder/lib-minified/",
-          encoding: "wav",
+          workerDir: '/js/web-audio-recorder/lib-minified/',
+          encoding: 'wav',
         });
         recorder.onComplete = function (recorder, blob) {
           recordingData = blob;
@@ -118,17 +110,17 @@
 
   function sendRecording() {
     var xhr = new XMLHttpRequest();
-    xhr.open("post", "/api/project/" + project._id + "/recordings", true);
+    xhr.open('post', '/api/project/' + project._id + '/recordings', true);
     xhr.onload = function () {
-      document.body.className = "";
+      document.body.className = '';
       //document.getElementById("state-indicator").src = "/images/rec.png";
-      alert("Ferdig! Opptaket er sendt. Tusen takk :)");
+      alert('Ferdig! Opptaket er sendt. Tusen takk :)');
     };
     var fd = new FormData();
-    fd.append("file", recordingData, "opptak.wav");
-    fd.append("memberId", user._id);
-    fd.append("projectId", project._id);
-    fd.append("meta", JSON.stringify(meta));
+    fd.append('file', recordingData, 'opptak.wav');
+    fd.append('memberId', user._id);
+    fd.append('projectId', project._id);
+    fd.append('meta', JSON.stringify(meta));
     meta = [];
     startTime = null;
     xhr.send(fd);
@@ -178,17 +170,17 @@
   }
 
   function endOfNote() {
-    console.log("finished notification");
+    console.log('finished notification');
     stop();
   }
 
   function toggle(e) {
     if (recorder && recorder.isRecording()) {
       stop();
-      document.body.className = "sending";
+      document.body.className = 'sending';
     } else {
       start();
-      document.body.className = "recording";
+      document.body.className = 'recording';
     }
   }
 
@@ -197,7 +189,7 @@
       var url = URL.createObjectURL(recordingData);
       audioElm.src = url;
       audioElm.play();
-      audioElm.addEventListener("ended", () => {
+      audioElm.addEventListener('ended', () => {
         recState = RECORDED_AUDIO;
       });
       recState = PLAYING;
@@ -232,6 +224,7 @@
 {/if}
 
 <nav id="rec-toolbar">
+  Hei {user.name}! 
   {#if recState === STOPPED}
     <!-- initial state: start recording-button only -->
     <button on:click={start}>Ta opp</button>
