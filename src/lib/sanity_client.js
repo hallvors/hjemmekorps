@@ -97,12 +97,24 @@ function getProjects(userId) {
   return getSanityClient().fetch(
     `*[_type == $type && owner._ref == $userId && !(_id in path("drafts.**"))] {
       name, _id, sheetmusic,
-      "sheetmusicFile": sheetmusic->url
+      "sheetmusicFile": sheetmusic.asset->url
     }
     | order(_createdAt desc)`,
     {
       type: 'project',
       userId,
+    }
+  );
+}
+
+function getProjectScoreData(projectId) {
+  return getSanityClient().fetch(
+    `*[_type == $type && _id == $projectId && !(_id in path("drafts.**"))] {
+      _id, "sheetmusicFile": sheetmusic.asset->url, partslist
+    }[0]`,
+    {
+      type: 'project',
+      projectId,
     }
   );
 }
@@ -317,6 +329,7 @@ async function updateOrCreateMember(data, bandId, portraitFile) {
   return result;
 }
 
+// TODO: reconsider if this is useful... likely not
 function ensureMembersExist(userId, bandId, members) {
   const client = getSanityClient();
   return client

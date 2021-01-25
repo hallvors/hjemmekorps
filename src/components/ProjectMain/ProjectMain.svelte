@@ -1,68 +1,195 @@
 <script>
-    import DeltakerDisplay from "../DeltakerDisplay/DeltakerDisplay.svelte";
-    import ProjectHome from "./ProjectHome.svelte";
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher();
 
-    export let project;
+  import DeltakerDisplay from '../DeltakerDisplay/DeltakerDisplay.svelte';
+  import ProjectHome from './ProjectHome.svelte';
+  import ScrollableListToolsRight from '../../structure/ScrollableListAndTools/ScrollableListToolsRight.svelte';
+  import TagTrigger from '../TagTrigger/TagTrigger.svelte';
 
-    // Todo:
-    // Tegne linjer med svg
-    // Fullføre resten
+  export let project;
+  export let band;
+
+  let listOptions = [];
+  listOptions.push({
+    title: 'Alle korpsmedlemmer',
+    list: band.members,
+  });
+  listOptions.push({
+    title: 'Med stemmer',
+    list: project.members,
+  });
+  if (band.groups) {
+    band.groups.forEach(group => {
+      listOptions.push({
+        title: group,
+        list: band.members.filter(item => item.subgroup === group),
+      });
+    });
+  }
+  let selectedOption = 1;
+
+  let activeTagValue, activeTagName;
+
+  function memberClicked(evt) {
+    if (!activeTagValue) {
+      return;
+    }
+    let member = band.members.find(item => item._id === evt.detail._id);
+    member.part = activeTagValue;
+    if (!project.members) {
+      project.members = [];
+    }
+    project.members = [...project.members, member];
+    let partDetails = project.partslist.find(
+      partDetails => partDetails.part === activeTagValue
+    );
+    let exists =
+      (partDetails.members &&
+        partDetails.members.findIndex(member => {
+          member._ref === evt.detail._id;
+        })) ||
+      -1;
+    if (exists > -1) {
+      partDetails.members.splice(exists, 1);
+    } else {
+      if (!partDetails.members) {
+        partDetails.members = [];
+      }
+      partDetails = [
+        ...partDetails,
+        {
+          _ref: evt.detail._id,
+          _type: 'reference',
+          _key: parseInt(Math.random() * 1000000000000),
+        },
+      ];
+    }
+
+    dispatch('dataupdate', project);
+    fetch('/api/project/' + project._id, {
+      method: 'POST',
+      body: JSON.stringify(Object.assign({}, { partslist: project.partslist })),
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }).then(result => {
+      result.json().then(data => dispatch('dataupdate', data));
+    });
+  }
+
+  let audioElements = [];
+  function startAudio() {
+    audioElements.forEach(elm => elm.play());
+  }
+  function stopAudio() {
+    audioElements.forEach(elm => elm.pause());
+  }
 </script>
 
+<div class="project-main">
+  <div class="project-info">
+    <h1 class="h1-bigger project-title">{project.name}</h1>
+  </div>
+</div>
+
 <main>
+  <div class="col">
     <div class="members">
-        <h1 class="members-title">Deltakere</h1>
+      <h1 class="members-title">Musikanter</h1>
 
-        {#each project.members || [] as member}
-            <DeltakerDisplay member={member}/>
+      <select bind:value={selectedOption}>
+        {#each listOptions as list, index}
+          <option value={index}>{list.title}</option>
         {/each}
+      </select>
 
-        <!-- <svg class="member-line">
-            <polyline points="0,100 50,100 50,15 100,15"
-            style="fill: none; stroke:var(--dark); stroke-width: 30;"/>
-        </svg> -->
+      {#each listOptions[selectedOption].list || [] as member}
+        <DeltakerDisplay
+          {member}
+          on:click={memberClicked}
+          registerAudioElement={elm =>
+            (audioElements = [...audioElements, elm])}
+        />
+      {/each}
 
+      <!-- <svg class="member-line">
+                    <polyline points="0,100 50,100 50,15 100,15"
+                    style="fill: none; stroke:var(--dark); stroke-width: 30;"/>
+                </svg> -->
     </div>
-
-    <div class="project-main">
-        <div class="project-info">
-            <h1 class="h1-bigger project-title">{project.name}</h1>
-
-            <ProjectHome project={project} />
-        </div>
-
-
-    </div>
+  </div>
+  <div class="col main">
+    <ScrollableListToolsRight>
+      <ProjectHome {project} />
+      <div slot="aside">
+        <h3>Stemmer</h3>
+        {#each project.partslist as partslist}
+          <TagTrigger
+            tagName="part"
+            tagValue={partslist.part}
+            active={activeTagValue === partslist.part}
+            on:activate={evt => {
+              activeTagValue = evt.detail.tagValue;
+              activeTagName = evt.detail.tagName;
+            }}
+            on:deactivate={evt => (activeTagValue = null)}
+          />
+        {/each}
+        {#if audioElements.length}
+          <h3>Spill av opptak</h3>
+          <button on:click={startAudio}>start</button><button
+            on:click={stopAudio}>stop</button
+          >
+        {/if}
+        <p>
+          <a href="/prosjekt/{project._id}/liste"
+            >Lenker til musikantenes sider</a
+          >
+        </p>
+      </div>
+    </ScrollableListToolsRight>
+  </div>
 </main>
 
-
-
 <style>
-    :root {
-        --padding-top: 30px;
-        --members-width: 34%;
-    }
-    main {
-        display: flex;
-    }
+  :root {
+    --padding-top: 30px;
+    --members-width: 54%;
+  }
 
-    .members {
-        border-right: var(--border);
-        padding: calc(var(--padding-top) + 10px) 0 20px 0 ;
+  main {
+    display: flex;
+  }
 
-        width: var(--members-width);
-    }
+  main > div.col {
+    flex: 1;
+  }
 
+  main > div.col.main {
+    flex: 1;
+    flex-basis: 50%;
+  }
 
-    .members-title {
-        text-align: center;
-        margin: 0;
-        padding: 0;
-    }
+  .members {
+    /* 
+    border-right: var(--border);
+    */
+    padding: calc(var(--padding-top) + 10px) 0 20px 0;
 
-    /* || CSS for possible lines between stuff */
+    width: var(--members-width);
+  }
 
-    /* .member-line {
+  .members-title {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* || CSS for possible lines between stuff */
+
+  /* .member-line {
         height: 20%;
         width: 8%;
 
@@ -72,31 +199,30 @@
         border: var(--border);
     } */
 
-    /* || Project-main */
+  /* || Project-main */
 
-    .project-main {
-        padding-top: var(--padding-top);
-        width: 66%;
-    }
+  .project-main {
+    padding-top: var(--padding-top);
+    width: 66%;
+  }
 
-    .project-title {
-        margin: 0;
-        padding: 0;
-    }
+  .project-title {
+    margin: 0;
+    padding: 0;
+  }
 
-    .project-info {
-        width: 85%;
-        margin: auto;
-    }
+  .project-info {
+    width: 85%;
+    margin: auto;
+  }
 
-    /* .audio {
+  /* .audio {
 
         border: 1px dashed lightcoral;
     } */
 
-    /* .audio-controls {
+  /* .audio-controls {
         background-color: var(--dark);
         color: var(--light);
     } */
-
 </style>
