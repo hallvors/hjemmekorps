@@ -1,1 +1,6 @@
-{}
+{
+        "site": {
+            "tokensecret": "local-test-secret-nonsense-to-encrypt-tokens"
+        }
+
+}

@@ -14,6 +14,7 @@
   let activeTagValue, activeTagName;
 
   function memberClicked(evt) {
+    if (!activeTagValue) return;
     let member = members.find(item => item._id === evt.detail._id);
     dispatch('dataupdate', [
       Object.assign(member, { [activeTagName]: activeTagValue }),

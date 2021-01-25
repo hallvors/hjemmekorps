@@ -41,6 +41,7 @@
       project.members = [];
     }
     project.members = [...project.members, member];
+    
     let partDetails = project.partslist.find(
       partDetails => partDetails.part === activeTagValue
     );
@@ -48,16 +49,16 @@
       (partDetails.members &&
         partDetails.members.findIndex(member => {
           member._ref === evt.detail._id;
-        })) ||
-      -1;
+        }));
+
     if (exists > -1) {
       partDetails.members.splice(exists, 1);
     } else {
       if (!partDetails.members) {
         partDetails.members = [];
       }
-      partDetails = [
-        ...partDetails,
+      partDetails.members = [
+        ...partDetails.members,
         {
           _ref: evt.detail._id,
           _type: 'reference',
@@ -114,10 +115,6 @@
         />
       {/each}
 
-      <!-- <svg class="member-line">
-                    <polyline points="0,100 50,100 50,15 100,15"
-                    style="fill: none; stroke:var(--dark); stroke-width: 30;"/>
-                </svg> -->
     </div>
   </div>
   <div class="col main">

@@ -62,9 +62,7 @@
       .then(function (stream) {
         theStream = stream;
         audioContext = new AudioContext();
-        input = audioContext.createMediaStreamTrackSource(
-          stream.getAudioTracks()[0]
-        );
+        input = audioContext.createMediaStreamSource(stream);
         let snapSource = audioContext.createMediaElementSource(snapElm);
         const analyser = audioContext.createAnalyser();
         analyser.fftSize = 512;

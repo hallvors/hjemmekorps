@@ -204,7 +204,7 @@ function getProject(userId, projectId) {
                 member.part = part.part;
               }
             });
-            sanityCache.set(id, result);
+            // sanityCache.set(id, result);
             return result;
           });
       }
