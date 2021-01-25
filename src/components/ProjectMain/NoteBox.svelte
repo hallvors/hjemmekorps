@@ -8,14 +8,17 @@
   // Box for displaying notes from musicXML
 
   export let project;
-  export let trackForPerson = null;
+  export let trackName = null;
   export let showTracker = false;
+  export let scale = 100;
+
   let sheetmusic;
   let alphaTabInstance;
   let scrollControlInterval;
 
   function renderMusic() {
     alphaTabInstance = new alphaTab.AlphaTabApi(sheetmusic, {
+      scale: scale / 100,
       file: project.sheetmusicFile,
       player: {
         enablePlayer: showTracker,
@@ -36,10 +39,10 @@
     alphaTabInstance.metronomeVolume = 1;
     alphaTabInstance.masterVolume = 0.0;
     alphaTabInstance.scoreLoaded.on((score) => {
-      if (trackForPerson) {
+      if (trackName) {
         // generate a track item for all tracks of the score
         score.tracks.forEach((track) => {
-          if (track.name && track.name.indexOf(trackForPerson) > -1) {
+          if (track.name && track.name.indexOf(trackName) > -1) {
             // TODO: where is player info in trackdata ???
             alphaTabInstance.renderTracks([track]);
           }

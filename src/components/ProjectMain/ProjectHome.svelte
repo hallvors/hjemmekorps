@@ -17,9 +17,7 @@
   </main>
 {/if}
 
-<p><a href="/prosjekt/{project._id}/liste">Lenker til musikantenes sider</a></p>
-
-<NoteBox {project} />
+<NoteBox {project} scale={50} />
 
 <style>
   .merged-audio {

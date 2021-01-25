@@ -5,6 +5,7 @@ const multerUpload = multer({ dest: '/tmp' })
 
 import sClient from '../../../../lib/sanity_client'
 
+// TODO: this get may be obsolete, we include recording data in project response now
 export async function get(req, res, next) {
   return sClient.getRecordings(req.params.id).then((recordings) => {
     res.json(recordings)

@@ -4,7 +4,7 @@
       </aside>
   
     <main>
-      <slot />
+      <slot name="main" />
     </main>
   </div>
   

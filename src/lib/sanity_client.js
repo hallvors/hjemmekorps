@@ -140,7 +140,8 @@ function getProject(userId, projectId) {
         if (
           !result.partslist.find(
             part =>
-              part.members && part.members.find(member => member._id === userId)
+              part.members &&
+              part.members.find(member => member._ref === userId)
           )
         ) {
           // the user is not a musician for this project.. odd!
@@ -152,6 +153,7 @@ function getProject(userId, projectId) {
         // TODO: is there a usable XML parser / serializer for node.js? Should we attempt to do this here,
         // or push this work to the browser? Or can we use AlphaTab and just tell it to render a certain track?
         // To be continued..
+        return result;
       } else {
         console.log('project owner requests project');
         // Project owner is requesting data. We should also include the secret links for all members
@@ -181,8 +183,10 @@ function getProject(userId, projectId) {
                 { userId: member._id, projectId },
                 env.nconf.get('site:tokensecret')
               );
-              let part = result.partslist.find(part =>
-                part.members.find(partMem => partMem._ref === member._id)
+              let part = result.partslist.find(
+                part =>
+                  part.members &&
+                  part.members.find(partMem => partMem._ref === member._id)
               );
               if (part) {
                 member.part = part.part;
@@ -218,6 +222,7 @@ function addProject(userId, name, mxmlFile, partslist, members) {
             }
             const assignmentObj = {
               _key: nanoid(),
+              _type: 'projectassignment',
               part,
               members: [{ _type: 'reference', _ref: member._id }],
             };
@@ -225,7 +230,7 @@ function addProject(userId, name, mxmlFile, partslist, members) {
             return assignmentObj;
           }
           // This is a generic part name, no musician assigned (which we know about)
-          return { _key: nanoid(), part };
+          return { _key: nanoid(), part, _type: 'projectassignment', members: [] };
         })
         .filter(obj => obj); // remove any nulls
       return client
@@ -241,6 +246,20 @@ function addProject(userId, name, mxmlFile, partslist, members) {
         })
         .then(project => getProject(userId, project._id));
     });
+}
+
+function updateProject(userId, projectId, data) {
+  const client = getSanityClient();
+  return client.getDocument(projectId).then(oldData => {
+    if (oldData.owner._ref !== userId) {
+      throw new Error('not allowed');
+    }
+
+    Object.assign(oldData, data);
+    return client
+      .createOrReplace(oldData)
+      .then(result => getProject(userId, projectId));
+  });
 }
 
 async function updateOrCreateMember(data, bandId, portraitFile) {
@@ -493,6 +512,8 @@ module.exports = {
   getUserData,
   getBandsForAdminUser,
   getProjects,
+  getProjectScoreData,
+  updateProject,
   updateOrCreateMember,
   ensureMembersExist,
 

@@ -26,7 +26,18 @@
   let countdown = false;
   let firstCount = true;
   let countDelay = 1000; // TODO!!
-
+  let trackName;
+  if (project.partslist) {
+    for (let i = 0; i < project.partslist.length; i++) {
+      if (
+        project.partslist[i].members &&
+        project.partslist[i].members.find(member => member._ref === user._id)
+      ) {
+        trackName = project.partslist[i].part;
+        break;
+      }
+    }
+  }
   // recording states
   const STOPPED = 0;
   const RECORDING = 1;
@@ -253,7 +264,7 @@
 
 <NoteBox
   {project}
-  trackForPerson={user.name}
+  {trackName}
   showTracker={true}
   bind:this={theBox}
   on:finished={endOfNote}
