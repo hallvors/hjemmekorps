@@ -10,9 +10,9 @@ export default
     { "title": "Saxofon", "value": "saxophone" },
     { "title": "Trombone", "value": "trombone" },
     { "title": "Tromme", "value": "drum" },
-    { "title": "Trumpet", "value": "trumpet" },
+    { "title": "Trompet", "value": "trumpet" },
     { "title": "Tuba", "value": "bass" },
     { "title": "Waldhorn", "value": "french-horn" },
-    { "title": "Xylophone", "value": "xylophone" }
+    { "title": "Xylofon", "value": "xylophone" }
   ]
 }
