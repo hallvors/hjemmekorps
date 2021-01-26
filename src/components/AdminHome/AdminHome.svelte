@@ -2,7 +2,7 @@
   import { stores } from '@sapper/app';
   const { session } = stores();
 
-  import ProjectList from '../ProjectList/ProjectList.svelte';
+  import ProjectListItem from '../ProjectListItem/ProjectListItem.svelte';
 
   // Dette får man fra backend
   let projects = [];
@@ -21,9 +21,9 @@
 <div class="main-wrapper">
   <div class="display">
     {#if bands[0].members && bands[0].members.length}
-      <ProjectList newProject={true} />
+      <ProjectListItem newProject={true} />
       {#each projects as project}
-        <ProjectList title={project.name} id={project._id} />
+        <ProjectListItem title={project.name} id={project._id} />
       {/each}
     {:else}
       <p>
