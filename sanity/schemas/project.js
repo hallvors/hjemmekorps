@@ -15,6 +15,11 @@ export default {
       type: "string",
     },
     {
+      title: "Tempo",
+      name: "bpm",
+      type: "number",
+    },
+    {
       title: "Notefil",
       name: "sheetmusic",
       type: "file",
