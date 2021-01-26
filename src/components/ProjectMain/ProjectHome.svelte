@@ -1,7 +1,7 @@
 <script>
   // Hjemskjermen for et prosjekt
   export let project;
-  import NoteBox from "./NoteBox.svelte";
+  import NoteBox from "../NoteBox/NoteBox.svelte";
 </script>
 
 {#if project.generated_soundfile}

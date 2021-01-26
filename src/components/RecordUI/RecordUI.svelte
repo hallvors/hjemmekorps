@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   //import DeltakerDisplay from "../ProjectMain/DeltakerDisplay.svelte";
   import LibLoader from '../utils/LibLoader.svelte';
-  import NoteBox from '../ProjectMain/NoteBox.svelte';
+  import NoteBox from '../NoteBox/NoteBox.svelte';
   // TODO:
   //  - nedtelling ved start ignorerer opptakt :(
   // - trengs mere CSS og pynt
