@@ -1,6 +1,6 @@
 import got from 'got';
 
-import sClient from "../../../lib/sanity_client";
+import sClient from "../../../../../lib/sanity_client";
 
 export async function get(req, res, next) {
 	return sClient.getProjectScoreData(req.params.id).then((project) => {
