@@ -41,9 +41,10 @@
   // audio element for playback
   let audioElm;
   let snapElm;
+  let snapSource;
+  let analyser;
 
   var meta = [];
-  var startTime;
 
   var audioContext;
   var volumeInterval;
@@ -62,8 +63,8 @@
         theStream = stream;
         audioContext = new AudioContext();
         input = audioContext.createMediaStreamSource(stream);
-        let snapSource = audioContext.createMediaElementSource(snapElm);
-        const analyser = audioContext.createAnalyser();
+        snapSource = audioContext.createMediaElementSource(snapElm);
+        analyser = audioContext.createAnalyser();
         analyser.fftSize = 512;
         analyser.minDecibels = -127;
         analyser.maxDecibels = 0;
@@ -98,7 +99,6 @@
           //mp3: { bitRate: 160 },
         });
 
-        startTime = new Date();
         //start the recording process
         recorder.startRecording();
         startCountdown();
@@ -119,7 +119,6 @@
     fd.append('projectId', project._id);
     fd.append('meta', JSON.stringify(meta));
     meta = [];
-    startTime = null;
     xhr.send(fd);
   }
 
@@ -135,6 +134,10 @@
       firstCount = false;
     }
     if (count < 4) {
+      if (count === 2 && !firstCount) {
+        // stop recording the pre-count (hack to avoid 'opptakt' without having to check if we have one)
+        snapSource.disconnect(analyser);
+      }
       count++;
       snapElm.play();
       setTimeout(metronomeCounter, firstCount ? countDelay : countDelay / 2);
@@ -147,7 +150,6 @@
     if (recorder) {
       recorder.cancelRecording();
       theBox.stopPlaythrough();
-      startTime = null;
       recordingData = null;
       meta = [];
       firstCount = true;
