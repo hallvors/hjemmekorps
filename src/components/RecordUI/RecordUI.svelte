@@ -91,6 +91,10 @@
         });
         recorder.onComplete = function (recorder, blob) {
           recordingData = blob;
+
+        var url = URL.createObjectURL(recordingData);
+        audioElm.src = url;
+        audioElm.controls = true;
         };
 
         recorder.setOptions({
@@ -151,6 +155,7 @@
       recorder.cancelRecording();
       theBox.stopPlaythrough();
       recordingData = null;
+      audioElm.controls = false;
       meta = [];
       firstCount = true;
       count = 1;
@@ -163,10 +168,15 @@
       theStream.getAudioTracks()[0].stop();
       theBox.stopPlaythrough();
       recorder.finishRecording();
+
+
       recState = RECORDED_AUDIO;
       clearInterval(volumeInterval);
+      
+
     }
-  }
+    }
+  
 
   function endOfNote() {
     console.log('finished notification');
@@ -212,24 +222,22 @@
   libraryDetectionObject="WebAudioRecorder"
 />
 
-<!-- svelte-ignore a11y-media-has-caption -->
-<audio bind:this={audioElm} on:ended={pausePlayRecording} />
+  <!-- svelte-ignore a11y-media-has-caption -->
+  <audio bind:this={snapElm} src="/samples/snap.mp3" preload />
 
-<!-- svelte-ignore a11y-media-has-caption -->
-<audio bind:this={snapElm} src="/samples/snap.mp3" preload />
 
 {#if countdown}
   <div id="countdown">{count}</div>
 {/if}
 
 <nav id="rec-toolbar">
-  Hei {user.name}!
+  <!-- Hei {user.name}! ADD TO NAVBAR! -->
   {#if recState === STOPPED}
     <!-- initial state: start recording-button only -->
-    <button on:click={start}>Ta opp</button>
+    <div class="start-stop-btn" on:click={start}><h2>Ta opp</h2></div>
   {:else if recState === RECORDING}
     <!-- pause button?, stop button -->
-    <button on:click={stop}>Stopp opptak</button>
+    <div class="start-stop-btn" on:click={stop}><h2>Stopp opptak</h2></div>
     <br />
     <div id="volume"><span bind:this={volumePercElm} class:volumeLoud /></div>
   {:else if recState === PAUSED}
@@ -239,9 +247,14 @@
     <button on:click={playRecording}>Hør på opptak</button>
     <button on:click={sendRecording}>Send opptak</button>
     <button on:click={cancel}>Slett opptak</button>
+
   {:else if recState === PLAYING}
     <button on:click={pausePlayRecording}>Pause</button>
   {/if}
+
+  <!-- svelte-ignore a11y-media-has-caption -->
+  <audio bind:this={audioElm} on:ended={pausePlayRecording} />
+
 
   <!-- 
 	<button id="waste-btn"><img
@@ -289,5 +302,46 @@
   }
   #volume span.volumeLoud {
     border-top-color: red;
+  }
+
+  #rec-toolbar {
+    position: fixed;
+    z-index: 2;
+    height: 200px;
+    width: 70%;
+    left: 15%;
+    top: 100px; /* Navbarheight */
+
+    background-color: var(--light);
+    border: var(--border);
+    border-top: none;
+    text-align: center;
+    font-size: 2em;
+
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  #rec-toolbar button {
+    font-size: 2em;
+  }
+
+  #rec-toolbar button:hover {
+    background-color: var(--dark);
+    color: var(--light);
+    cursor: pointer;
+  }
+
+  .start-stop-btn {
+    width: 100%;
+    height: 100%;
+
+    
+  }
+  .start-stop-btn:hover {
+    background-color: var(--dark);
+    color: var(--light);
+    cursor: pointer;
   }
 </style>
