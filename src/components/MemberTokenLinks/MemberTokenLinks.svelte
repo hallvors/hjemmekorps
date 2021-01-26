@@ -18,7 +18,7 @@
       selection.addRange(range);
       ok = true;
     }
-    if (ok && document.execCommand("copy")) {
+    if (ok && document.execCommand('copy')) {
       copied = true;
     } else {
       copied = false;
@@ -27,17 +27,29 @@
       copied = undefined;
     }, 2500);
   }
+
+  function areYouSure(evt) {
+    if (
+      !confirm(
+        'Dersom du går til denne lenka, logger du inn som musikant. ' +
+          'For å bruke dirigent-sidene igjen må du bruke dirigentens innloggings-lenke. ' +
+          'Er du sikker på at du vil bytte til musikant-modus?'
+      )
+    ) {
+      evt.preventDefault();
+    }
+  }
 </script>
 
 <div>
   <ul bind:this={ulElement}>
     {#each project.members as member}
       <li>
-        <a href={"/?t=" + member.token}>{member.name}</a>
+        <a href={'/?t=' + member.token} on:click={areYouSure}>{member.name}</a>
       </li>
     {/each}
   </ul>
-  
+
   {#if copied === true}
     <p>Liste kopiert!</p>
   {:else if copied === false}
