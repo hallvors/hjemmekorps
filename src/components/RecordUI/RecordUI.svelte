@@ -234,26 +234,28 @@
   <!-- Hei {user.name}! ADD TO NAVBAR! -->
   {#if recState === STOPPED}
     <!-- initial state: start recording-button only -->
-    <div class="start-stop-btn" on:click={start}><h2>Ta opp</h2></div>
+    <div class="start-stop-btn" on:click={start}><h1>Ta opp</h1></div>
   {:else if recState === RECORDING}
     <!-- pause button?, stop button -->
-    <div class="start-stop-btn" on:click={stop}><h2>Stopp opptak</h2></div>
-    <br />
+    <div class="start-stop-btn" on:click={stop}><h1>Stopp opptak</h1></div>
     <div id="volume"><span bind:this={volumePercElm} class:volumeLoud /></div>
   {:else if recState === PAUSED}
     <!-- resume button, stop button -->
   {:else if recState === RECORDED_AUDIO}
     <!-- Listen button, send button, delete button -->
-    <button on:click={playRecording}>Hør på opptak</button>
-    <button on:click={sendRecording}>Send opptak</button>
-    <button on:click={cancel}>Slett opptak</button>
+    <!-- <button on:click={playRecording}>Hør på opptak</button> -->
+    <div class="recording-btn-wrapper">
+      <div class="half-btn" on:click={sendRecording}> <h1>Send opptak</h1> </div>
+      <div class="half-btn" on:click={cancel}> <h1>Slett opptak</h1> </div>
+    </div>
 
-  {:else if recState === PLAYING}
-    <button on:click={pausePlayRecording}>Pause</button>
+
+    <!-- {:else if recState === PLAYING}
+      <button on:click={pausePlayRecording}>Pause</button> -->
   {/if}
 
   <!-- svelte-ignore a11y-media-has-caption -->
-  <audio bind:this={audioElm} on:ended={pausePlayRecording} />
+  <audio id="audio-elm" bind:this={audioElm} on:ended={pausePlayRecording} />
 
 
   <!-- 
@@ -321,27 +323,49 @@
     font-weight: 300;
     text-transform: uppercase;
     letter-spacing: 1px;
-  }
 
-  #rec-toolbar button {
-    font-size: 2em;
   }
+.recording-btn-wrapper {
+  height: 70%;
+  display: flex;
+}
 
-  #rec-toolbar button:hover {
-    background-color: var(--dark);
-    color: var(--light);
+  .half-btn {
+    width: 50%;
+    height: 100%;
+  } 
+  .half-btn:hover {
     cursor: pointer;
-  }
+    background-color: #F5F5F5;
+  } 
+  #audio-elm {
+    width: 100%;
+  } 
 
   .start-stop-btn {
     width: 100%;
     height: 100%;
 
-    
+    position: absolute;
+    top: 0;
+    left: 0;
   }
   .start-stop-btn:hover {
-    background-color: var(--dark);
-    color: var(--light);
+    background-color: #F5F5F5;
     cursor: pointer;
   }
+
+  .start-stop-btn h1 {
+    width: max-content;
+    margin: 0;
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    font-size: 7rem;
+  }
+
+
 </style>

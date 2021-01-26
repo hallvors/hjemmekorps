@@ -23,5 +23,6 @@
     top: 10px;
     max-height: calc(100vh - 10px);
     overflow-y: auto;
+    overflow-x: none;
   }
 </style>
