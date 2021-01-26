@@ -1,7 +1,7 @@
 <script>
   import { stores, goto } from '@sapper/app';
   const { session } = stores();
-
+  let bpm = 60;
   let bands = [];
 
   session.subscribe(data => {
@@ -22,6 +22,7 @@ if (bands.length === 1) {
     if (files.length > 0) {
       const formData = new FormData();
       formData.append("band", band);
+      formData.append("bpm", bpm);
       formData.append("file", files[0]);
       const response = await fetch("/api/projects", {
         method: "POST",
@@ -52,5 +53,7 @@ if (bands.length === 1) {
     <br>
   <label for="file">Velg Music XML-fil:</label>
   <input required id="file" type="file" bind:files />
+  <label for="file">Tempo: <input type="number" size="4" bind:value={bpm}>BPM</label>
+
   <input type="submit" value="Last opp" />
 </form>

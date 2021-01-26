@@ -1,9 +1,7 @@
 <script>
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from 'svelte';
 
   const dispatch = createEventDispatcher();
-
-  import LibLoader from "../utils/LibLoader.svelte";
 
   // Box for displaying notes from musicXML
 
@@ -11,100 +9,99 @@
   export let trackName = null;
   export let showTracker = false;
   export let scale = 100;
+  let bpm = project.bpm || 60;
 
   let sheetmusic;
-  let alphaTabInstance;
-  let scrollControlInterval;
+  let sheetMusicRenderer; // OSMD instance
+  let playing = false;
+  // TODO: we have one metronome elm in RecordUI and one here. The main reason
+  // is to facilitate recording the "clicks" during pre-count (the idea being this
+  // can make it easier to align the recorded sound files correctly) - but we should
+  // refactor this.. Possibly more elegant ways to structure note rendering + recording 
+  // + metronome code
+  let snapElm; 
 
-  function renderMusic() {
-    alphaTabInstance = new alphaTab.AlphaTabApi(sheetmusic, {
-      scale: scale / 100,
-      file: project.sheetmusicFile,
-      player: {
-        enablePlayer: showTracker,
-        soundFont: "/js/alphatab/soundfont/sonivox.sf2",
-        // this is the element to scroll during playback - disabled because it is buggy and scrolls too much!
-        //scrollElement: sheetmusic, 
-      },
-      notation: {
-        elements: {
-          GuitarTuning: false,
-          EffectTempo: false,
-        },
-      },
-    });
-
-    alphaTabInstance.load(project.sheetmusicFile);
-    alphaTabInstance.countInVolume = 1;
-    alphaTabInstance.metronomeVolume = 1;
-    alphaTabInstance.masterVolume = 0.0;
-    alphaTabInstance.scoreLoaded.on((score) => {
-      if (trackName) {
-        // generate a track item for all tracks of the score
-        score.tracks.forEach((track) => {
-          if (track.name && track.name.indexOf(trackName) > -1) {
-            // TODO: where is player info in trackdata ???
-            alphaTabInstance.renderTracks([track]);
-          }
-          //trackList.appendChild(createTrackItem(track));
-        });
-      } else {
-        alphaTabInstance.render();
-      }
-    });
-
-    // mark the rendered track as active in the list
-    alphaTabInstance.renderStarted.on(() => {
-      // collect tracks being rendered
-      const tracks = new Map();
-      // here we access the currently rendered tracks of alphaTab
-      alphaTabInstance.tracks.forEach((t) => {
-        tracks.set(t.index, t);
-      });
-    });
-    alphaTabInstance.playerFinished.on(() => {
-      dispatch("finished", {});
-    });
-  }
+  function renderMusic() {}
 
   export function initPlaythrough() {
-    alphaTabInstance.changeTrackSolo();
-    alphaTabInstance.play();
-    scrollControlInterval = setInterval(function () {
-      document.getElementsByClassName("at-cursor-beat")[0].scrollIntoView();
-    }, 200);
+    if (!playing) {
+      sheetMusicRenderer.cursor.show();
+      playing = true;
+      scheduleNext();
+    } else {
+      playing = false;
+    }
   }
 
-  export function pausePlaythrough() {
-    clearInterval(scrollControlInterval);
-    alphaTabInstance.pause();
+  function scheduleNext() {
+    let notes = sheetMusicRenderer.cursor.NotesUnderCursor();
+    //console.log({ notes: notes.length });
+    let minValue = Number.POSITIVE_INFINITY;
+    let beatNote =
+      1 / sheetMusicRenderer.sheet.SheetPlaybackSetting.rhythm.denominator;
+    notes.forEach(note => {
+      let thisValue = note.length.numerator / note.length.denominator;
+      if (thisValue < minValue) {
+        minValue = thisValue;
+      }
+    });
+    //console.log(minValue);
+    let delayMS = (minValue / beatNote) * (60000 /* ms in minute */ / bpm);
+    //console.log({ delayMS });
+    if (
+      /*sheetMusicRenderer.cursor.iterator.EndReached ||*/ delayMS ===
+        Number.POSITIVE_INFINITY ||
+      !playing
+    ) {
+      console.log('THE END');
+      dispatch('finished', {});
+      return;
+    }
+    setTimeout(nextNote, delayMS);
+  }
+
+  function nextNote() {
+    sheetMusicRenderer.cursor.next();
+    snapElm.play();
+    scheduleNext();
   }
 
   export function stopPlaythrough() {
-    clearInterval(scrollControlInterval);
-    alphaTabInstance.stop();
+    playing = false;
   }
 
-  /* Old OSMD - code for rendering score:
-        const module = await import('opensheetmusicdisplay');
+  onMount(async () => {
+    const module = await import('opensheetmusicdisplay');
 
-        sheetMusicRenderer = new module.default.OpenSheetMusicDisplay('sheetmusic', {
-            autoResize: true,
-            drawTitle: true,
+    sheetMusicRenderer = new module.default.OpenSheetMusicDisplay(
+      sheetmusic,
+      {
+        autoResize: true,
+        drawTitle: true,
+        drawingParameters: 'compact',
+        drawtrackNames: true,
+        disableCursor: !showTracker,
+        followCursor: true,
+      }
+    );
+    sheetMusicRenderer.zoom = scale / 100;
+    fetch(
+      `/api/project/${project._id}/score/${
+        trackName ? encodeURIComponent(trackName) : ''
+      }`
+    )
+      .then(data => data.text())
+      .then(xmlSource => {
+        sheetMusicRenderer.load(xmlSource).then(() => {
+          sheetMusicRenderer.render();
         });
-        sheetMusicRenderer.load('/api/mxml/' + project._id)
-        .then(() => sheetMusicRenderer.render());
-
-*/
+      });
+  });
 </script>
 
-<LibLoader
-  src="/js/alphatab/alphaTab.min.js"
-  on:loaded={renderMusic}
-  libraryDetectionObject="alphaTab"
-/>
-
 <div class="standard-box note-box" bind:this={sheetmusic} id="sheetmusic" />
+<!-- svelte-ignore a11y-media-has-caption -->
+<audio bind:this={snapElm} src="/samples/snap.mp3" preload />
 
 <style>
   .note-box {

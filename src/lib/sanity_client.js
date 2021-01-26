@@ -211,7 +211,7 @@ function getProject(userId, projectId) {
     });
 }
 
-function addProject(userId, name, mxmlFile, partslist, members) {
+function addProject(userId, name, mxmlFile, partslist, bpm, members) {
   const client = getSanityClient();
   return client.assets
     .upload('file', mxmlFile.buffer, { filename: mxmlFile.originalname })
@@ -250,6 +250,7 @@ function addProject(userId, name, mxmlFile, partslist, members) {
           _type: 'project',
           owner: { _ref: userId },
           name,
+          bpm,
           sheetmusic: {
             _type: 'file',
             asset: { _type: 'reference', _ref: filedoc._id },
@@ -327,54 +328,6 @@ async function updateOrCreateMember(data, bandId, portraitFile) {
     await client.delete(oldData.portrait.asset._ref);
   }
   return result;
-}
-
-// TODO: reconsider if this is useful... likely not
-function ensureMembersExist(userId, bandId, members) {
-  const client = getSanityClient();
-  return client
-    .fetch(`*[_type == $type && _id == $id && references($uid)]`, {
-      type: 'band',
-      id: bandId,
-      uid: userId,
-    })
-    .then(band => {
-      if (!band.length) {
-        return Promise.reject({ message: 'Band not found' });
-      }
-      return Promise.all(
-        members.map(member => {
-          const name = member.name.trim();
-          return client
-            .fetch(
-              '*[_type == $type && name == $name && references($bandId)]',
-              {
-                type: 'member',
-                name,
-                bandId,
-              }
-            )
-            .then(result => {
-              if (!result.length) {
-                return client.create({
-                  _type: 'member',
-                  band: {
-                    _type: 'reference',
-                    _ref: bandId,
-                  },
-                  name,
-                  instrument: member.instrument
-                    ? filterInstrumentName(member.instrument, instruments)
-                    : '',
-                  visible: true,
-                });
-              } else {
-                return result[0];
-              }
-            });
-        })
-      );
-    });
 }
 
 function addProjectRecording(projectId, memberId, filepath) {
@@ -528,7 +481,6 @@ module.exports = {
   getProjectScoreData,
   updateProject,
   updateOrCreateMember,
-  ensureMembersExist,
 
   getProject,
   addProject,

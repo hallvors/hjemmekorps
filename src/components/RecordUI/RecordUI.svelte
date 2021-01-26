@@ -4,7 +4,6 @@
   import LibLoader from '../utils/LibLoader.svelte';
   import NoteBox from '../ProjectMain/NoteBox.svelte';
   // TODO:
-  //  - velge korrekt del av notene for akkurat den brukeren (!)
   //  - nedtelling ved start ignorerer opptakt :(
   // - trengs mere CSS og pynt
   // -
@@ -222,7 +221,7 @@
 {/if}
 
 <nav id="rec-toolbar">
-  Hei {user.name}! 
+  Hei {user.name}!
   {#if recState === STOPPED}
     <!-- initial state: start recording-button only -->
     <button on:click={start}>Ta opp</button>
