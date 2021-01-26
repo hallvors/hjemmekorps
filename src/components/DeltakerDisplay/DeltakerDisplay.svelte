@@ -64,7 +64,7 @@
     /* text-align: center; */
     border: var(--border);
     box-shadow: var(--shadow);
-
+    width: 100%;
     transition: 0.3s;
   }
 

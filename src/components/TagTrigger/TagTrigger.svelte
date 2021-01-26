@@ -27,6 +27,9 @@
 </button>
 
 <style>
+    button {
+      width: 100%;
+    }
     button img {
         max-width: 24px;
     }
