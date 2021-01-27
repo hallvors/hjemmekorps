@@ -14,7 +14,7 @@
   //export let segment;
 </script>
 
-<Navbar />
+<Navbar style="margin-top:0;"/>
 
 <main>
   <slot />
@@ -28,7 +28,8 @@
     max-width: 70vw;
     background-color: var(--light);
     padding: 2em;
-    margin: 0 auto;
-    box-sizing: border-box;
+    margin: 0 auto;	
+	box-sizing: border-box;
+	margin-top: var(--navbarHeight);
   }
 </style>
