@@ -10,7 +10,6 @@
   export let band;
   export let instruments;
 
-
   let activeTagValue, activeTagName;
 
   function memberClicked(evt) {
@@ -42,9 +41,13 @@
 <ScrollableListToolsRight>
   <div>
     {#if members}
-      {#each members as member}
-        <DeltakerDisplay {member} on:click={memberClicked} />
-      {/each}
+      <div class="members-list">
+        {#each members as member}
+          <div class="member">
+            <DeltakerDisplay {member} on:click={memberClicked} />
+          </div>
+        {/each}
+      </div>
     {/if}
   </div>
 
@@ -79,3 +82,20 @@
     {/each}
   </div>
 </ScrollableListToolsRight>
+
+<style>
+  .members-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .member {
+    flex: 0 1 auto;
+    width: 45%;
+    box-sizing: border-box;
+  }
+</style>

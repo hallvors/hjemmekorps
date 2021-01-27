@@ -19,18 +19,16 @@
 </script>
 
 <div class="main-wrapper">
-  <div class="display">
-    {#if bands[0].members && bands[0].members.length}
-      <ProjectListItem newProject={true} />
-      {#each projects as project}
-        <ProjectListItem title={project.name} id={project._id} />
-      {/each}
-    {:else}
-      <p>
-        Første steg er å <a href="/musikanter/import">importere musikanter</a>.
-      </p>
-    {/if}
-  </div>
+  {#if bands[0].members && bands[0].members.length}
+    <div><ProjectListItem newProject={true} /></div>
+    {#each projects as project}
+      <div><ProjectListItem title={project.name} id={project._id} /></div>
+    {/each}
+  {:else}
+    <p>
+      Første steg er å <a href="/musikanter/import">importere musikanter</a>.
+    </p>
+  {/if}
 </div>
 
 <style>
@@ -38,32 +36,15 @@
     padding: 50px 0;
     width: 90%;
     margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
   }
 
-  .display {
-    display: grid;
-    grid-gap: 40px;
-    grid-template-columns: 1fr 1fr 1fr;
-
-    justify-items: center;
-  }
-
-  /* || Media queries */
-
-  @media only screen and (min-width: 1200px) {
-    .main-wrapper {
-      width: 1200px;
-    }
-  }
-
-  @media only screen and (max-width: 820px) {
-    .display {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-  @media only screen and (max-width: 600px) {
-    .display {
-      grid-template-columns: 1fr;
-    }
+  .main-wrapper > div {
+    flex: 0 1 auto;
+    width: 18vw;
+    height: 18vw;
+    margin: 1vw;
   }
 </style>

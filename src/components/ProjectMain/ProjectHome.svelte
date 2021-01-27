@@ -1,11 +1,17 @@
 <script>
   // Hjemskjermen for et prosjekt
   export let project;
-  import NoteBox from "../NoteBox/NoteBox.svelte";
+  import LinkedBoxList from '../LinkedBoxList/LinkedBoxList.svelte';
+  let partslinks = project.partslist
+    ? project.partslist.map(item => ({
+        href: `/prosjekt/${project._id}/${item.part}`,
+        title: item.part,
+      }))
+    : [];
 </script>
 
 {#if project.generated_soundfile}
-  <main class="merged-audio">
+  <div class="merged-audio">
     <h1 style="text-align: center;">Samlet lydfil</h1>
     <span class="audio">
       <!-- svelte-ignore a11y-media-has-caption -->
@@ -14,15 +20,16 @@
         Audio does not work
       </audio>
     </span>
-  </main>
+  </div>
 {/if}
 
-<NoteBox {project} scale={50} />
+<div class="partslist">
+    <LinkedBoxList items={partslinks} />
+</div>
 
 <style>
   .merged-audio {
     text-align: center;
-
     margin-top: 30px;
     padding-bottom: 30px;
     border: var(--border);
