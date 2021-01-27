@@ -1,6 +1,6 @@
 const env = process.env.NODE_ENV || 'development';
 const port = process.env.PORT || 3000;
-const APP_ENV_VARS=['sanity__token', 'site__tokensecret', 'sanity__dataset'];
+const APP_ENV_VARS = ['sanity__token', 'site__tokensecret', 'sanity__dataset'];
 // Order of priorities for config:
 // 1. defaults ..can be overwritten by
 // 2. app-environment-specific ..can be overwritten by
@@ -37,10 +37,13 @@ let envConf = {};
 APP_ENV_VARS.forEach(varName => {
   if (process.env[varName]) {
     let parts = varName.split('__');
-    envConf[parts[0]] = { [parts[1]]: process.env[varName] };
+    if (envConf[parts[0]]) {
+      objectMerge(envConf[parts[0]], {[parts[1]]: process.env[varName]});
+    } else {
+      envConf[parts[0]] = { [parts[1]]: process.env[varName] };
+    }
   }
 });
-
 objectMerge(config, envConf);
 
 module.exports = {
