@@ -18,18 +18,19 @@
   });
 </script>
 
-<div class="main-wrapper">
-  {#if bands[0].members && bands[0].members.length}
+{#if bands[0].members && bands[0].members.length}
+  <div class="main-wrapper">
     <div><ProjectListItem newProject={true} /></div>
     {#each projects as project}
       <div><ProjectListItem title={project.name} id={project._id} /></div>
     {/each}
-  {:else}
+  </div>
+{:else}
+    <h1>Velkommen, {user.friendly_name}!</h1>
     <p>
       Første steg er å <a href="/musikanter/import">importere musikanter</a>.
     </p>
-  {/if}
-</div>
+{/if}
 
 <style>
   .main-wrapper {
