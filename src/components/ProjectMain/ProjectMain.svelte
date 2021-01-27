@@ -63,14 +63,15 @@
     let partDetails = project.partslist.find(
       partDetails => partDetails.part === activeTagValue
     );
-    let exists =
+    let indexInList =
       partDetails.members &&
       partDetails.members.findIndex(member => {
-        member._ref === evt.detail._id;
+        return member._ref === evt.detail._id;
       });
 
-    if (exists > -1) {
-      partDetails.members.splice(exists, 1);
+    if (indexInList > -1) {
+      partDetails.members.splice(indexInList, 1);
+      delete member.part;
     } else {
       if (!partDetails.members) {
         partDetails.members = [];
