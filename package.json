@@ -25,7 +25,6 @@
   },
   "homepage": "https://github.com/hallvors/hjemmekorps#readme",
   "dependencies": {
-    "@coderline/alphatab": "^1.1.0",
     "@rollup/plugin-json": "^4.1.0",
     "@sanity/client": "^2.0.9",
     "body-parser": "^1.19.0",
