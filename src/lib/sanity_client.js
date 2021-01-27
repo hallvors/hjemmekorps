@@ -485,6 +485,10 @@ function addRecording(projectName, pupil, meta, filepath) {
   });
 }
 
+function purgeCache() {
+  sanityCache.flushAll();
+}
+
 module.exports = {
   getSanityClient,
   getAdminUserData,
@@ -504,4 +508,5 @@ module.exports = {
   addRecording,
   addImage,
   getRecordings,
+  purgeCache,
 };

@@ -48,6 +48,7 @@ const authenticate = async function(req, res, next) {
 			user = await sClient.getUserData(tokenData.userId); // user, user.band
 			user.project = await sClient.getProject(tokenData.userId, tokenData.projectId);
 		}
+		console.log({user});
 		if (!user) {
 			if (isOkWithoutSession(req.url)) { 
 				// avoid redirect loops /feil/* if token is wrong

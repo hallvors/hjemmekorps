@@ -18,7 +18,7 @@ console.log('---- starting server ----');
 console.log({
   PORT,
   NODE_ENV,
-  dataset: env.config.sanity.dataset,
+  conf: env.config,
 });
 
 const app = polka();
