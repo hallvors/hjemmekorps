@@ -38,7 +38,7 @@ const authenticate = async function(req, res, next) {
 	}
 	let token = req.query.t || req.cookies.token;
 	try {
-		let tokenData = jwt.verify(token, env.nconf.get('site:tokensecret'));
+		let tokenData = jwt.verify(token, env.config.site.tokensecret);
 		let user;
 		// admins are authenticated by email
 		if (tokenData.email) {

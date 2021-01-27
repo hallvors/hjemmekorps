@@ -8,7 +8,7 @@ const sClient = require("../../src/lib/sanity_client");
 
 const HTOKEN = jwt.sign(
   { email: "hallvord@hallvord.com" },
-  env.nconf.get("site:tokensecret")
+  env.config.site.tokensecret
 );
 
 describe("Projects API", function () {

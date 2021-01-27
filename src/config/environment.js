@@ -1,17 +1,26 @@
-const nconf = require('nconf');
-
 const env = process.env.NODE_ENV || 'development';
 const port = process.env.PORT || 3000;
 
-nconf.env('__').argv();
-nconf.add('overrides', {type: 'file', file: './overrides.json'});
-if (env === 'development') {
-	nconf.add('environment', {type: 'file', file: './development.json'});
+let envConf = {};
+['sanity__token', 'site__tokensecret', 'sanity__dataset'].forEach(varName => {
+  if (process.env[varName]) {
+    let parts = varName.split('__');
+    envConf[parts[0]] = { [parts[1]]: process.env[varName] };
+  }
+});
+const defaultConf = require('./defaults.json');
+let runtimeConf = {};
+if (env === 'test') {
+  runtimeConf = require('./test.json');
+} else if (env === 'development') {
+  runtimeConf = require('./development.json');
 } else {
-	nconf.add('environment', {type: 'file', file: './production.json'});
-}
+  runtimeConf = require('./production.json');
 
-nconf.add('defaults', {type: 'file', file: './defaults.json'});
+}
+const overrideConf = require('./overrides.json');
+
+let config = Object.assign({}, defaultConf, runtimeConf, overrideConf, envConf);
 
 module.exports = {
   instruments: require('./instruments.json').instruments,
@@ -20,5 +29,5 @@ module.exports = {
   development: env === 'development',
   production: env === 'production',
   port,
-  nconf,
+  config,
 };

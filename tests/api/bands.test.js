@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const app = require('../../src/server');
 //const sClient = require('../../lib/sanity_client');
 
-const HTOKEN = jwt.sign({email: 'hallvord@hallvord.com'}, env.nconf.get('site:tokensecret'));
+const HTOKEN = jwt.sign({email: 'hallvord@hallvord.com'}, env.config.site.tokensecret);
 
 describe('Get bands', function() {
   it('get band - not authorized', function(){

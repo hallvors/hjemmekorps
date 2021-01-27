@@ -6,7 +6,7 @@ if (!email) {
 	process.exit(1);
 }
 console.log(email)
-const token = jwt.sign({email}, env.nconf.get('site:tokensecret'));
+const token = jwt.sign({email}, env.config.site.tokensecret);
 
 console.log('\n');
 console.log('(KOMMER!) https://hjemmekorps.herokuapp.com/?t=' + token)

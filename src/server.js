@@ -18,9 +18,9 @@ console.log('---- starting server ----');
 console.log({
   PORT,
   NODE_ENV,
-  datast: env.nconf.get('sanity:dataset'),
-  sec: env.nconf.get('site:tokensecret'),
-  all: process.env,
+  dataset: env.config.sanity.dataset,
+  sec: env.config.site.tokensecret,
+  wot: env.config
 });
 
 const app = polka();

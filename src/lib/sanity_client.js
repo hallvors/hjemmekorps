@@ -14,9 +14,9 @@ const sanityCache = new NodeCache({
   useClones: true,
 });
 
-const PROJECT = env.nconf.get('sanity:project');
-const TOKEN = env.nconf.get('sanity:token') || process.env.SANITY_TOKEN;
-const DATASET = env.nconf.get('sanity:dataset');
+const PROJECT = env.config.sanity.project;
+const TOKEN = env.config.sanity.token;
+const DATASET = env.config.sanity.dataset;
 const instruments = env.instruments;
 
 var sanityClient = null;
@@ -205,7 +205,7 @@ function getProject(userId, projectId) {
             result.members.forEach(member => {
               member.token = jwt.sign(
                 { userId: member._id, projectId },
-                env.nconf.get('site:tokensecret')
+                env.config.site.tokensecret
               );
               let part = result.partslist.find(
                 part =>
