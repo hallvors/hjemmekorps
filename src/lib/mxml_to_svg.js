@@ -90,11 +90,40 @@ export async function generateSVGImage(
   await osmdInstance.load(mxmlData);
   debug('xml loaded', DEBUG);
   try {
+    // TODO: use our mxml helpers to remove the non-wanted parts instead
     osmdInstance.sheet.instruments.forEach(instrument => {
       instrument.Visible = instrument.nameLabel.text === partName;
     });
     osmdInstance.render();
-  } catch (ex) {
+
+    // add meta data to SVG notes
+    osmdInstance.cursor.reset()
+    const iterator = osmdInstance.cursor.Iterator;
+    
+    while(!iterator.EndReached){
+       const voices = iterator.CurrentVoiceEntries;
+       for(var i = 0; i < voices.length; i++){
+          const v = voices[i];
+          const notes = v.Notes;
+          for(var j = 0; j < notes.length; j++){
+                const note = notes[j];
+                // make sure our note is not silent
+                if((note != null) && (note.halfTone != 0)){
+                    // add data- attributes to vf-note SVG element
+                    if (note.getSVGGElement) {
+                      let svgElm = note.getSVGGElement();
+                      console.log(note, svgElm)
+                      svgElm.setAttribute('data-numerator', note.graphicalNoteLength.numerator);
+                      svgElm.setAttribute('data-denominator', note.graphicalNoteLength.denominator);
+                    }
+                   // this might be an alternative iteration..
+                   // osmd.graphic.MeasureList[0][0].staffEntries[0].graphicalVoiceEntries[0].notes[0].getSVGGElement()
+                }
+           }
+        }
+        iterator.moveToNext()
+    }
+} catch (ex) {
     console.log('renderError: ' + ex);
   }
   debug('rendered', DEBUG);
