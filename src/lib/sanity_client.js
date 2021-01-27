@@ -107,6 +107,18 @@ function getProjects(userId) {
   );
 }
 
+function getMembers(bandId) {
+  return getSanityClient().fetch(
+    `*[_type == $type && references($bandId) && !(_id in path("drafts.**"))] {
+      name, _id, instrument
+    }`,
+    {
+      type: 'member',
+      bandId,
+    }
+  );
+}
+
 function getProjectScoreData(projectId) {
   return getSanityClient().fetch(
     `*[_type == $type && _id == $projectId && !(_id in path("drafts.**"))] {
@@ -211,7 +223,7 @@ function getProject(userId, projectId) {
     });
 }
 
-function addProject(userId, name, mxmlFile, partslist, bpm, members) {
+function addProject(userId, bandId, name, mxmlFile, partslist, bpm, members) {
   const client = getSanityClient();
   return client.assets
     .upload('file', mxmlFile.buffer, { filename: mxmlFile.originalname })
@@ -223,7 +235,7 @@ function addProject(userId, name, mxmlFile, partslist, bpm, members) {
           // but it might also mention the name of a member,
           // in the latter case we can complete the assignment
           const member = members.find(member => {
-            return part.toLowerCase().indexOf(member.name.toLowerCase()) > -1;
+            return part.toLowerCase().indexOf(member.name.toLowerCase().split(' ')[0]) > -1;
           });
           if (member) {
             // this score part mentions a name
@@ -248,7 +260,8 @@ function addProject(userId, name, mxmlFile, partslist, bpm, members) {
       return client
         .create({
           _type: 'project',
-          owner: { _ref: userId },
+          owner: { _type: 'reference', _ref: userId },
+          band: { _type: 'reference', _ref: bandId },
           name,
           bpm,
           sheetmusic: {
@@ -478,6 +491,7 @@ module.exports = {
   getUserData,
   getBandsForAdminUser,
   getProjects,
+  getMembers,
   getProjectScoreData,
   updateProject,
   updateOrCreateMember,

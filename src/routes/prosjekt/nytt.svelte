@@ -12,12 +12,11 @@
 
 let files;
 let band;
-// Good UX to pre-select band if only one
 if (bands.length === 1) {
     band = bands[0]._id;
 }
   let statusCode = "";
- 
+
   async function handleSubmit() {
     if (files.length > 0) {
       const formData = new FormData();
@@ -43,6 +42,7 @@ if (bands.length === 1) {
 <p>Last opp fil i <em>Music XML</em>-format for å opprette et nytt prosjekt.</p>
 {statusCode}
 <form on:submit|preventDefault={handleSubmit}>
+  {#if bands.length > 1}
     <label for="band">Velg korps:</label>
     <select id="band" required bind:value={band}>
         <option></option>
@@ -51,6 +51,9 @@ if (bands.length === 1) {
         {/each}
     </select>
     <br>
+    {:else}
+    <input type="hidden" name="band" bind:value={band}>
+    {/if}
   <label for="file">Velg Music XML-fil:</label>
   <input required id="file" type="file" bind:files />
   <label for="file">Tempo: <input type="number" size="4" bind:value={bpm}>BPM</label>

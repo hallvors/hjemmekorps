@@ -25,20 +25,23 @@ export async function post(req, res, next) {
     }
     const bandId = req.body.band;
     const mxlmData = parseFile(req.file);
-    const bandMembers = getMemberNames(mxlmData);
-    const partslist = getPartsList(mxlmData);
-    const projName = getName(mxlmData);
-    return sClient
-      .addProject(
-        req.user._id,
-        projName,
-        req.file,
-        partslist,
-        req.body.bpm,
-        bandMembers
-      )
-      .then(project => {
-        res.json(project);
-      });
+    return sClient.getMembers(req.band)
+    .then(bandMembers => {
+      const partslist = getPartsList(mxlmData);
+      const projName = getName(mxlmData);
+      return sClient
+        .addProject(
+          req.user._id,
+          projName,
+          req.file,
+          partslist,
+          req.body.bpm,
+          bandMembers
+        )
+        .then(project => {
+          res.json(project);
+        });
+
+    })
   });
 }

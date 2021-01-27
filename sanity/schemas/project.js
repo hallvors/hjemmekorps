@@ -10,6 +10,12 @@ export default {
       to: [{ type: "adminUser" }],
     },
     {
+      title: "Korps",
+      name: "band",
+      type: "reference",
+      to: [{ type: "band" }],
+    },
+    {
       title: "Navn",
       name: "name",
       type: "string",
