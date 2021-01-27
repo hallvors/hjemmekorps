@@ -19,8 +19,6 @@ console.log({
   PORT,
   NODE_ENV,
   dataset: env.config.sanity.dataset,
-  sec: env.config.site.tokensecret,
-  wot: env.config
 });
 
 const app = polka();
