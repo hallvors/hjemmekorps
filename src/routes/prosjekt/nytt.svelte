@@ -18,7 +18,7 @@ if (bands.length === 1) {
   let statusCode = "";
 
   async function handleSubmit() {
-    if (files.length > 0) {
+    if (files && files.length > 0) {
       const formData = new FormData();
       formData.append("band", band);
       formData.append("bpm", bpm);
