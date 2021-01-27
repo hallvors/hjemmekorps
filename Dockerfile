@@ -20,5 +20,5 @@ COPY --chown=node:node ./prep-files.sh ./prep-files.sh
 # browsers
 RUN ./prep-files.sh
 
-RUN npm build
+RUN npm run build
 CMD ["npm", "start"]
