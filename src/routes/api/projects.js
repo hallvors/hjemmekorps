@@ -25,7 +25,7 @@ export async function post(req, res, next) {
     }
     const bandId = req.body.band;
     const mxlmData = parseFile(req.file);
-    return sClient.getMembers(req.band)
+    return sClient.getMembers(bandId)
     .then(bandMembers => {
       const partslist = getPartsList(mxlmData);
       const projName = getName(mxlmData);
