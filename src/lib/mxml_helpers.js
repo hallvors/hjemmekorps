@@ -30,46 +30,8 @@ function getPartsList(mxmlData) {
   return [];
 }
 
-function getMemberNames(mxmlData) {
-  const instruments = env.instruments;
-
-  if (
-    mxmlData['score-partwise'] &&
-    mxmlData['score-partwise']['part-list'] &&
-    mxmlData['score-partwise']['part-list']['score-part']
-  ) {
-    let members = mxmlData['score-partwise']['part-list']['score-part'].map(
-      part => {
-        let names = part['part-name']
-          .split(/, */g)
-          .map(name => name.replace(/\(.*$/, '')) // remove (JK) or (1) annotations
-          // some conductors will label the musical parts with the names of the kids playing
-          // others will however leave the instruments - we remove any names that match instruments
-          .filter(name => {
-            return !instruments.find(instrument => {
-              return (
-                name.toLowerCase().indexOf(instrument.title.toLowerCase()) >
-                  -1 || name.toLowerCase().indexOf(instrument.value) > -1
-              );
-            });
-            return names;
-          });
-        names = _.flatten(names);
-        let instrument = part['score-instrument']
-          ? part['score-instrument']['instrument-name']
-          : '';
-        names = names.map(name => ({ name, instrument }));
-        return names;
-      }
-    );
-    return members.filter(part => part && part.length);
-  }
-  throw new Error('unexpected MXML data');
-}
-
 module.exports = {
   parseFile,
   getName,
   getPartsList,
-  getMemberNames,
 };

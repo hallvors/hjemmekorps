@@ -60,7 +60,7 @@
 </script>
 
 {#if importSuccess}
-  <p>Import fullført. <a href="/musikanter">Til musikantliste</a></p>
+  <p>Import fullført. <a href="/musikanter?reload={Math.random()}">Til musikantliste</a></p>
 {:else}
   <p>
     For å importere data, kopier en tabell fra et regneark og lim inn her.
