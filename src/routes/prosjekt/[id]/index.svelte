@@ -1,8 +1,6 @@
 <script context="module">
-  let id;
   export async function preload(page, session) {
-    id = page.params.id;
-    const res = await this.fetch(`/api/project/${id}`);
+    const res = await this.fetch(`/api/project/${page.params.id}`);
     const project = await res.json();
     const band = session.bands[0];
     return { project, band };
@@ -16,7 +14,7 @@
   import ProjectMain from '../../../components/ProjectMain/ProjectMain.svelte';
 
   function onUpdate(evt) {
-    project = evt.detail;
+    project = { ...evt.detail };
   }
 </script>
 
