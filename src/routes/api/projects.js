@@ -32,6 +32,7 @@ export async function post(req, res, next) {
       return sClient
         .addProject(
           req.user._id,
+          bandId,
           projName,
           req.file,
           partslist,
