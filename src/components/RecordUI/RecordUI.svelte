@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   //import DeltakerDisplay from "../ProjectMain/DeltakerDisplay.svelte";
+
   import LibLoader from '../utils/LibLoader.svelte';
   import NoteBox from '../NoteBox/NoteBox.svelte';
   // TODO:
@@ -193,17 +194,17 @@
     }
   }
 
-  function playRecording() {
-    if (recordingData) {
-      var url = URL.createObjectURL(recordingData);
-      audioElm.src = url;
-      audioElm.play();
-      audioElm.addEventListener('ended', () => {
-        recState = RECORDED_AUDIO;
-      });
-      recState = PLAYING;
-    }
-  }
+  // function playRecording() {
+  //   if (recordingData) {
+  //     var url = URL.createObjectURL(recordingData);
+  //     audioElm.src = url;
+  //     audioElm.play();
+  //     audioElm.addEventListener('ended', () => {
+  //       recState = RECORDED_AUDIO;
+  //     });
+  //     recState = PLAYING;
+  //   }
+  // }
 
   function pausePlayRecording() {
     audioElm.pause();
@@ -231,16 +232,17 @@
 {/if}
 
 <nav id="rec-toolbar">
-  <!-- Hei {user.name}! ADD TO NAVBAR! -->
   {#if recState === STOPPED}
     <!-- initial state: start recording-button only -->
     <div class="start-stop-btn" on:click={start}><h1>Ta opp</h1></div>
   {:else if recState === RECORDING}
     <!-- pause button?, stop button -->
-    <div class="start-stop-btn" on:click={stop}><h1>Stopp opptak</h1></div>
+    <div class="start-stop-btn" on:click={stop}><h1>Stopp opptak</h1>
     <div id="volume"><span bind:this={volumePercElm} class:volumeLoud /></div>
-  {:else if recState === PAUSED}
-    <!-- resume button, stop button -->
+    </div>
+    
+  <!-- {:else if recState === PAUSED}
+    resume button, stop button -->
   {:else if recState === RECORDED_AUDIO}
     <!-- Listen button, send button, delete button -->
     <!-- <button on:click={playRecording}>Hør på opptak</button> -->
@@ -281,7 +283,7 @@
   #countdown {
     position: fixed;
     width: 100%;
-    top: 10%;
+    top: 30%;
     left: 0;
     height: 50%;
     z-index: 3;
@@ -291,14 +293,19 @@
     padding-top: 3em;
   }
   #volume {
-    width: 200px;
-    height: 20px;
-    position: relative;
+    width: 100%;
+    position: absolute;
     border: 1px solid grey;
+
+    bottom: 0px;
+    left: 50%;
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+    font-size: 7rem;
   }
   #volume span {
-    position: absolute;
-    height: 100%;
+    background-color: red;
+    width: 100%;
     border-top: 10px dotted green;
     display: inline-block;
   }
@@ -309,7 +316,7 @@
   #rec-toolbar {
     position: fixed;
     z-index: 2;
-    height: 200px;
+    height: 15vw;
     width: 70%;
     left: 15%;
     top: 100px; /* Navbarheight */
@@ -332,7 +339,7 @@
 
   .half-btn {
     width: 50%;
-    height: 100%;
+    height: 13vw;
   } 
   .half-btn:hover {
     cursor: pointer;
