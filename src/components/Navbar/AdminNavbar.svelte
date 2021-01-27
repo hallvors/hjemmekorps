@@ -136,8 +136,6 @@
 
 <style>
 	.navbar-wrapper {
-
-
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -166,6 +164,10 @@
 		letter-spacing: 3px;
 		font-size: 15px;
 		color: var(--dark);
+	}
+
+	.logo img {
+		max-height: var(--navbarHeight);
 	}
 
 	button:active {
