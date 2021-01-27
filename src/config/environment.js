@@ -4,15 +4,14 @@ const env = process.env.NODE_ENV || 'development';
 const port = process.env.PORT || 3000;
 
 nconf.env('__').argv();
-nconf.overrides(require('./overrides.json'));
+nconf.add('overrides', {type: 'file', file: './overrides.json'});
 if (env === 'development') {
-	nconf.env(require('./development.json'));
+	nconf.add('environment', {type: 'file', file: './development.json'});
 } else {
-	nconf.env(require('./production.json'));
-
+	nconf.add('environment', {type: 'file', file: './production.json'});
 }
 
-nconf.defaults(require('./defaults.json'));
+nconf.add('defaults', {type: 'file', file: './defaults.json'});
 
 module.exports = {
   instruments: require('./instruments.json').instruments,
