@@ -20,6 +20,7 @@ console.log({
   NODE_ENV,
   datast: env.nconf.get('sanity:dataset'),
   sec: env.nconf.get('site:tokensecret'),
+  all: process.env,
 });
 
 const app = polka();

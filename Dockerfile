@@ -22,5 +22,6 @@ RUN ./prep-files.sh
 # overrides settings are used locally for development,
 # this file needs no content on the server - we use environment vars
 RUN echo "{}" > ./src/config/overrides.json
+
 RUN npm run build
 CMD ["npm", "start"]
