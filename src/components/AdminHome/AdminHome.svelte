@@ -19,6 +19,7 @@
 </script>
 
 {#if bands[0].members && bands[0].members.length}
+  <h1>Låter</h1>
   <div class="main-wrapper">
     <div><ProjectListItem newProject={true} /></div>
     {#each projects as project}
