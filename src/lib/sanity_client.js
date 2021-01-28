@@ -111,7 +111,7 @@ function getMembers(bandId) {
   return getSanityClient().fetch(
     `*[_type == $type && references($bandId) && !(_id in path("drafts.**"))] {
       name, _id, instrument
-    }`,
+    } | order(name asc)`,
     {
       type: 'member',
       bandId,
