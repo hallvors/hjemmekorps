@@ -42,3 +42,9 @@
   instruments={instruments}
   on:dataupdate={onUpdate}
 />
+
+{#if selectedBand.members.length}
+<p>
+  Når musikant-liste er komplett kan du <a href="/">gå videre til låter</a>.
+</p>
+{/if}
