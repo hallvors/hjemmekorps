@@ -109,7 +109,7 @@ function getProjects(userId) {
 
 function getMembers(bandId) {
   return getSanityClient().fetch(
-    `*[_type == $type && references($bandId) && !(_id in path("drafts.**"))] {
+    `*[_type == $type && references($bandId) && visible && !(_id in path("drafts.**"))] {
       name, _id, instrument
     } | order(name asc)`,
     {
@@ -131,12 +131,12 @@ function getProjectScoreData(projectId) {
   );
 }
 
-function getProject(userId, projectId) {
+function getProject(userId, projectId, mustBeFresh) {
   // userId can be either an admin user or a regular band member user ID
   // admin user will get more data from this method, however: no members details
   // for a non-admin
   let id = `project-${userId}-${projectId}`;
-  if (sanityCache.has(id)) {
+  if (sanityCache.has(id) && !mustBeFresh) {
     return Promise.resolve(sanityCache.get(id));
   }
   const client = getSanityClient();
@@ -189,7 +189,7 @@ function getProject(userId, projectId) {
         return client
           .fetch(
             `*[
-          _type == "member" && _id in $memberIds
+          _type == "member" && _id in $memberIds && visible
         ]{
           _id, name, phone, email, subgroup, instrument,
           "band": band->name, "portraitUrl": portrait.asset->url,
@@ -270,7 +270,7 @@ function addProject(userId, bandId, name, mxmlFile, partslist, bpm, members) {
           },
           partslist,
         })
-        .then(project => getProject(userId, project._id));
+        .then(project => getProject(userId, project._id, true));
     });
 }
 
@@ -284,7 +284,7 @@ function updateProject(userId, projectId, data) {
     Object.assign(oldData, data);
     return client
       .createOrReplace(oldData)
-      .then(result => getProject(userId, projectId));
+      .then(result => getProject(userId, projectId, true));
   });
 }
 
@@ -385,7 +385,7 @@ function addProjectRecording(projectId, memberId, filepath) {
               },
               volume: 100,
             })
-            .then(() => getProject(memberId, projectId));
+            .then(() => getProject(memberId, projectId, true));
         });
     });
 }
