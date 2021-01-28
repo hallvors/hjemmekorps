@@ -188,44 +188,22 @@ function getProject(userId, projectId, mustBeFresh) {
       } else {
         console.log('project owner requests project');
         // Project owner is requesting data. We should also include the secret links for all members
-        const memberIds = _.flatten(
-          result.partslist.map(
-            part => part.members && part.members.map(member => member._ref)
-          )
-        );
-        return client
-          .fetch(
-            `*[
-          _type == "member" && _id in $memberIds
-        ]{
-          _id, name, phone, email, subgroup, instrument,
-          "band": band->name, "portraitUrl": portrait.asset->url,
-            "recording": *[_type == 'recording' && references(^._id) && references($projectId)][0]{
-              "url": file.asset->url, volume
+        if (result.partslist) {
+          result.partslist.forEach(part => {
+            if (part.members) {
+              part.members.forEach(memRef => {
+                memRef.token = jwt.sign(
+                  { userId: memRef._ref, projectId },
+                  env.config.site.tokensecret
+                );
+              });
             }
-        }`,
-            { memberIds, projectId }
-          )
-          .then(members => {
-            result.members = members;
-
-            result.members.forEach(member => {
-              member.token = jwt.sign(
-                { userId: member._id, projectId },
-                env.config.site.tokensecret
-              );
-              let part = result.partslist.find(
-                part =>
-                  part.members &&
-                  part.members.find(partMem => partMem._ref === member._id)
-              );
-              if (part) {
-                member.part = part.part;
-              }
-            });
-            // sanityCache.set(id, result);
-            return result;
           });
+        }
+        // TODO: enable caching projects, listen for updates
+        // sanityCache.set(id, result);
+        //console.log(JSON.stringify(result))
+        return result;
       }
     });
 }
@@ -242,7 +220,11 @@ function addProject(userId, bandId, name, mxmlFile, partslist, bpm, members) {
           // but it might also mention the name of a member,
           // in the latter case we can complete the assignment
           const member = members.find(member => {
-            return part.toLowerCase().indexOf(member.name.toLowerCase().split(' ')[0]) > -1;
+            return (
+              part
+                .toLowerCase()
+                .indexOf(member.name.toLowerCase().split(' ')[0]) > -1
+            );
           });
           if (member) {
             // this score part mentions a name
@@ -261,7 +243,12 @@ function addProject(userId, bandId, name, mxmlFile, partslist, bpm, members) {
             return assignmentObj;
           }
           // This is a generic part name, no musician assigned (which we know about)
-          return { _key: nanoid(), part, _type: 'projectassignment', members: [] };
+          return {
+            _key: nanoid(),
+            part,
+            _type: 'projectassignment',
+            members: [],
+          };
         })
         .filter(obj => obj); // remove any nulls
       return client
