@@ -85,7 +85,7 @@ function getBandsForAdminUser(userId) {
     `*[_type == $type && references($userId) && !(_id in path("drafts.**"))]{
     ..., "logoUrl": logo.asset->url,
     "palette": logo.asset->metadata.palette,
-    "members": *[_type == "member" && references(^._id)] {
+    "members": *[_type == "member" && references(^._id) && visible] {
       ..., "portraitUrl": portrait.asset->url
     }
   }`,
@@ -189,7 +189,7 @@ function getProject(userId, projectId, mustBeFresh) {
         return client
           .fetch(
             `*[
-          _type == "member" && _id in $memberIds && visible
+          _type == "member" && _id in $memberIds
         ]{
           _id, name, phone, email, subgroup, instrument,
           "band": band->name, "portraitUrl": portrait.asset->url,
