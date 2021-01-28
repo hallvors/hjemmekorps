@@ -16,6 +16,11 @@ export default {
       to: [{ type: 'member' }],
     },
     {
+      title: 'Instrument',
+      name: 'instrument',
+      type: 'string',
+    },
+    {
       title: 'Lydfil',
       name: 'file',
       type: 'file',

@@ -63,7 +63,7 @@ function getUserData(id) {
   return getSanityClient()
     .fetch(
       `*[_type == $type && _id == $id && !(_id in path("drafts.**"))][0]{
-    name, email, phone, "portrait": portrait.asset->, _id, _type,
+    name, email, phone, instrument, "portrait": portrait.asset->, _id, _type,
     "band": band->{name,
       "palette": logo.asset->metadata.palette,
       "logoUrl": logo.asset->url
@@ -343,7 +343,7 @@ async function updateOrCreateMember(data, bandId, portraitFile) {
   return result;
 }
 
-function addProjectRecording(projectId, memberId, filepath) {
+function addProjectRecording(projectId, memberId, instrument, filepath) {
   const cl = getSanityClient();
   return cl
     .fetch(
@@ -384,6 +384,7 @@ function addProjectRecording(projectId, memberId, filepath) {
                 },
               },
               volume: 100,
+              instrument,
             })
             .then(() => getProject(memberId, projectId, true));
         });

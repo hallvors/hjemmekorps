@@ -16,7 +16,7 @@ export const post = compose([
   multerUpload.single('file'),
   function (req, res, next) {
     return sClient
-      .addProjectRecording(req.body.projectId, req.body.memberId, req.file.path)
+      .addProjectRecording(req.body.projectId, req.body.memberId, req.body.instrument, req.file.path)
       .then((project) => {
         res.json(project)
       })

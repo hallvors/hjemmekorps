@@ -121,6 +121,7 @@
     var fd = new FormData();
     fd.append('file', recordingData, 'opptak.wav');
     fd.append('memberId', user._id);
+    fd.append('instrument', user.instrument);
     fd.append('projectId', project._id);
     fd.append('meta', JSON.stringify(meta));
     meta = [];
