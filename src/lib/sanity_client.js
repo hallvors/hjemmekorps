@@ -81,16 +81,25 @@ function getUserData(id) {
 }
 
 function getBandsForAdminUser(userId) {
-  return getSanityClient().fetch(
-    `*[_type == $type && references($userId) && !(_id in path("drafts.**"))]{
+  return getSanityClient()
+    .fetch(
+      `*[_type == $type && references($userId) && !(_id in path("drafts.**"))]{
     ..., "logoUrl": logo.asset->url,
     "palette": logo.asset->metadata.palette,
     "members": *[_type == "member" && references(^._id) && visible] {
       ..., "portraitUrl": portrait.asset->url
     }
   }`,
-    { type: 'band', userId }
-  );
+      { type: 'band', userId }
+    )
+    .then(bands => {
+      bands.forEach(band => {
+        band.members = band.members.sort((mA, mB) => {
+          return mA.name < mB.name ? -1 : 1;
+        });
+      });
+      return bands;
+    });
 }
 
 function getProjects(userId) {
