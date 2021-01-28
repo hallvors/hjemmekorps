@@ -157,6 +157,7 @@ function getProject(userId, projectId, mustBeFresh) {
       name, _id, sheetmusic, bpm,
       "sheetmusicFile": sheetmusic.asset->url,
       owner, partslist, generated_soundfile,
+
     }`,
       {
         type: 'project',
@@ -183,11 +184,6 @@ function getProject(userId, projectId, mustBeFresh) {
           console.error('user not musician for requested project');
           return null;
         }
-        // Here comes the hard part: remove non-useful parts of this score
-        // we want to send only the relevant part for this person
-        // TODO: is there a usable XML parser / serializer for node.js? Should we attempt to do this here,
-        // or push this work to the browser? Or can we use AlphaTab and just tell it to render a certain track?
-        // To be continued..
         return result;
       } else {
         console.log('project owner requests project');
