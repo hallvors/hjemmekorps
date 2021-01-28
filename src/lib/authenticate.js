@@ -50,8 +50,9 @@ const authenticate = async function(req, res, next) {
 		}
 		console.log({user});
 		if (!user) {
-			if (isOkWithoutSession(req.url)) { 
+			if (isOkWithoutSession(req.url)) {
 				// avoid redirect loops /feil/* if token is wrong
+				// TODO: what if we are on / with a ?t= URL?
 				return next();
 			}
 			console.error('go to /feil/nyreg')

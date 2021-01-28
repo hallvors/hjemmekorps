@@ -29,5 +29,14 @@ export default {
       name: "portrait",
       type: "image",
     },
+    {
+      title: "Aktiv",
+      description: "Skru av tilgang til systemet ved å skru av denne",
+      name: "enabled",
+      type: "boolean",
+    },
   ],
+  initialValue: {
+    enabled: true
+  },
 };

@@ -40,7 +40,7 @@ function getAdminUserData(email) {
   }
   return getSanityClient()
     .fetch(
-      `*[_type == $type && email == $email && !(_id in path("drafts.**"))][0]{
+      `*[_type == $type && email == $email && enabled && !(_id in path("drafts.**"))][0]{
     name, email, friendly_name, phone, portrait, _id, _type,
     "portraitUrl": portrait.asset->url
   }`,
