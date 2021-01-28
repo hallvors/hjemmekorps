@@ -17,7 +17,7 @@
   let count = 1;
   let countdown = false;
   let firstCount = true;
-  let countDelay = 1000; // TODO!!
+  let countDelay = 60000 / project.bpm;
   let trackName;
   if (project.partslist) {
     for (let i = 0; i < project.partslist.length; i++) {
@@ -127,11 +127,13 @@
     xhr.send(fd);
   }
 
+let metronomeInterval;
   function startCountdown() {
     countdown = true;
+    count = 1;
     recState = RECORDING;
     snapElm.play();
-    setTimeout(metronomeCounter, countDelay);
+    setTimeout(metronomeCounter, countDelay * 2);
   }
   function metronomeCounter() {
     if (count === 2 && firstCount) {
@@ -145,10 +147,14 @@
       }
       count++;
       snapElm.play();
-      setTimeout(metronomeCounter, firstCount ? countDelay : countDelay / 2);
+      setTimeout(metronomeCounter, firstCount ? countDelay * 2 : countDelay);
     } else {
       countdown = false;
       theBox.initPlaythrough();
+      snapElm.play();
+      metronomeInterval = setInterval(() => {
+        snapElm.play();
+      }, countDelay);
     }
   }
   function cancel() {
@@ -159,6 +165,8 @@
       audioElm.controls = false;
       meta = [];
       firstCount = true;
+      clearInterval(metronomeInterval);
+      clearInterval(volumeInterval);
       count = 1;
       recState = STOPPED;
     }
@@ -173,14 +181,14 @@
 
       recState = RECORDED_AUDIO;
       clearInterval(volumeInterval);
-      
+      clearInterval(metronomeInterval);
+    }
+    }
 
-    }
-    }
-  
 
   function endOfNote() {
     console.log('finished notification');
+    clearInterval(volumeInterval);
     stop();
   }
 
@@ -193,18 +201,6 @@
       document.body.className = 'recording';
     }
   }
-
-  // function playRecording() {
-  //   if (recordingData) {
-  //     var url = URL.createObjectURL(recordingData);
-  //     audioElm.src = url;
-  //     audioElm.play();
-  //     audioElm.addEventListener('ended', () => {
-  //       recState = RECORDED_AUDIO;
-  //     });
-  //     recState = PLAYING;
-  //   }
-  // }
 
   function pausePlayRecording() {
     audioElm.pause();
@@ -240,7 +236,7 @@
     <div class="start-stop-btn" on:click={stop}><h1>Stopp opptak</h1>
     <div id="volume"><span bind:this={volumePercElm} class:volumeLoud /></div>
     </div>
-    
+
   <!-- {:else if recState === PAUSED}
     resume button, stop button -->
   {:else if recState === RECORDED_AUDIO}
@@ -260,7 +256,7 @@
   <audio id="audio-elm" bind:this={audioElm} on:ended={pausePlayRecording} />
 
 
-  <!-- 
+  <!--
 	<button id="waste-btn"><img
 		src="/images/kast.png"
 		alt="Avbryt opptak" /></button>
@@ -274,7 +270,7 @@
 <NoteBox
   {project}
   {trackName}
-  showTracker={true}
+  showTracker={false}
   bind:this={theBox}
   on:finished={endOfNote}
 />
@@ -283,10 +279,10 @@
   #countdown {
     position: fixed;
     width: 100%;
-    top: 30%;
+    top: 0;
     left: 0;
-    height: 50%;
-    z-index: 3;
+    height: 100%;
+    z-index: 300;
     background: rgba(200, 200, 200, 0.6);
     font-size: 6em;
     text-align: center;
@@ -340,14 +336,14 @@
   .half-btn {
     width: 50%;
     height: 13vw;
-  } 
+  }
   .half-btn:hover {
     cursor: pointer;
     background-color: #F5F5F5;
-  } 
+  }
   #audio-elm {
     width: 100%;
-  } 
+  }
 
   .start-stop-btn {
     width: 100%;

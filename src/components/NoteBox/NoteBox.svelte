@@ -17,15 +17,17 @@
   // TODO: we have one metronome elm in RecordUI and one here. The main reason
   // is to facilitate recording the "clicks" during pre-count (the idea being this
   // can make it easier to align the recorded sound files correctly) - but we should
-  // refactor this.. Possibly more elegant ways to structure note rendering + recording 
+  // refactor this.. Possibly more elegant ways to structure note rendering + recording
   // + metronome code
-  let snapElm; 
+  let snapElm;
 
   function renderMusic() {}
 
   export function initPlaythrough() {
     if (!playing) {
-      sheetMusicRenderer.cursor.show();
+      if (showTracker) {
+        sheetMusicRenderer.cursor.show();
+      }
       playing = true;
       scheduleNext();
     } else {
@@ -34,6 +36,9 @@
   }
 
   function scheduleNext() {
+    if (!showTracker) {
+      return;
+    }
     let notes = sheetMusicRenderer.cursor.NotesUnderCursor();
     //console.log({ notes: notes.length });
     let minValue = Number.POSITIVE_INFINITY;
@@ -61,8 +66,10 @@
   }
 
   function nextNote() {
-    sheetMusicRenderer.cursor.next();
-    snapElm.play();
+    if (showTracker) {
+      sheetMusicRenderer.cursor.next();
+      snapElm.play();
+    }
     scheduleNext();
   }
 

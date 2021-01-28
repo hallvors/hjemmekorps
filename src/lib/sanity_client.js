@@ -143,7 +143,7 @@ function getProject(userId, projectId, mustBeFresh) {
   return client
     .fetch(
       `*[_type == $type && _id == $projectId][0] {
-      name, _id, sheetmusic,
+      name, _id, sheetmusic, bpm,
       "sheetmusicFile": sheetmusic.asset->url,
       owner, partslist, generated_soundfile,
     }`,
