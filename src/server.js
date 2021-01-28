@@ -39,6 +39,9 @@ app
         let projects = [];
         if (req.user && req.user._type === 'adminUser') {
           // admin is loading this page, list bands and projects
+          // bands includes band.members - full member info
+          // projects include recordings and partlist[].members[].token
+          // for secret links
           bands = await getBandsForAdminUser(req.user._id);
           projects = await getProjects(req.user._id);
         } else if (req.user) {
