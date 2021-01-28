@@ -117,6 +117,7 @@
       document.body.className = '';
       //document.getElementById("state-indicator").src = "/images/rec.png";
       alert('Ferdig! Opptaket er sendt. Tusen takk :)');
+      recState = STOPPED;
     };
     var fd = new FormData();
     fd.append('file', recordingData, 'opptak.wav');
