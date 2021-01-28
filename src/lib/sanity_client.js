@@ -102,16 +102,18 @@ function getBandsForAdminUser(userId) {
     });
 }
 
-function getProjects(userId) {
+function getProjects(userId, start = 0, end = 20) {
   return getSanityClient().fetch(
     `*[_type == $type && owner._ref == $userId && !(_id in path("drafts.**"))] {
       name, _id, sheetmusic,
       "sheetmusicFile": sheetmusic.asset->url
     }
-    | order(_createdAt desc)`,
+    | order(_createdAt desc) | [$start .. $end]`,
     {
       type: 'project',
       userId,
+      start,
+      end,
     }
   );
 }
