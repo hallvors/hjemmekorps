@@ -263,7 +263,7 @@ function addProject(userId, bandId, name, mxmlFile, partslist, bpm, members) {
           owner: { _type: 'reference', _ref: userId },
           band: { _type: 'reference', _ref: bandId },
           name,
-          bpm,
+          bpm: parseInt(bpm),
           sheetmusic: {
             _type: 'file',
             asset: { _type: 'reference', _ref: filedoc._id },
