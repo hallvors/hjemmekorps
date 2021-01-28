@@ -6,7 +6,6 @@
   import ProjectHome from './ProjectHome.svelte';
   import ScrollableListToolsRight from '../../structure/ScrollableListAndTools/ScrollableListToolsRight.svelte';
   import TagTrigger from '../TagTrigger/TagTrigger.svelte';
-  import { update_keyed_each } from 'svelte/internal';
 
   export let project;
   export let band;
