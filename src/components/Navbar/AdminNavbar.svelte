@@ -1,7 +1,7 @@
 <script>
 	import { stores } from '@sapper/app';
 	const { session } = stores();
-	/* TODO: this navigation is used for
+	/* This navigation is used for
 		1. pages that do not need a user session (/feil/*, /om/*)
 			if (!user)
 		2. Normal users (musicians)
@@ -79,7 +79,7 @@
 		},
 		{
 			text: "Låter",
-			href: `/`,
+			href: "/prosjekt",
 		},
 		{
 			text: "Logg ut",
