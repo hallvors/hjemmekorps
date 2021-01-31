@@ -1,27 +1,19 @@
 <script>
-  import { stores } from '@sapper/app';
-  const { session } = stores();
-
   import RecordUI from '../RecordUI/RecordUI.svelte';
-
+  import Loading from '../Loading/Loading.svelte';
+import {user, projectList} from '../../lib/datastore'
   // Dette får man fra backend
-  let project;
-  let user;
+  // Beklager manglende samsvar mellom data-modellen for admin og musikant
+  const project = $projectList[0];
 
-  session.subscribe(data => {
-    if (data.projects) {
-      project = data.projects[0];
-    }
-    user = data.user;
-  });
 </script>
 
 <div class="main-wrapper">
   <div class="display">
-    {#if project && user}
-    <RecordUI {project} {user} />
+    {#if project && $user}
+    <RecordUI {project} user={$user} />
     {:else}
-       <p>Vennligst vent..</p>
+       <Loading />
     {/if}
   </div>
 </div>

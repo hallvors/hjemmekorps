@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
-
+  import Loading from '../Loading/Loading.svelte'
   const dispatch = createEventDispatcher();
 
   // Box for displaying notes from musicXML
@@ -9,8 +9,8 @@
   export let trackName = null;
   export let showTracker = false;
   export let scale = 100;
-  let bpm = project.bpm || 60;
-
+  let bpm = project.bpm || 96;
+  let renderingMusic = true;
   let sheetmusic;
   let sheetMusicRenderer; // OSMD instance
   let playing = false;
@@ -21,7 +21,6 @@
   // + metronome code
   let snapElm;
 
-  function renderMusic() {}
 
   export function initPlaythrough() {
     if (!playing) {
@@ -101,11 +100,14 @@
       .then(xmlSource => {
         sheetMusicRenderer.load(xmlSource).then(() => {
           sheetMusicRenderer.render();
+          renderingMusic = false;
         });
       });
   });
 </script>
-
+{#if renderingMusic}
+<div class="loading"><Loading /></div>
+{/if}
 <div class="standard-box note-box" bind:this={sheetmusic} id="sheetmusic" />
 <!-- svelte-ignore a11y-media-has-caption -->
 <audio bind:this={snapElm} src="/samples/snap.mp3" preload />
@@ -116,6 +118,12 @@
     padding: 5%;
     height: 100%;
     overflow: auto;
+  }
+  .loading {
+    z-index: 500;
+    width: 100%;
+    height: 80vh;
+    background: #fff;
   }
   /*
     .note-box h2 {
