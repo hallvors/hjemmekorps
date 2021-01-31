@@ -1,6 +1,6 @@
 <script>
-	import { stores } from '@sapper/app';
-	const { session } = stores();
+import {user, bands, selectedBand} from '../../lib/datastore'
+
 	/* This navigation is used for
 		1. pages that do not need a user session (/feil/*, /om/*)
 			if (!user)
@@ -15,16 +15,9 @@
 	export let backgroundColor = "red";
 	export let navbarHeight = 100;
 
-	let user;
     let logo;
-    
-	session.subscribe(data => {
-		if (data.bands.length) {
-			logo = data.bands[0].logoUrl;
-			backgroundColor = data.bands[0].palette ? data.bands[0].palette.darkVibrant.background : '#fff';
-		}
-		user = data.user;
-	});
+	logo = $bands[$selectedBand].logoUrl;
+	backgroundColor = $bands[$selectedBand].palette ? $bands[$selectedBand].palette.darkVibrant.background : '#fff'
 
 	let mobileNav, mobileLinks, burger;
 
@@ -125,8 +118,8 @@
 <!-- MobileNav. Only shows when burger is active -->
 <div bind:this={mobileNav} style="top: {navbarHeight};" class="mobile-menu">
 		<ul bind:this={mobileLinks} class="mobile-links">
-			{#if user}
-			<li>Hei, {user.friendly_name}</li>
+			{#if $user}
+			<li>Hei, {$user.friendly_name}</li>
 			{/if}
 			{#each navbarElms as navbarElm}
 			<li class="mobile-link link"><a on:click={toggleMobileNav} class="navbar-elm mobile-menu-text" href={navbarElm.href}>{navbarElm.text}</a></li>

@@ -1,22 +1,15 @@
 <script>
-
 	import AdminNavbar from "./AdminNavbar.svelte";
 	import MemberNavbar from "./MemberNavbar.svelte";
+	import {user} from '../../lib/datastore'
 
-	import { stores } from '@sapper/app';
-	const { session } = stores();
-
-	let user;
-	session.subscribe(data => {
-		user = data.user;
-	});
 </script>
 
 <main>
-{#if (user && user._type === "adminUser")}
+{#if ($user && $user._type === "adminUser")}
 	<AdminNavbar/>
 
-	{:else if (user && user._type === "member")}
+	{:else if ($user && $user._type === "member")}
 	<MemberNavbar />
 {/if}
 </main>
