@@ -1,5 +1,8 @@
 <script>
-  export let band;
+ import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher();
+
+export let band;
   let importData = '';
   let parsedImportData;
   let importSuccess = false;
@@ -42,6 +45,7 @@
     });
     fetch('/api/members', {
       method: 'POST',
+      credentials: 'same-origin',
       body: JSON.stringify({ members: submitData, bandId: band._id }),
       headers: {
         Accept: 'application/json',
@@ -53,7 +57,7 @@
         importData = '';
         parsedImportData = null;
         importSuccess = true;
-        //response.json().then(data => dispatch('dataupdate', data));
+        response.json().then(data => dispatch('dataupdate', data));
       }
     });
   }

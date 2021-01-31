@@ -1,6 +1,5 @@
 <script>
   import { createEventDispatcher } from 'svelte';
-
   const dispatch = createEventDispatcher();
 
   let muted = false;
@@ -19,46 +18,53 @@
   }
 
   function dispatchClick() {
+    debugger;
     dispatch('click', member);
   }
 
   export let member;
   export let projectName;
+  export let assignmentInfo = {};
   export let registerAudioElement = () => {};
-</script>
-{#if member}
-<div on:click={dispatchClick}>
-  {#if member.instrument}
-    <figure class="instrument">
-      <img
-        src={'/images/instruments/' + member.instrument + '.png'}
-        alt={member.instrument}
-        class="instrument-icon"
-      />
-      <figcaption>{member.instrument}</figcaption>
-    </figure>
-  {/if}
 
-  {#if member.portraitUrl}
-    <figure class="portrait">
-      <img src={member.portraitUrl} alt={member.name} />
-      <figcaption>{member.name}</figcaption>
-    </figure>
-  {/if}
-  <h3>{member.name}</h3>
-  {#if member.subgroup}<p>{member.subgroup}</p>{/if}
-  {#if member.part}<p class="part">
-      <em>{member.part}{#if projectName}, {projectName}{/if}</em>
-    </p>{/if}
-  {#if member.recording}
-    <button class="mute-btn" on:click|preventDefault={toggleMute}
-      ><i class="fas fa-volume-up" /></button
-    >
-    <!-- svelte-ignore a11y-media-has-caption -->
-    <audio src={member.recording.url} use:registerAudioElement {muted} />
-  {/if}
-</div>
+</script>
+
+{#if member}
+  <div on:click={dispatchClick}>
+    {#if member.instrument}
+      <figure class="instrument">
+        <img
+          src={'/images/instruments/' + member.instrument + '.png'}
+          alt={member.instrument}
+          class="instrument-icon"
+        />
+        <figcaption>{member.instrument}</figcaption>
+      </figure>
+    {/if}
+
+    {#if member.portraitUrl}
+      <figure class="portrait">
+        <img src={member.portraitUrl} alt={member.name} />
+        <figcaption>{member.name}</figcaption>
+      </figure>
+    {/if}
+    <h3>{member.name}</h3>
+    {#if member.subgroup}<p>{member.subgroup}</p>{/if}
+    {#if assignmentInfo && assignmentInfo.part}<p class="part">
+        <em
+          >{assignmentInfo.part}{#if projectName}, {projectName}{/if}</em
+        >
+      </p>{/if}
+    {#if assignmentInfo && assignmentInfo.recording}
+      <button class="mute-btn" on:click|preventDefault|stopPropagation={toggleMute}
+        ><i class="fas fa-volume-up" /></button
+      >
+      <!-- svelte-ignore a11y-media-has-caption -->
+      <audio src={assignmentInfo.recording.url} use:registerAudioElement {muted} />
+    {/if}
+  </div>
 {/if}
+
 <style>
   div {
     min-height: 118px;

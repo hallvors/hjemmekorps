@@ -1,24 +1,14 @@
 <script>
-	import { stores } from '@sapper/app';
-	const { session } = stores();
-	let user;
-	session.subscribe(data => {
-		user = data.user;
-	});
-
-	/* TODO: load different section of app for regular users (musicians)
-			if (user && user._type === 'member')
-	*/
-
+	export let user;
 	import AdminHome from "../AdminHome/AdminHome.svelte";
 	import UserHome from "../UserHome/UserHome.svelte";
 	import GuestHome from "../GuestHome/GuestHome.svelte";
 </script>
 <div>
 	{#if user && user._type === 'adminUser'}
-		<AdminHome />
+		<AdminHome {user} />
 	{:else if user && user._type === 'member'}
-		<UserHome />
+		<UserHome {user} />
 	{:else}
 		<GuestHome />
 	{/if}

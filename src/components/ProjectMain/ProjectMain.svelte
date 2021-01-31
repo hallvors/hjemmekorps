@@ -3,15 +3,27 @@
   const dispatch = createEventDispatcher();
 
   import DeltakerDisplay from '../DeltakerDisplay/DeltakerDisplay.svelte';
-  import ProjectHome from './ProjectHome.svelte';
+  import ProjectPartsLinks from './ProjectPartsLinks.svelte';
   import ScrollableListToolsRight from '../../structure/ScrollableListAndTools/ScrollableListToolsRight.svelte';
   import TagTrigger from '../TagTrigger/TagTrigger.svelte';
 
   export let project;
   export let band;
+  export let members = [];
+  export let assignments = {};
+
   let listOptions = [];
   let selectedOption = 1;
 
+  // filter out members from other bands, list members in alphabetical order
+  let membersFiltered = Object.keys(members)
+    .filter(m => m && members[m].band._ref === band._id)
+    .map(m => members[m])
+    .sort((mA, mB) => {
+      return mA.name < mB.name ? -1 : 1;
+    });
+
+  /*
   // TODO: we're making it hard for Svelte to detect changes
   // because our data structures are getting a bit complex..
   // Some assignment hacks follow, would be nice to get rid of them..
@@ -33,20 +45,21 @@
     }
   }
   updateAssignedMembers();
+  */
+
   listOptions.push({
     title: 'Alle korpsmedlemmer',
-    list: band.members,
+    list: membersFiltered,
   });
   listOptions.push({
     title: 'Med tildelte stemmer',
-    list: projectAssignedMembers,
   });
 
   if (band.groups) {
     band.groups.forEach(group => {
       listOptions.push({
         title: group,
-        list: band.members.filter(item => item.subgroup === group),
+        list: membersFiltered.filter(item => item.subgroup === group),
       });
     });
   }
@@ -57,37 +70,51 @@
     if (!activeTagValue) {
       return;
     }
-    let member = band.members.find(item => item._id === evt.detail._id);
-
     let partDetails = project.partslist.find(
       partDetails => partDetails.part === activeTagValue
     );
     let indexInList =
       partDetails.members &&
-      partDetails.members.findIndex(member => {
-        return member._ref === evt.detail._id;
+      partDetails.members.findIndex(memRef => {
+        return memRef._ref === evt.detail._id;
       });
 
     if (indexInList > -1) {
       partDetails.members.splice(indexInList, 1);
-      delete member.part;
     } else {
       if (!partDetails.members) {
         partDetails.members = [];
       }
-      partDetails.members = [
-        ...partDetails.members,
-        {
-          _ref: evt.detail._id,
-          _type: 'reference',
-          _key: 'hj' + parseInt(Math.random() * 1000000000000),
-        },
-      ];
+      partDetails.members.push({
+        _ref: evt.detail._id,
+        _type: 'reference',
+        _key: 'hj' + parseInt(Math.random() * 1000000000000),
+      });
     }
-    updateAssignedMembers();
+    partDetails.members = [...partDetails.members];
+
+    dispatch('partsupdate', {
+      id: project._id,
+      partslist: [...project.partslist],
+    });
     fetch('/api/project/' + project._id, {
       method: 'POST',
-      body: JSON.stringify(Object.assign({}, { partslist: project.partslist })),
+      body: JSON.stringify({
+        partslist: project.partslist.map(part => ({
+          _key: part._key,
+          _type: part._type,
+          _ref: part._ref,
+          part: part.part,
+          members: part.members.map(m => ({
+            // TODO: no token, recording - we get that back from the server,
+            // but temporarily they will be missing during the update. Can we fix?
+            _key: m._key,
+            _ref: m._ref,
+            _type: m._type,
+          })),
+        })),
+      }),
+      credentials: 'same-origin',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
@@ -95,7 +122,6 @@
     }).then(result => {
       result.json().then(data => {
         dispatch('dataupdate', data);
-        updateAssignedMembers();
       });
     });
   }
@@ -107,6 +133,7 @@
   function stopAudio() {
     audioElements.forEach(elm => elm.pause());
   }
+
 </script>
 
 <div class="project-main">
@@ -126,17 +153,36 @@
       </select>
     </div>
     <div class="members-list">
-      {#each listOptions[selectedOption].list || [] as member}
-        <div class="member">
-          <DeltakerDisplay
-            {member}
-            projectName={project.name}
-            on:click={memberClicked}
-            registerAudioElement={elm =>
-              (audioElements = [...audioElements, elm])}
-          />
-        </div>
-      {/each}
+      {#if listOptions[selectedOption].list}
+        {#each listOptions[selectedOption].list || [] as member}
+          <div class="member">
+            <DeltakerDisplay
+              member={members[member._id]}
+              projectName={project.name}
+              assignmentInfo={(assignments[project._id] || {})[member._id]}
+              on:click={memberClicked}
+              registerAudioElement={elm =>
+                (audioElements = [...audioElements, elm])}
+            />
+          </div>
+        {/each}
+      {:else}
+        <!-- render based on parts list -->
+        {#if assignments && assignments[project._id]}
+          {#each Object.entries(assignments[project._id]) as [memberId, data]}
+            <div class="member">
+              <DeltakerDisplay
+                member={members[memberId]}
+                projectName={project.name}
+                assignmentInfo={data}
+                on:click={memberClicked}
+                registerAudioElement={elm =>
+                  (audioElements = [...audioElements, elm])}
+              />
+            </div>
+          {/each}
+        {/if}
+      {/if}
     </div>
   </div>
   <div slot="aside">
@@ -155,14 +201,19 @@
     {/each}
     {#if audioElements.length}
       <h3>Spill av opptak</h3>
-      <button on:click={startAudio}>start</button><button on:click={stopAudio}
+      <p><a href="/prosjekt/{project._id}/opptak">Liste over opptak</a></p>
+      <p><em>
+        Du kan prøve å høre alle samtidig her, men det er usikkert om det vil høres fint ut..
+
+      </em></p>
+        <button on:click={startAudio}>start</button><button on:click={stopAudio}
         >stop</button
       >
     {/if}
   </div>
 </ScrollableListToolsRight>
 
-{#if projectAssignedMembers.length}
+{#if !listOptions[selectedOption].list}
   <p>
     For å dele <em>{project.name}</em>-noter med musikantene som har fått
     tildelt stemmer, gå til
@@ -171,7 +222,7 @@
 {/if}
 
 <h2>Noter</h2>
-<ProjectHome {project} />
+<ProjectPartsLinks {project} />
 
 <style>
   :root {

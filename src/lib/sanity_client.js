@@ -8,6 +8,7 @@ const { nanoid } = require('nanoid');
 const NodeCache = require('node-cache');
 
 const { filterInstrumentName } = require('./utils');
+const { bands } = require('./datastore');
 
 const sanityCache = new NodeCache({
   stdTTL: 60 * 60 * 24 * 7,
@@ -81,25 +82,16 @@ function getUserData(id) {
 }
 
 function getBandsForAdminUser(userId) {
-  return getSanityClient()
-    .fetch(
-      `*[_type == $type && references($userId) && !(_id in path("drafts.**"))]{
+  return getSanityClient().fetch(
+    `*[_type == $type && references($userId) && !(_id in path("drafts.**"))]{
     ..., "logoUrl": logo.asset->url,
     "palette": logo.asset->metadata.palette,
     "members": *[_type == "member" && references(^._id) && visible] {
       ..., "portraitUrl": portrait.asset->url
     }
   }`,
-      { type: 'band', userId }
-    )
-    .then(bands => {
-      bands.forEach(band => {
-        band.members = band.members.sort((mA, mB) => {
-          return mA.name < mB.name ? -1 : 1;
-        });
-      });
-      return bands;
-    });
+    { type: 'band', userId }
+  );
 }
 
 function getProjects(userId, start = 0, end = 20) {
@@ -151,61 +143,72 @@ function getProject(userId, projectId, mustBeFresh) {
     return Promise.resolve(sanityCache.get(id));
   }
   const client = getSanityClient();
-  return client
-    .fetch(
+  return Promise.all([
+    client.fetch(
       `*[_type == $type && _id == $projectId][0] {
       name, _id, sheetmusic, bpm,
       "sheetmusicFile": sheetmusic.asset->url,
       owner, partslist, generated_soundfile,
-
+      "bandAdmins": band->owner
     }`,
       {
         type: 'project',
         userId,
         projectId,
       }
-    )
-    .then(result => {
-      if (!result) {
-        console.error('no result!?');
-        return null;
-      }
-      if (result.owner._ref !== userId) {
-        console.log('not requested by owner?', result.owner._ref);
-        // not requested by the admin user who owns this project..
-        if (
-          !result.partslist.find(
-            part =>
-              part.members &&
-              part.members.find(member => member._ref === userId)
-          )
-        ) {
-          // the user is not a musician for this project.. odd!
-          console.error('user not musician for requested project');
-          return null;
-        }
-        return result;
-      } else {
-        console.log('project owner requests project');
-        // Project owner is requesting data. We should also include the secret links for all members
-        if (result.partslist) {
-          result.partslist.forEach(part => {
-            if (part.members) {
-              part.members.forEach(memRef => {
-                memRef.token = jwt.sign(
-                  { userId: memRef._ref, projectId },
-                  env.config.site.tokensecret
-                );
-              });
+    ),
+    getRecordings(projectId),
+  ]).then(results => {
+    if (!results[0]) {
+      console.error('no result!?');
+      return null;
+    }
+    let project = results[0];
+    let recordings = results[1];
+    let userIsBandAdmin =
+      project.owner._ref === userId ||
+      Boolean(project.bandAdmins.find(bA => bA._ref === userId));
+
+    console.log('requested by owner or band admin?', userIsBandAdmin);
+    // We allow band admins, project owner and members who have parts to load data
+    if (
+      !(
+        userIsBandAdmin ||
+        project.partslist.find(
+          part =>
+            part.members && part.members.find(member => member._ref === userId)
+        )
+      )
+    ) {
+      // the user is not a musician for this project.. odd!
+      console.error('user not admin or musician for requested project');
+      return null;
+    }
+    // Acceptable user is requesting data. We should also include the secret links for all members
+    if (project.partslist) {
+      project.partslist.forEach(part => {
+        if (part.members) {
+          part.members.forEach(memRef => {
+            if (userIsBandAdmin) {
+              memRef.token = jwt.sign(
+                { userId: memRef._ref, projectId },
+                env.config.site.tokensecret
+              );
+            }
+            // TODO: "listening to others while recording enabled"-setting for project?
+            let recording = recordings.find(r => r.member._ref === memRef._ref);
+            if (recording) {
+              memRef.recording = recording;
             }
           });
         }
-        // TODO: enable caching projects, listen for updates
-        // sanityCache.set(id, result);
-        //console.log(JSON.stringify(result))
-        return result;
-      }
-    });
+      });
+      // TODO: enable caching projects, listen for updates
+      // sanityCache.set(id, project);
+      //console.log(JSON.stringify(project, null, 2))
+      return project;
+    }
+  });
 }
 
 function addProject(userId, bandId, name, mxmlFile, partslist, bpm, members) {

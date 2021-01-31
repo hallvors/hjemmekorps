@@ -1,52 +1,50 @@
 <script>
-  import { stores } from '@sapper/app';
-  const { session } = stores();
+// TODO: should some of this logic move to routes/index.svelte?
 
-  import ProjectListItem from '../ProjectListItem/ProjectListItem.svelte';
+//import { createEventDispatcher } from 'svelte';
+//  const dispatch = createEventDispatcher();
+  import LinkedBoxList from '../LinkedBoxList/LinkedBoxList.svelte';
 
-  // Dette får man fra backend
-  let projects = [];
-  let bands = [];
-  let user;
+  export let user;
 
-  session.subscribe(data => {
-    if (data.bands) {
-      bands = data.bands;
-      projects = data.projects;
-    }
-    user = data.user;
-  });
+import { bands, selectedBand, updateSelectedBand } from '../../lib/datastore';
+  function onBandSelect(newBandIdx) {
+    updateSelectedBand(newBandIdx);
+  }
+  let bandSelectorData = $bands.map((band, idx) => ({
+    href: '#',
+    onclick: function () {
+      onBandSelect(idx);
+    },
+    title: band.name,
+    active: idx === $selectedBand,
+  }));
+  let categoryLinks = [
+    { title: 'Musikanter', href: '/musikanter' },
+    { title: 'Låter', href: '/prosjekt' },
+  ];
 </script>
 
-{#if bands[0].members && bands[0].members.length}
-  <h1>Låter</h1>
-  <div class="main-wrapper">
-    <div><ProjectListItem newProject={true} /></div>
-    {#each projects as project}
-      <div><ProjectListItem title={project.name} id={project._id} /></div>
-    {/each}
-  </div>
-{:else}
-    <h1>Velkommen, {user.friendly_name}!</h1>
+<div class="main-wrapper">
+  <h1>Velkommen, {user.friendly_name}!</h1>
+
+  {#if $bands.length > 1}
+    <h2>Velg korps</h2>
+    <LinkedBoxList items={bandSelectorData} />
+  {/if}
+  {#if $bands[$selectedBand].members.length > 0}
+    <LinkedBoxList items={categoryLinks} />
+  {:else}
     <p>
       Første steg er å <a href="/musikanter/import">importere musikanter</a>.
     </p>
-{/if}
+  {/if}
+</div>
 
 <style>
   .main-wrapper {
     padding: 50px 0;
     width: 90%;
     margin: 0 auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-
-  .main-wrapper > div {
-    flex: 0 1 auto;
-    width: 18vw;
-    height: 18vw;
-    margin: 1vw;
   }
 </style>

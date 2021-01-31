@@ -15,21 +15,30 @@
   function memberClicked(evt) {
     if (!activeTagValue) return;
     let member = members.find(item => item._id === evt.detail._id);
-    dispatch('dataupdate', [
-      Object.assign(member, { [activeTagName]: activeTagValue }),
-    ]);
+    dispatch('dataupdate', {
+      memberId: evt.detail._id,
+      newMemberProps: { [activeTagName]: activeTagValue, band: {_ref: band._id }},
+      bandId: band._id,
+    });
     fetch('/api/members/' + evt.detail._id, {
       method: 'POST',
+      credentials: 'same-origin',
       body: JSON.stringify({
         [activeTagName]: activeTagValue,
-        bandId: band.id,
+        bandId: band._id,
       }),
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
     }).then(result => {
-      result.json().then(data => dispatch('dataupdate', [data]));
+      result.json().then(data =>
+        dispatch('dataupdate', {
+          memberId: evt.detail._id,
+          newMemberProps: data,
+          bandId: band._id,
+        })
+      );
     });
   }
 

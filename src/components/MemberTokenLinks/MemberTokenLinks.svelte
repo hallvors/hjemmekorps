@@ -1,7 +1,12 @@
 <script>
   export let project;
+  export let members;
   let ulElement;
   let copied;
+  let nameMap = {};
+  members.forEach(m => {
+    nameMap[m._id] = m.name;
+  });
 
   function triggerSelectAndCopy() {
     let ok = false;
@@ -28,6 +33,21 @@
     }, 2500);
   }
 
+  document.addEventListener('copy', event => {
+    console.log('event fires', event)
+    const plainTextLinks = [];
+    const links = ulElement.getElementsByTagName('a');
+    for (let i = 0; i < links.length; i++) {
+      plainTextLinks.push(links[i].textContent);
+      plainTextLinks.push(links[i].href);
+      plainTextLinks.push('');
+    }
+    console.log({plainTextLinks})
+    event.clipboardData.setData('text/plain', plainTextLinks.join('\n'));
+    event.clipboardData.setData('text/html', ulElement.outerHTML);
+    event.preventDefault();
+  });
+
   function areYouSure(evt) {
     if (
       !confirm(
@@ -43,10 +63,13 @@
 
 <div>
   <ul bind:this={ulElement}>
-    {#each project.members as member}
-      <li>
-        <a href={'/?t=' + member.token} on:click={areYouSure}>{member.name}</a>
-      </li>
+    {#each project.partslist as part}
+      {#each part.members as memRef}
+        <li>
+          <a href={'/?t=' + memRef.token} on:click={areYouSure}>{nameMap[memRef._ref]}</a
+          >
+        </li>
+      {/each}
     {/each}
   </ul>
 

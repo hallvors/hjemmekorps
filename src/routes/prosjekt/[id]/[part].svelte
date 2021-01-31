@@ -1,18 +1,16 @@
 <script context="module">
-  let id;
-  let part;
   export async function preload(page, session) {
-    id = page.params.id;
-    part = page.params.part;
-    const res = await this.fetch(`/api/project/${id}`);
-    const project = await res.json();
-    return { project };
+    let id = page.params.id;
+    let part = page.params.part;
+    return { id, part };
   }
 </script>
 
 <script>
-  export let project;
+  export let id;
+  export let part;
+  import { projects } from '../../../lib/datastore';
   import NoteBox from '../../../components/NoteBox/NoteBox.svelte';
 </script>
 
-<NoteBox {project} trackName={part} showTracker={false} />
+<NoteBox project={$projects[id]} trackName={part} showTracker={false} />

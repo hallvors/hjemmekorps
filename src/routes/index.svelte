@@ -1,9 +1,11 @@
 <script>
-	import App from '../components/App/App.svelte';
+  import { user } from '../lib/datastore';
+  import App from '../components/App/App.svelte';
+  console.log($user);
 </script>
 
 <svelte:head>
-	<title>Hjemmekorps</title>
+  <title>Hjemmekorps</title>
 </svelte:head>
 
-<App />
+<App user={$user} />

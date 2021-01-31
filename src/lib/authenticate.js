@@ -26,7 +26,7 @@ const authenticate = async function(req, res, next) {
 		return next();
 	}
 	if (!(req.query.t || req.cookies.token)) {
-		console.log('no token in URL or cookie');
+		console.log('no token in URL or cookie, ', req.url);
 
 		if (isOkWithoutSession(req.url)) {
 			return next();
@@ -61,6 +61,7 @@ const authenticate = async function(req, res, next) {
 			res.end();
 			return;
 		}
+		user.token = token;
 		req.user = user;
 		// if token does not exist or is not the value we use for auth now,
 		// make a new cookie.
