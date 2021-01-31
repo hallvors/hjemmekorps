@@ -31,29 +31,29 @@ app
     sirv('static', { dev }), // serve files in "static" dir (in root) as-is
     authenticate,
     sapper.middleware({
-      // enable Sapper - Svelte's server-side rendering lib
+      // scaffold session data
       session: async (req, res) => {
-        // this adds session data to the page
-        // data will be available to routes that do export let session
+        // data will be available to routes that use a preload() method
         let bands = [];
-        let projects = [];
+        let projectList = [];
         if (req.user && req.user._type === 'adminUser') {
           // admin is loading this page, list bands and projects
           // bands includes band.members - full member info
           // projects include recordings and partlist[].members[].token
           // for secret links
           bands = await getBandsForAdminUser(req.user._id);
-          projects = await getProjects(req.user._id);
+          projectList = await getProjects(req.user._id);
         } else if (req.user) {
           // this a regular, non-admin user
-          projects = [req.user.project];
+          projectList = [req.user.project];
           bands = [req.user.band];
         }
         return {
           user: req.user,
           bands,
-          projects,
+          projectList, // holds a list of id, title
           instruments: env.instruments,
+          protocol: dev ? 'http' : 'https',
         };
       },
     })
