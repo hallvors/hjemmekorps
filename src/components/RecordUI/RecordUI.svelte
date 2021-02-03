@@ -310,7 +310,7 @@ let metronomeInterval;
   #rec-toolbar {
     position: fixed;
     z-index: 2;
-    height: 15vw;
+    height: 10vw;
     width: 70%;
     left: 15%;
     top: 100px; /* Navbarheight */
