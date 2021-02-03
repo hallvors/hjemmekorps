@@ -37,6 +37,6 @@
 
 {#if $bands[$selectedBand].members.length}
   <p>
-    Når musikant-liste er komplett kan du <a href="/">gå videre til låter</a>.
+    Når musikant-liste er komplett kan du <a href="/prosjekt">gå videre til låter</a>.
   </p>
 {/if}
