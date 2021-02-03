@@ -23,30 +23,6 @@
       return mA.name < mB.name ? -1 : 1;
     });
 
-  /*
-  // TODO: we're making it hard for Svelte to detect changes
-  // because our data structures are getting a bit complex..
-  // Some assignment hacks follow, would be nice to get rid of them..
-  let projectAssignedMembers = [];
-  function updateAssignedMembers() {
-    let ids = [];
-    project.partslist.forEach(item =>
-      item.members.forEach(m => {
-        let bm = band.members.find(bm => bm._id === m._ref);
-        if (bm) {
-          bm.part = item.part;
-          ids.push(m._ref);
-        }
-      })
-    );
-    projectAssignedMembers = band.members.filter(m => ids.includes(m._id));
-    if (listOptions[selectedOption]) {
-      listOptions[selectedOption].list = listOptions[selectedOption].list;
-    }
-  }
-  updateAssignedMembers();
-  */
-
   listOptions.push({
     title: 'Alle korpsmedlemmer',
     list: membersFiltered,
