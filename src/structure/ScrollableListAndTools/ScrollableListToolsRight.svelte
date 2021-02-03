@@ -20,8 +20,8 @@
     flex: 1;
     align-self: flex-start; /* required for sticky flex to work */
     position: sticky;
-    top: 10px;
-    max-height: calc(100vh - 10px);
+    top: 50px;
+    max-height: calc(100vh - 50px);
     overflow-y: auto;
     overflow-x: none;
   }
