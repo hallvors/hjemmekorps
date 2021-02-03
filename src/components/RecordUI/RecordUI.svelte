@@ -52,17 +52,13 @@
   let volumePercElm;
   let volumeLoud = false;
 
-  onMount(async () => {
-    AudioContext = window.AudioContext || window.webkitAudioContext;
-  });
-
   function start() {
     meta.push({ timestamp: 0 });
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then(function (stream) {
         theStream = stream;
-        audioContext = new AudioContext();
+        audioContext = new (window.AudioContext || window.webkitAudioContext);
         input = audioContext.createMediaStreamSource(stream);
         snapSource = audioContext.createMediaElementSource(snapElm);
         analyser = audioContext.createAnalyser();
