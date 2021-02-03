@@ -13,9 +13,6 @@ import { bands, selectedBand, updateSelectedBand } from '../../lib/datastore';
   }
   let bandSelectorData = $bands.map((band, idx) => ({
     href: '#',
-    onclick: function () {
-      onBandSelect(idx);
-    },
     title: band.name,
     active: idx === $selectedBand,
   }));
@@ -23,6 +20,12 @@ import { bands, selectedBand, updateSelectedBand } from '../../lib/datastore';
     { title: 'Musikanter', href: '/musikanter' },
     { title: 'Låter', href: '/prosjekt' },
   ];
+
+function handleClick(evt) {
+  let idx = bandSelectorData.findIndex(band => band.title === evt.target.textContent);
+  onBandSelect(idx);
+};
+
 </script>
 
 <div class="main-wrapper">
@@ -30,9 +33,9 @@ import { bands, selectedBand, updateSelectedBand } from '../../lib/datastore';
 
   {#if $bands.length > 1}
     <h2>Velg korps</h2>
-    <LinkedBoxList items={bandSelectorData} />
+    <LinkedBoxList items={bandSelectorData} on:click={handleClick} />
   {/if}
-  {#if $bands[$selectedBand].members.length > 0}
+  {#if $bands[$selectedBand].members && $bands[$selectedBand].members.length > 0}
     <LinkedBoxList items={categoryLinks} />
   {:else}
     <p>
