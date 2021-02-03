@@ -14,6 +14,7 @@
   let sheetmusic;
   let sheetMusicRenderer; // OSMD instance
   let playing = false;
+  let errorMessage;
   // TODO: we have one metronome elm in RecordUI and one here. The main reason
   // is to facilitate recording the "clicks" during pre-count (the idea being this
   // can make it easier to align the recorded sound files correctly) - but we should
@@ -98,15 +99,27 @@
     )
       .then(data => data.text())
       .then(xmlSource => {
-        sheetMusicRenderer.load(xmlSource).then(() => {
-          sheetMusicRenderer.render();
-          renderingMusic = false;
+        return sheetMusicRenderer.load(xmlSource).then(() => {
+          try {
+            sheetMusicRenderer.render();
+            renderingMusic = false;
+          } catch(e) {
+            renderingMusic = false;
+            errorMessage = 'Lasting av noter mislyktes. Feilmelding ' + error.message;
+          }
         });
+      })
+      .catch(e => {
+        renderingMusic = false;
+        errorMessage = 'Lasting av noter mislyktes. Feilmelding ' + error.message;
       });
   });
 </script>
 {#if renderingMusic}
 <div class="loading"><Loading /></div>
+{/if}
+{#if errorMessage}
+<div class="error">{errorMessage}</div>
 {/if}
 <div class="standard-box note-box" bind:this={sheetmusic} id="sheetmusic" />
 <!-- svelte-ignore a11y-media-has-caption -->
@@ -125,10 +138,10 @@
     height: 80vh;
     background: #fff;
   }
-  /*
-    .note-box h2 {
-        padding: 0;
-        margin: 0;
-    }
-    */
+
+.error {color: red}
+
+#sheetmusic {
+padding: 0
+}
 </style>
