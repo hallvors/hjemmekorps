@@ -1,5 +1,5 @@
 <script>
-import {user, bands, selectedBand} from '../../lib/datastore'
+import {bands, selectedBand} from '../../lib/datastore'
 
 	/* This navigation is used for
 		1. pages that do not need a user session (/feil/*, /om/*)
@@ -13,11 +13,10 @@ import {user, bands, selectedBand} from '../../lib/datastore'
 	*/
 	// NOTE: this module is dependent on the "hamburgers.css" file
 	export let backgroundColor = "red";
+	export let foregroundColor = "white";
 	export let navbarHeight = 100;
-
-    let logo;
-	logo = $bands[$selectedBand].logoUrl;
-	backgroundColor = $bands[$selectedBand].palette ? $bands[$selectedBand].palette.darkVibrant.background : '#fff'
+    export let logo;
+    export let user;
 
 	let mobileNav, mobileLinks, burger;
 
@@ -83,7 +82,7 @@ import {user, bands, selectedBand} from '../../lib/datastore'
 </script>
 
 
-<div style="background-color: {backgroundColor}; height: {navbarHeight}" class="navbar-wrapper">
+<div style="height: {navbarHeight}px" class="navbar-wrapper">
 	<!-- Logo -->
 	{#if logo}
 		<a on:click={closeMobileNav} href="/" class="logo">
@@ -102,7 +101,7 @@ import {user, bands, selectedBand} from '../../lib/datastore'
 		<li><a href={navbarElm.href} class="navbar-elm">{navbarElm.text}</a></li>
 		{/each} -->
 		{#each navbarElms as navbarElm}
-		<li><a href={navbarElm.href}>{navbarElm.text}</a></li>
+		<li><a href={navbarElm.href} style="color: {foregroundColor}">{navbarElm.text}</a></li>
 		{/each}
 	</ul>
 
@@ -116,10 +115,10 @@ import {user, bands, selectedBand} from '../../lib/datastore'
 </button>
 
 <!-- MobileNav. Only shows when burger is active -->
-<div bind:this={mobileNav} style="top: {navbarHeight};" class="mobile-menu">
+<div bind:this={mobileNav} style="top: {navbarHeight}px;" class="mobile-menu">
 		<ul bind:this={mobileLinks} class="mobile-links">
-			{#if $user}
-			<li>Hei, {$user.friendly_name}</li>
+			{#if user}
+			<li>Hei, {user.friendly_name}</li>
 			{/if}
 			{#each navbarElms as navbarElm}
 			<li class="mobile-link link"><a on:click={toggleMobileNav} class="navbar-elm mobile-menu-text" href={navbarElm.href}>{navbarElm.text}</a></li>

@@ -1,9 +1,10 @@
 <script>
-import {user} from '../../lib/datastore'
+export let user;
+
 </script>
 
 <main>
-    <h1>Hei {$user.name}!</h1>
+    <h1>Hei {user.name}!</h1>
 </main>
 <style>
     main {

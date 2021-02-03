@@ -1,16 +1,24 @@
 <script>
 	import AdminNavbar from "./AdminNavbar.svelte";
 	import MemberNavbar from "./MemberNavbar.svelte";
-	import {user} from '../../lib/datastore'
+	import {user, bands, selectedBand} from '../../lib/datastore'
+    let logo;
+    let backgroundColor;
+    let foregroundColor;
+    let band = $bands[$selectedBand];
+
+	logo = band.logoUrl;
+	backgroundColor = band.palette.darkVibrant.background;
+	foregroundColor = band.palette.darkVibrant.foreground;
 
 </script>
 
-<main>
+<main style="background-color: {backgroundColor}; color: {foregroundColor}">
 {#if ($user && $user._type === "adminUser")}
-	<AdminNavbar/>
+	<AdminNavbar {logo} {foregroundColor} user={$user} />
 
 	{:else if ($user && $user._type === "member")}
-	<MemberNavbar />
+	<MemberNavbar {logo} {foregroundColor} user={$user} />
 {/if}
 </main>
 
@@ -19,8 +27,6 @@
 		position: fixed;
 		top: 0;
 		z-index: 100;
-		background-color: var(--contrastColor);
-
 		height: var(--navbarHeight);
 		width: 100%;
 	}
