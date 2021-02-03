@@ -42,6 +42,8 @@
     });
   }
 
+  members.sort((a,b) => a.name < b.name ? -1 : 1);
+
   function getIconUrl(instrument) {
     return instrument ? `/images/instruments/${instrument}.png` : null;
   }
