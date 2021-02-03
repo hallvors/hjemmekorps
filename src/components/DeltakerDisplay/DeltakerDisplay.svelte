@@ -18,7 +18,6 @@
   }
 
   function dispatchClick() {
-    debugger;
     dispatch('click', member);
   }
 
