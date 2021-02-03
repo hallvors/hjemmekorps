@@ -58,11 +58,12 @@ self.addEventListener('fetch', event => {
 
 	// don't try to handle e.g. data: URIs
 	const isHttp = url.protocol.startsWith('http');
+	const isServerAction = url.protocol.startsWith('/api/auth/logout');
 	const isDevServerRequest = url.hostname === self.location.hostname && url.port !== self.location.port;
 	const isStaticAsset = url.host === self.location.host && staticAssets.has(url.pathname);
 	const skipBecauseUncached = event.request.cache === 'only-if-cached' && !isStaticAsset;
 
-	if (isHttp && !isDevServerRequest && !skipBecauseUncached) {
+	if (isHttp && !isDevServerRequest && !skipBecauseUncached && !isServerAction) {
 		event.respondWith(
 			(async () => {
 				// always serve static files and bundler-generated assets from cache.
