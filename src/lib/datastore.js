@@ -101,9 +101,16 @@ export function updateSelectedBand(newIdx) {
   selectedBand.set(newIdx);
 }
 
-export function updateMember(memberId, newMemberData) {
-  members.update(
-    old => (old[memberId] = Object.assign({}, old[memberId], newMemberData))
+export function updateMember(bandId, memberId, newMemberData) {
+  bands.update(
+    old => {
+      let band = old.find(b => b._id === bandId);
+      let memberIdx = band.members.findIndex(m => m._id === memberId);
+      if (memberIdx > -1) {
+        band.members[memberIdx] = Object.assign({}, band.members[memberIdx], newMemberData)
+      }
+      return [...old];
+    }
   );
 }
 
