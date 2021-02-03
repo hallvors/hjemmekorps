@@ -162,7 +162,7 @@
     </div>
   </div>
   <div slot="aside">
-    <h3>Stemmer</h3>
+    <h2>Stemmer</h2>
     {#each project.partslist as partslist}
       <TagTrigger
         tagName="part"
@@ -176,7 +176,7 @@
       />
     {/each}
     {#if audioElements.length}
-      <h3>Spill av opptak</h3>
+      <h2>Spill av opptak</h2>
       <p><a href="/prosjekt/{project._id}/opptak">Liste over opptak</a></p>
       <p><em>
         Du kan prøve å høre alle samtidig her, men det er usikkert om det vil høres fint ut..
@@ -207,7 +207,9 @@
 
   .project-title {
     text-align: center;
-    padding-bottom: 1em;
+    padding-bottom: .8em;
+    padding-top: .8em;
+    margin: 0;
   }
 
   .list {
@@ -232,7 +234,7 @@
   h2 {
     text-align: center;
     padding-bottom: 1em;
-    font-size: large;
+    font-size: xlarge;
   }
 
   /* .audio {
