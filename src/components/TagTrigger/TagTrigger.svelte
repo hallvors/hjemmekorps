@@ -7,12 +7,14 @@
   export let tagRendered = '';
   export let tagIcon = '';
   export let active = false;
+  export let className = 'fa-tag';
+  export let classNameActive = 'fa-tag';
 
   function toggle() {
     if (active) {
       dispatch('deactivate');
     } else {
-      dispatch('activate', {tagValue, tagName});
+      dispatch('activate', { tagValue, tagName });
     }
   }
 </script>
@@ -21,18 +23,18 @@
   {#if tagIcon}
     <img src={tagIcon} alt={tagName} />
   {:else}
-    <i class="fas fa-tag" />
+    <i class={"fas " + (active ? classNameActive : className)} />
   {/if}
-  { tagRendered || tagValue}
+  {tagRendered || tagValue}
 </button>
 
 <style>
-    button {
-      width: 100%;
-    }
-    button img {
-        max-width: 24px;
-    }
+  button {
+    width: 100%;
+  }
+  button img {
+    max-width: 24px;
+  }
   .active {
     border-color: green;
     color: #030;
