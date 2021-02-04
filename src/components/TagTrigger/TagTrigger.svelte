@@ -12,7 +12,7 @@
 
   function toggle() {
     if (active) {
-      dispatch('deactivate');
+      dispatch('deactivate', { tagValue, tagName });
     } else {
       dispatch('activate', { tagValue, tagName });
     }
