@@ -1,17 +1,17 @@
 <script>
   import RecordUI from '../RecordUI/RecordUI.svelte';
   import Loading from '../Loading/Loading.svelte';
-import {user, projectList} from '../../lib/datastore'
+  import {projectList} from '../../lib/datastore'
   // Dette får man fra backend
   // Beklager manglende samsvar mellom data-modellen for admin og musikant
   const project = $projectList[0];
-
+  export let user;
 </script>
 
 <div class="main-wrapper">
   <div class="display">
-    {#if project && $user}
-    <RecordUI {project} user={$user} />
+    {#if project && user}
+    <RecordUI {project} {user} />
     {:else}
        <Loading />
     {/if}
