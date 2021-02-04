@@ -1,6 +1,6 @@
 <script>
-  import { onMount } from 'svelte';
-  //import DeltakerDisplay from "../ProjectMain/DeltakerDisplay.svelte";
+  import { createEventDispatcher, onMount } from 'svelte';
+  const dispatch = createEventDispatcher();
 
   import LibLoader from '../utils/LibLoader.svelte';
   import NoteBox from '../NoteBox/NoteBox.svelte';
@@ -102,6 +102,7 @@
 
         //start the recording process
         recorder.startRecording();
+        dispatch('start');
         startCountdown();
       });
   }
@@ -175,6 +176,7 @@ let metronomeInterval;
       theStream.getAudioTracks()[0].stop();
       theBox.stopPlaythrough();
       recorder.finishRecording();
+      dispatch('stop');
 
 
       recState = RECORDED_AUDIO;
