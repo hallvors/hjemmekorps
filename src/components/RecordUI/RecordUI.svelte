@@ -1,9 +1,10 @@
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
   import LibLoader from '../utils/LibLoader.svelte';
   import NoteBox from '../NoteBox/NoteBox.svelte';
+  import Loading from '../Loading/Loading.svelte';
   // TODO:
   //  - nedtelling ved start ignorerer opptakt :(
   // - trengs mere CSS og pynt
@@ -36,6 +37,7 @@
   const PAUSED = 2;
   const RECORDED_AUDIO = 3;
   const PLAYING = 4;
+  const SENDING = 5;
   var recState = STOPPED;
   // actual audio data we've recorded - obviously only available in RECORDED_AUDIO state
   var recordingData;
@@ -58,7 +60,7 @@
       .getUserMedia({ audio: true })
       .then(function (stream) {
         theStream = stream;
-        audioContext = new (window.AudioContext || window.webkitAudioContext);
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
         input = audioContext.createMediaStreamSource(stream);
         snapSource = audioContext.createMediaElementSource(snapElm);
         analyser = audioContext.createAnalyser();
@@ -72,6 +74,9 @@
 
         const volumes = new Uint8Array(analyser.frequencyBinCount);
         const volumeCallback = () => {
+          if (!volumePercElm) { // only exists while recording
+            return;
+          }
           analyser.getByteFrequencyData(volumes);
           let volume = 0;
           for (const vol of volumes) volume += vol;
@@ -89,9 +94,9 @@
         recorder.onComplete = function (recorder, blob) {
           recordingData = blob;
 
-        var url = URL.createObjectURL(recordingData);
-        audioElm.src = url;
-        audioElm.controls = true;
+          var url = URL.createObjectURL(recordingData);
+          audioElm.src = url;
+          audioElm.controls = true;
         };
 
         recorder.setOptions({
@@ -108,6 +113,7 @@
   }
 
   function sendRecording() {
+    recState = SENDING;
     var xhr = new XMLHttpRequest();
     xhr.open('post', '/api/project/' + project._id + '/recordings', true);
     xhr.onload = function () {
@@ -126,7 +132,7 @@
     xhr.send(fd);
   }
 
-let metronomeInterval;
+  let metronomeInterval;
   function startCountdown() {
     countdown = true;
     count = 1;
@@ -178,13 +184,11 @@ let metronomeInterval;
       recorder.finishRecording();
       dispatch('stop');
 
-
       recState = RECORDED_AUDIO;
       clearInterval(volumeInterval);
       clearInterval(metronomeInterval);
     }
-    }
-
+  }
 
   function endOfNote() {
     console.log('finished notification');
@@ -219,9 +223,8 @@ let metronomeInterval;
   libraryDetectionObject="WebAudioRecorder"
 />
 
-  <!-- svelte-ignore a11y-media-has-caption -->
-  <audio bind:this={snapElm} src="/samples/snap.mp3" preload />
-
+<!-- svelte-ignore a11y-media-has-caption -->
+<audio bind:this={snapElm} src="/samples/snap.mp3" preload />
 
 {#if countdown}
   <div id="countdown">{count}</div>
@@ -233,38 +236,26 @@ let metronomeInterval;
     <div class="start-stop-btn" on:click={start}><h1>Ta opp</h1></div>
   {:else if recState === RECORDING}
     <!-- pause button?, stop button -->
-    <div class="start-stop-btn" on:click={stop}><h1>Stopp opptak</h1>
-    <div id="volume"><span bind:this={volumePercElm} class:volumeLoud /></div>
+    <div class="start-stop-btn" on:click={stop}>
+      <h1>Stopp opptak</h1>
+      <div id="volume"><span bind:this={volumePercElm} class:volumeLoud /></div>
     </div>
 
-  <!-- {:else if recState === PAUSED}
+    <!-- {:else if recState === PAUSED}
     resume button, stop button -->
   {:else if recState === RECORDED_AUDIO}
     <!-- Listen button, send button, delete button -->
     <!-- <button on:click={playRecording}>Hør på opptak</button> -->
     <div class="recording-btn-wrapper">
-      <div class="half-btn" on:click={sendRecording}> <h1>Send opptak</h1> </div>
-      <div class="half-btn" on:click={cancel}> <h1>Slett opptak</h1> </div>
+      <div class="half-btn" on:click={sendRecording}><h1>Send opptak</h1></div>
+      <div class="half-btn" on:click={cancel}><h1>Slett opptak</h1></div>
     </div>
-
-
-    <!-- {:else if recState === PLAYING}
-      <button on:click={pausePlayRecording}>Pause</button> -->
+  {:else if recState === SENDING}
+    <Loading message="Sender..." />
   {/if}
 
   <!-- svelte-ignore a11y-media-has-caption -->
   <audio id="audio-elm" bind:this={audioElm} on:ended={pausePlayRecording} />
-
-
-  <!--
-	<button id="waste-btn"><img
-		src="/images/kast.png"
-		alt="Avbryt opptak" /></button>
-		<span id="state-indicator" />
-		<button id="send-btn"><img
-			src="/images/send.png"
-			alt="Send opptak til lærer" /></button>
--->
 </nav>
 
 <NoteBox
@@ -326,12 +317,11 @@ let metronomeInterval;
     font-weight: 300;
     text-transform: uppercase;
     letter-spacing: 1px;
-
   }
-.recording-btn-wrapper {
-  height: 70%;
-  display: flex;
-}
+  .recording-btn-wrapper {
+    height: 70%;
+    display: flex;
+  }
 
   .half-btn {
     width: 50%;
@@ -339,7 +329,7 @@ let metronomeInterval;
   }
   .half-btn:hover {
     cursor: pointer;
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
   }
   #audio-elm {
     width: 100%;
@@ -354,7 +344,7 @@ let metronomeInterval;
     left: 0;
   }
   .start-stop-btn:hover {
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
     cursor: pointer;
   }
 
@@ -369,6 +359,4 @@ let metronomeInterval;
     transform: translate(-50%, -50%);
     font-size: 7rem;
   }
-
-
 </style>
