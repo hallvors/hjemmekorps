@@ -1,6 +1,7 @@
 <script>
   import { instruments } from '../../lib/datastore';
   import { getRandomInt } from '../../lib/utils';
+  export let message = 'Vent litt...';
   let rndInstr = [];
   function pickInstruments() {
     for (let i = 0; i < 3; i++) {
@@ -19,7 +20,7 @@
       alt=""
     />
   {/each}
-<p>Vent litt...</p>
+<p>{message}</p>
 </div>
 
 <style>
