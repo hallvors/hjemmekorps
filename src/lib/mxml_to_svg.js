@@ -1,4 +1,4 @@
-import Blob from 'cross-blob'
+import Blob from 'cross-blob';
 import jsdom from 'jsdom';
 
 // this path is prepared by prep-files.sh - but should we skip that
@@ -22,7 +22,7 @@ global.DOMParser = window.DOMParser;
 global.Node = window.Node;
 
 // all the faked browser stuff needs to be available before we can require OSMD
-const OSMD = require('opensheetmusicdisplay'); 
+const OSMD = require('opensheetmusicdisplay');
 
 export async function generateSVGImage(
   mxmlData,
@@ -31,7 +31,7 @@ export async function generateSVGImage(
   pageHeight,
   DEBUG = false
 ) {
-    const markupStrings=[]
+  const markupStrings = [];
   pageWidth = parseInt(pageWidth);
   pageHeight = parseInt(pageHeight);
   const endlessPage = !(pageHeight > 0 && pageWidth > 0);
@@ -79,12 +79,12 @@ export async function generateSVGImage(
   // ---- end browser hacks (hopefully) ----
 
   const osmdInstance = new OSMD.OpenSheetMusicDisplay(div, {
-    autoResize: false,
+    autoResize: true,
     backend: 'svg',
     pageBackgroundColor: '#FFFFFF',
     pageFormat: pageFormat,
     // defaultFontFamily: 'Arial',
-    drawTitle: false
+    drawTitle: false,
   });
   // for more options check OSMDOptions.ts
   await osmdInstance.load(mxmlData);
