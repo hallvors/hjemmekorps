@@ -44,7 +44,7 @@ export async function generateSVGImage(
   document.body.appendChild(div);
 
   // TODO sometimes the width is way too small for the score, may need to adjust zoom.
-  if (endlessPage) {
+  if (endlessPage && !pageWidth > 0) {
     pageWidth = 1440;
   }
   if (endlessPage) {
