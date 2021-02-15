@@ -12,7 +12,6 @@ import {bands, selectedBand} from '../../lib/datastore'
 
 	*/
 	// NOTE: this module is dependent on the "hamburgers.css" file
-	export let backgroundColor = "red";
 	export let foregroundColor = "white";
 	export let navbarHeight = 100;
     export let logo;
