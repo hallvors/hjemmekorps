@@ -97,37 +97,71 @@ export async function generateSVGImage(
     osmdInstance.render();
 
     // add meta data to SVG notes
-    osmdInstance.cursor.reset()
-    const iterator = osmdInstance.cursor.Iterator;
-    
-    while(!iterator.EndReached){
-       const voices = iterator.CurrentVoiceEntries;
-       for(var i = 0; i < voices.length; i++){
-          const v = voices[i];
-          const notes = v.Notes;
-          for(var j = 0; j < notes.length; j++){
-                const note = notes[j];
-                // make sure our note is not silent
-                if((note != null) && (note.halfTone != 0)){
-                    // add data- attributes to vf-note SVG element
-                    if (note.getSVGGElement) {
-                      let svgElm = note.getSVGGElement();
-                      console.log(note, svgElm)
-                      svgElm.setAttribute('data-numerator', note.graphicalNoteLength.numerator);
-                      svgElm.setAttribute('data-denominator', note.graphicalNoteLength.denominator);
-                    }
-                   // this might be an alternative iteration..
-                   // osmd.graphic.MeasureList[0][0].staffEntries[0].graphicalVoiceEntries[0].notes[0].getSVGGElement()
+    let time = 0;
+    for (let i = 0; i < osmdInstance.graphic.MeasureList.length; i++) {
+      for (let j = 0; j < osmdInstance.graphic.MeasureList[i].length; j++) {
+        for (
+          let k = 0;
+          k < osmdInstance.graphic.MeasureList[i][j].staffEntries.length;
+          k++
+        ) {
+          for (
+            let l = 0;
+            l <
+            osmdInstance.graphic.MeasureList[i][j].staffEntries[k]
+              .graphicalVoiceEntries.length;
+            l++
+          ) {
+            for (
+              let m = 0;
+              m <
+              osmdInstance.graphic.MeasureList[i][j].staffEntries[k]
+                .graphicalVoiceEntries[l].notes.length;
+              m++
+            ) {
+              let note =
+                osmdInstance.graphic.MeasureList[i][j].staffEntries[k]
+                  .graphicalVoiceEntries[l].notes[m];
+              if (note.getSVGGElement && note.sourceNote.length) {
+                let svgElm = note.getSVGGElement();
+                if (svgElm) {
+                  svgElm.setAttribute('data-measure', i);
+                  svgElm.setAttribute('data-time-start', time);
+                  time += note.sourceNote.length.realValue;
+                  svgElm.setAttribute('data-time-end', time);
                 }
-           }
+              }
+            }
+          }
         }
-        iterator.moveToNext()
+      }
     }
-} catch (ex) {
+    //osmdInstance.graphic.MeasureList[0][0].staffEntries[0].graphicalVoiceEntries[0].notes[0].getSVGGElement();
+  } catch (ex) {
     console.log('renderError: ' + ex);
   }
   debug('rendered', DEBUG);
-
+  let repeats = [];
+  let upbeat = 0;
+  let measureData = osmdInstance.sheet.sourceMeasures.map(measure => {
+    let info = {};
+    if (measure.RhythmPrinted) {
+      info.timeSignature = {
+        numerator: measure.activeTimeSignature.numerator,
+        denominator: measure.activeTimeSignature.denominator,
+      };
+    }
+    if (measure.firstRepetitionInstructions) {
+      repeats = repeats.concat(measure.firstRepetitionInstructions);
+    }
+    if (measure.lastRepetitionInstructions) {
+      repeats = repeats.concat(measure.lastRepetitionInstructions);
+    }
+    return info;
+  });
+  if (osmdInstance.sheet.sourceMeasures[0] && osmdInstance.sheet.sourceMeasures[0].duration.realValue < osmdInstance.sheet.sourceMeasures[0].activeTimeSignature.realValue) {
+    upbeat = osmdInstance.sheet.sourceMeasures[0].duration.realValue;
+  }
   let svgElement;
   // This loop supports all the pages you might possibly wish for, no?
   for (
@@ -141,6 +175,9 @@ export async function generateSVGImage(
     }
     // The important xmlns attribute is not serialized unless we set it here
     svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svgElement.setAttribute('data-measure-list', JSON.stringify(measureData));
+    svgElement.setAttribute('data-upbeat', upbeat);
+    svgElement.setAttribute('data-repeats', JSON.stringify(repeats));
     markupStrings.push(svgElement.outerHTML);
   }
   while (document.body.firstChild) {
