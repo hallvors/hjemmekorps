@@ -8,6 +8,10 @@
   export let tempo = 96;
   export let timeNumerator = 3;
   export let timeDenominator = 4;
+  export let upbeat = 0.0;
+  // how many heartbeats is the upbeat?
+  $: upbeat16s = upbeat / (1 / 16);
+  upbeat16s = 0; // skip upbeats
   let fBuffer;
   let aBuffer;
   let ac;
@@ -93,16 +97,16 @@
   }
 
   function scheduleNote(beatNumber, time) {
-    //console.log({ beat: beatNumber, time: time });
-    if (noteResolution == EIGTHS && beatNumber % 2) return; // we're not playing non-8th 16th notes
-    if (noteResolution == QUARTERS && beatNumber % 4) return; // we're not playing non-quarter 8th notes
-    if (noteResolution == HALVES && beatNumber % 8) return; // we're not playing non-half 4th notes
+    //console.log({ beat: beatNumber, upbeat16s, adjusted: beatNumber - upbeat16s, time: time });
+    if (noteResolution == EIGTHS && (beatNumber - upbeat16s) % 2) return; // we're not playing non-8th 16th notes
+    if (noteResolution == QUARTERS && (beatNumber - upbeat16s) % 4) return; // we're not playing non-quarter 8th notes
+    if (noteResolution == HALVES && (beatNumber - upbeat16s) % 8) return; // we're not playing non-half 4th notes
     let source = ac.createBufferSource();
-    if (beatNumber === 0) {
-      // beat 0 == high pitch
+    if (beatNumber - upbeat16s === 0) {
+      // 0th beat in measure == high pitch
       source.buffer = aBuffer;
     } else {
-      // quarter notes = medium pitch
+      // non-0th beat = medium pitch
       source.buffer = fBuffer;
     }
     source.connect(ac.destination);
