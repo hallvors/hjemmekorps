@@ -156,10 +156,6 @@
     } else {
       countdown = false;
       theBox.initPlaythrough();
-      snapElm.play();
-      metronomeInterval = setInterval(() => {
-        snapElm.play();
-      }, countDelay);
     }
   }
   function cancel() {
@@ -168,6 +164,7 @@
       theBox.stopPlaythrough();
       recordingData = null;
       audioElm.controls = false;
+      audioElm.pause();
       meta = [];
       firstCount = true;
       clearInterval(metronomeInterval);
@@ -186,7 +183,6 @@
 
       recState = RECORDED_AUDIO;
       clearInterval(volumeInterval);
-      clearInterval(metronomeInterval);
     }
   }
 
@@ -263,7 +259,7 @@
   {trackName}
   showTracker={false}
   bind:this={theBox}
-  on:finished={endOfNote}
+  on:ended={endOfNote}
 />
 
 <style>
@@ -291,12 +287,13 @@
     font-size: 7rem;
   }
   #volume span {
-    background-color: red;
+    background-color: rgb(15, 83, 55);
     width: 100%;
-    border-top: 10px dotted green;
+    border-top: 10px dotted rgb(2, 148, 2);
     display: inline-block;
   }
   #volume span.volumeLoud {
+    background-color: rgb(160, 27, 34);
     border-top-color: red;
   }
 
