@@ -4,6 +4,7 @@
   import TagTrigger from '../TagTrigger/TagTrigger.svelte';
   import Loading from '../Loading/Loading.svelte';
   import { projectList, bands } from '../../lib/datastore';
+  import TracksPlayer from '../TracksPlayer/TracksPlayer.svelte';
   // Dette får man fra backend
   // Beklager manglende samsvar mellom data-modellen for admin og musikant
   const project = $projectList[0];
@@ -24,40 +25,37 @@
   }
   let activeRecordings = [];
   function handleClick(evt) {
-    if (activeRecordings.includes(evt.detail.tagName)) {
+    console.log(evt);
+    if (activeRecordings.includes(evt.detail.tagValue)) {
       activeRecordings = activeRecordings.filter(
-        url => url !== evt.detail.tagName
+        url => url !== evt.detail.tagValue
       );
     } else {
-      activeRecordings = [...activeRecordings, evt.detail.tagName];
+      activeRecordings = [...activeRecordings, evt.detail.tagValue];
     }
     console.log(activeRecordings);
   }
-
+  let tracksPlayer;
+  let loading = false;
+  function indicateLoading() {
+    loading = true;
+  }
+  function stopIndicateLoading() {
+    loading = false;
+  }
   function startPlay() {
-    for (
-      let elms = document.getElementsByTagName('audio'), elm, i = 0;
-      (elm = elms[i]);
-      i++
-    ) {
-      console.log(elm);
-      elm.play();
+    if (tracksPlayer) {
+      tracksPlayer.start();
     }
   }
-
   function stopPlay() {
-    for (
-      let elms = document.getElementsByTagName('audio'), elm, i = 0;
-      (elm = elms[i]);
-      i++
-    ) {
-      elm.pause();
-      elm.currentTime = 0
+    if (tracksPlayer) {
+      tracksPlayer.stop();
     }
   }
 </script>
 
-<div class="main-wrapper">
+<div class="main-wrapper" class:loading>
   <div class="display">
     {#if project && user}
       <ScrollableListToolsRight>
@@ -66,10 +64,11 @@
           {#if recordings && recordings.length}
             {#each recordings as rec}
               <TagTrigger
-                tagValue={rec.member.name}
-                tagName={rec.recording.url}
+                tagRendered={rec.member.name}
+                tagName=""
+                tagValue={rec.recording.url}
                 active={activeRecordings.includes(rec.recording.url)}
-                className="fa-volute-mute"
+                className="fa-volume-mute"
                 classNameActive="fa-volume-up"
                 on:activate={handleClick}
                 on:deactivate={handleClick}
@@ -77,10 +76,14 @@
             {/each}
           {/if}
         </div>
-        {#each activeRecordings as rec}
-          <!-- svelte-ignore a11y-media-has-caption -->
-          <audio src={rec} controls />
-        {/each}
+        {#if activeRecordings && activeRecordings.length}
+          <TracksPlayer
+            recordings={activeRecordings}
+            bind:this={tracksPlayer}
+            on:loadstart={indicateLoading}
+            on:loadend={stopIndicateLoading}
+          />
+        {/if}
       </ScrollableListToolsRight>
     {:else}
       <Loading />
@@ -93,5 +96,8 @@
     padding: 50px 0;
     width: 90%;
     margin: 0 auto;
+  }
+  .main-wrapper.loading {
+    cursor: wait;
   }
 </style>
