@@ -42,13 +42,13 @@ const authenticate = async function(req, res, next) {
 		let user;
 		// admins are authenticated by email
 		if (tokenData.email) {
-			console.log('will get data for ' + tokenData.email)
+			//console.log('will get data for ' + tokenData.email)
 			user = await sClient.getAdminUserData(tokenData.email);
 		} else if (tokenData.userId) {
 			user = await sClient.getUserData(tokenData.userId); // user, user.band
 			user.project = await sClient.getProject(tokenData.userId, tokenData.projectId);
 		}
-		console.log({user});
+		//console.log({user});
 		if (!user) {
 			if (isOkWithoutSession(req.url)) {
 				// avoid redirect loops /feil/* if token is wrong
