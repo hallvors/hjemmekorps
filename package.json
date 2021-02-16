@@ -35,6 +35,7 @@
     "cross-blob": "^2.0.0",
     "cross-fetch": "^3.0.6",
     "fast-xml-parser": "^3.17.5",
+    "fluent-ffmpeg": "^2.1.2",
     "got": "^11.8.1",
     "jsdom": "^16.4.0",
     "jsonwebtoken": "^8.5.1",
