@@ -57,7 +57,7 @@
 
 <div class="main-wrapper" class:loading>
   <div class="display">
-    {#if project && user}
+    {#if project && user && !loading}
       <ScrollableListToolsRight>
         <RecordUI {project} {user} on:start={startPlay} on:stop={stopPlay} />
         <div slot="aside">
@@ -86,7 +86,7 @@
         {/if}
       </ScrollableListToolsRight>
     {:else}
-      <Loading />
+      <Loading message="Henter noter og opptak..." />
     {/if}
   </div>
 </div>

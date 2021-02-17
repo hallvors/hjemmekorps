@@ -144,8 +144,15 @@ export async function generateSVGImage(
   let repeats = [];
   let upbeat = 0;
   let measureData = osmdInstance.sheet.sourceMeasures.map(measure => {
-    let info = {};
+    // Choose some properties of this measure and prepare client-side code
+    let info = {
+      tempoInBPM: measure.tempoInBPM,
+      duration: measure.duration.realValue,
+      jumps: [],
+      beats: [],
+    };
     if (measure.RhythmPrinted) {
+      // nice shortcut to "does the signature change here?"
       info.timeSignature = {
         numerator: measure.activeTimeSignature.numerator,
         denominator: measure.activeTimeSignature.denominator,
@@ -159,7 +166,11 @@ export async function generateSVGImage(
     }
     return info;
   });
-  if (osmdInstance.sheet.sourceMeasures[0] && osmdInstance.sheet.sourceMeasures[0].duration.realValue < osmdInstance.sheet.sourceMeasures[0].activeTimeSignature.realValue) {
+  if (
+    osmdInstance.sheet.sourceMeasures[0] &&
+    osmdInstance.sheet.sourceMeasures[0].duration.realValue <
+      osmdInstance.sheet.sourceMeasures[0].activeTimeSignature.realValue
+  ) {
     upbeat = osmdInstance.sheet.sourceMeasures[0].duration.realValue;
   }
   let svgElement;

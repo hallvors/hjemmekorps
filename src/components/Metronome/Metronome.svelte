@@ -9,16 +9,16 @@
   export let timeNumerator = 3;
   export let timeDenominator = 4;
   export let upbeat = 0.0;
-  // how many heartbeats is the upbeat?
+  // how many heartbeats is the upbeat? Required to accent the first note in each measure
   $: upbeat16s = upbeat / (1 / 16);
-  upbeat16s = 0; // skip upbeats
   let fBuffer;
   let aBuffer;
   let ac;
   var unlocked = false;
   var isPlaying = false; // Are we currently playing?
   var startTime; // The start time of the entire sequence.
-  var current16thNote; // What note is currently last scheduled?
+  // What note is currently last scheduled? If upbeat, a negative number.
+  var current16thNote = upbeat16s / -1;
   var lookahead = 50.0; // How frequently to call scheduling function
   //(in milliseconds)
   var scheduleAheadTime = 0.2; // How far ahead to schedule audio (sec)
@@ -29,7 +29,7 @@
   const EIGTHS = 1;
   const QUARTERS = 2;
   const HALVES = 3;
-  // resolution: beat on each ... note
+  // resolution: beat on each ... note - basically the denominator in the time signature
   const resolutions = {
     '16': SIXTEENTHS,
     '8': EIGTHS,
@@ -97,12 +97,12 @@
   }
 
   function scheduleNote(beatNumber, time) {
-    //console.log({ beat: beatNumber, upbeat16s, adjusted: beatNumber - upbeat16s, time: time });
-    if (noteResolution == EIGTHS && (beatNumber - upbeat16s) % 2) return; // we're not playing non-8th 16th notes
-    if (noteResolution == QUARTERS && (beatNumber - upbeat16s) % 4) return; // we're not playing non-quarter 8th notes
-    if (noteResolution == HALVES && (beatNumber - upbeat16s) % 8) return; // we're not playing non-half 4th notes
+    console.log({ beat: beatNumber, upbeat16s, time: time });
+    if (noteResolution == EIGTHS && beatNumber % 2) return; // we're not playing non-8th 16th notes
+    if (noteResolution == QUARTERS && beatNumber % 4) return; // we're not playing non-quarter 8th notes
+    if (noteResolution == HALVES && beatNumber % 8) return; // we're not playing non-half 4th notes
     let source = ac.createBufferSource();
-    if (beatNumber - upbeat16s === 0) {
+    if (beatNumber === 0) {
       // 0th beat in measure == high pitch
       source.buffer = aBuffer;
     } else {
@@ -147,7 +147,7 @@
 
     if (isPlaying) {
       // start playing
-      current16thNote = 0;
+      current16thNote = upbeat16s / -1;
       startTime = ac.currentTime;
       nextHeartbeatTime = ac.currentTime;
       timerWorker.postMessage('start');

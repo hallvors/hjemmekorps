@@ -5,10 +5,6 @@
   import LibLoader from '../utils/LibLoader.svelte';
   import NoteBox from '../NoteBox/NoteBox.svelte';
   import Loading from '../Loading/Loading.svelte';
-  // TODO:
-  //  - nedtelling ved start ignorerer opptakt :(
-  // - trengs mere CSS og pynt
-  // -
 
   export let project;
   export let user;
