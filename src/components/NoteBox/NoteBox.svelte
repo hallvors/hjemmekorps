@@ -127,7 +127,7 @@
           // but it's easire to calculate if relative to measure
           start -= measure.start;
         }
-        let beat = Math.floor(start / beatDuration);
+        beatInMeasure = Math.floor(start / beatDuration);
 
         if (start % beatDuration === 0) {
           // this note starts exactly on the beat
@@ -219,6 +219,7 @@
         measure = measureList[currentMeasure];
         measureCompletedTime = 0;
         if (measure.jumps.length) {
+          console.log('jumping from ' + currentMeasure + ' to ' + measure.jumps[0])
           currentMeasure = measure.jumps.shift();
           measure = measureList[currentMeasure];
         }
@@ -230,6 +231,7 @@
       }
       // detect tempo changes
       if (measure.tempoInBPM && measure.tempoInBPM !== tempo) {
+        console.log('tempo change')
         tempo = measure.tempoInBPM;
       }
     }

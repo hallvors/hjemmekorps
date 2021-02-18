@@ -115,7 +115,7 @@
   }
 
   function scheduleNote(beatNumber, time) {
-    console.log({ beat: beatNumber, upbeat16s, time: time, countDown16ths });
+    console.log({ beat: beatNumber, time: time, countDown16ths });
     let recordBeat = false;
     if (countDown16ths) {
       // we're in countdown mode

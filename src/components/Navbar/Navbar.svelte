@@ -18,7 +18,7 @@
   {#if $user && $user._type === 'adminUser'}
     <AdminNavbar {logo} {foregroundColor} user={$user} />
   {:else if $user && $user._type === 'member'}
-    <MemberNavbar {logo} {foregroundColor} user={$user} />
+    <MemberNavbar {logo} user={$user} />
   {/if}
 </main>
 
