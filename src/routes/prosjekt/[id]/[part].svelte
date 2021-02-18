@@ -13,4 +13,4 @@
   import NoteBox from '../../../components/NoteBox/NoteBox.svelte';
 </script>
 
-<NoteBox project={$projects[id]} trackName={part} showTracker={false} />
+<NoteBox project={$projects[id]} trackName={part} />

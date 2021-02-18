@@ -11,10 +11,10 @@
   var recorder, input, theStream;
 
   // variables for metronome countdown before recording
-  let count = 1;
+  let count = 0;
   let countdown = false;
   let firstCount = true;
-  let countDelay = 60000 / project.bpm;
+
   let trackName;
   if (project.partslist) {
     for (let i = 0; i < project.partslist.length; i++) {
@@ -58,14 +58,11 @@
         theStream = stream;
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         input = audioContext.createMediaStreamSource(stream);
-        snapSource = audioContext.createMediaElementSource(snapElm);
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 512;
         analyser.minDecibels = -127;
         analyser.maxDecibels = 0;
         analyser.smoothingTimeConstant = 0.4;
-        snapSource.connect(audioContext.destination);
-        snapSource.connect(analyser);
         input.connect(analyser);
 
         const volumes = new Uint8Array(analyser.frequencyBinCount);
@@ -103,8 +100,8 @@
 
         //start the recording process
         recorder.startRecording();
-        dispatch('start');
-        startCountdown();
+        dispatch('start'); // starts playing other tracks - if any
+        theBox.initPlaythrough(); // Tell NoteBox to start metronome
       });
   }
 
@@ -128,32 +125,16 @@
     xhr.send(fd);
   }
 
-  let metronomeInterval;
-  function startCountdown() {
-    countdown = true;
-    count = 1;
+  function countdownUi(evt) {
+    countdown = !evt.detail.last;
     recState = RECORDING;
-    snapElm.play();
-    setTimeout(metronomeCounter, countDelay * 2);
-  }
-  function metronomeCounter() {
+    count++;
     if (count === 2 && firstCount) {
       count = 0;
       firstCount = false;
     }
-    if (count < 4) {
-      if (count === 2 && !firstCount) {
-        // stop recording the pre-count (hack to avoid 'opptakt' without having to check if we have one)
-        snapSource.disconnect(analyser);
-      }
-      count++;
-      snapElm.play();
-      setTimeout(metronomeCounter, firstCount ? countDelay * 2 : countDelay);
-    } else {
-      countdown = false;
-      theBox.initPlaythrough();
-    }
   }
+
   function cancel() {
     if (recorder) {
       recorder.cancelRecording();
@@ -191,10 +172,8 @@
   function toggle(e) {
     if (recorder && recorder.isRecording()) {
       stop();
-      document.body.className = 'sending';
     } else {
       start();
-      document.body.className = 'recording';
     }
   }
 
@@ -204,19 +183,12 @@
   }
 
   var theBox;
-  function debugmsg(msg) {
-    console.log(msg);
-  }
 </script>
 
 <LibLoader
   src="/js/web-audio-recorder/lib-minified/WebAudioRecorder.min.js"
-  on:load={debugmsg}
   libraryDetectionObject="WebAudioRecorder"
 />
-
-<!-- svelte-ignore a11y-media-has-caption -->
-<audio bind:this={snapElm} src="/samples/snap.mp3" preload />
 
 {#if countdown}
   <div id="countdown">{count}</div>
@@ -253,9 +225,10 @@
 <NoteBox
   {project}
   {trackName}
-  showTracker={false}
+  soundRecorder={analyser}
   bind:this={theBox}
   on:ended={endOfNote}
+  on:countdown={countdownUi}
 />
 
 <style>
