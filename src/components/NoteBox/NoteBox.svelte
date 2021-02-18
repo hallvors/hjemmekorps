@@ -36,8 +36,8 @@
   // trigger & schedule note movements according to beat queue entry
 
   let measureList;
-  let currentMeasure = -1;
-  let currentBeatInMeasure = 0;
+  let currentMeasure = 0;
+  let currentBeatInMeasure = -1;
   let measureCompletedTime = 0.0;
 
   onMount(async function () {
@@ -92,30 +92,34 @@
       // Caveat: we may have a first *incomplete* measure in case of upbeats
       let beatDuration = 1 / timeNumerator; // 0.25 for 4/4, 0.125 for 6/8 ..
       let notes = document.getElementsByClassName('vf-stavenote');
+      let beatInMeasure = 0;
+      if (upbeat) {
+        // TODO: set beatInMeasure initially to last whole beat before upbeat
+      }
       for (let i = 0; i < notes.length; i++) {
         let note = notes[i];
-        let start = note.dataset.timeStart;
         let measureIndex = note.dataset.measure;
         let measure = measureList[measureIndex] || { notes: [] }; // the right-of-|| part should never happen
+        let start = note.dataset.timeStart;
         // pick up changing time signatures..
         if (measure.timeSignature) {
           beatDuration = 1 / measure.timeSignature.numerator;
         }
-        // start is in seconds since beginning, but it's easire to calculate with seconds
-        // w/o upbeat
-        if (measureIndex > 0 && upbeat) {
-          start -= upbeat;
+        // we use duration of a beat in this measure + note start point
+        // to calculate beat - this does not work with incomplete measures
+        // so skip this for first measure if upbeat
+        if (!(measureIndex === 0 && upbeat)) {
+          beatInMeasure = Math.floor((start - measure.start) / beatDuration);
         }
         let end = note.dataset.timeEnd;
-        let beat = Math.floor(start / beatDuration);
-
+        
         if (start % beatDuration === 0) {
           // this note starts exactly on the beat
-          pushQueue(measure, beat, { note });
+          pushQueue(measure, beatInMeasure, { note });
         } else {
           // should highlight at _delay_ after beat
           let delay = start % beatDuration; // measure unit, not time
-          pushQueue(measure, beat, {
+          pushQueue(measure, beatInMeasure, {
             delay,
             note,
           });
@@ -172,8 +176,10 @@
   // trigger & schedule note movements according to beat queue entry
 
   function onBeat(evt) {
+    console.log('onBeat', evt.detail, currentMeasure, currentBeatInMeasure)
     let measure = measureList[currentMeasure];
     if (measureCompletedTime >= measure.duration) {
+      console.log('measure is finished', measureCompletedTime, measure.duration)
       // next measure!
       currentMeasure++;
       currentBeatInMeasure = -1;
@@ -185,6 +191,7 @@
         return;
       } else {
         measure = measureList[currentMeasure];
+        measureCompletedTime = 0;
         if (measure.jumps.length) {
           currentMeasure = measure.jumps.shift();
           measure = measureList[currentMeasure];

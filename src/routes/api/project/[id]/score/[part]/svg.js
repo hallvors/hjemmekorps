@@ -2,13 +2,13 @@ import { generateSVGImage } from '../../../../../../lib/mxml_to_svg';
 import sClient from '../../../../../../lib/sanity_client';
 import got from 'got';
 
-export async function get(req, res, next) {
+export async function get(req, res) {
   let url = await sClient.getPartFile(req.params.id, req.params.part);
+  console.log({url})
   let svgMarkup;
   if (url) {
     let result = await got(url);
     if (result) {
-        console.log(result.body)
       svgMarkup = result.body;
     }
   }

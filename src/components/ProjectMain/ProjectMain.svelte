@@ -81,6 +81,7 @@
           _type: part._type,
           _ref: part._ref,
           part: part.part,
+          sheetmusic: part.sheetmusic,
           members: part.members.map(m => ({
             // TODO: no token, recording - we get that back from the server,
             // but temporarily they will be missing during the update. Can we fix?

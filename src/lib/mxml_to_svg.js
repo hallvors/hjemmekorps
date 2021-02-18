@@ -143,6 +143,7 @@ export async function generateSVGImage(
   debug('rendered', DEBUG);
   let repeats = [];
   let upbeat = 0;
+  let durationSoFar = 0;
   let measureData = osmdInstance.sheet.sourceMeasures.map(measure => {
     // Choose some properties of this measure and prepare client-side code
     let info = {
@@ -150,7 +151,9 @@ export async function generateSVGImage(
       duration: measure.duration.realValue,
       jumps: [],
       beats: [],
+      start: durationSoFar,
     };
+    durationSoFar += info.duration;
     if (measure.RhythmPrinted) {
       // nice shortcut to "does the signature change here?"
       info.timeSignature = {
