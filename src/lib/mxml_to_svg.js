@@ -126,9 +126,9 @@ export async function generateSVGImage(
                 let svgElm = note.getSVGGElement();
                 if (svgElm) {
                   svgElm.setAttribute('data-measure', i);
-                  svgElm.setAttribute('data-time-start', time);
+                  svgElm.setAttribute('data-time-start', parseFloat(time).toFixed(3));
                   time += note.sourceNote.length.realValue;
-                  svgElm.setAttribute('data-time-end', time);
+                  svgElm.setAttribute('data-time-end', parseFloat(time).toFixed(3));
                 }
               }
             }
