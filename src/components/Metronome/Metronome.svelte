@@ -141,7 +141,7 @@
     }
     source.connect(ac.destination);
     if (recordBeat) {
-      source.connect(analyzer);
+      source.connect(soundRecorder);
     }
     source.start(time);
     let countdown = Boolean(countDown16ths);
