@@ -1,35 +1,40 @@
 <script>
+  // Box for displaying notes from musicXML (SVG format)
   import { createEventDispatcher, onMount } from 'svelte';
   import Loading from '../Loading/Loading.svelte';
   import Metronome from '../Metronome/Metronome.svelte';
 
   const dispatch = createEventDispatcher();
-  let elemWidth = 0;
-  // Box for displaying notes from musicXML
 
   export let project;
   export let trackName = null;
+  export let soundRecorder;
+
+  let elemWidth = 0;
   let tempo = project.bpm || 96;
   let renderingMusic = true;
   let timeNumerator = 4;
   let timeDenominator = 4;
-  let met;
+  let metronome;
   let svg;
   let upbeat = 0;
 
   // To move a cursor correctly, we need to know about _beats, measures and jumps_
-  // We set up a queue of beats that may cause a note highlight either immediately or after a delay.
-  // Beat signals arrive from the metronome and cause cursor movements.
+  // Beat signals arrive from the metronome and potentially cause cursor movements.
+  // We set up a queue (sparse array) of beats that may cause a note highlight
+  // either immediately or after a delay.
   // Jumps are used for repeats and recorded on a per-measure basis. Whenever cursor reaches a new
   // measure, it checks for jump instructions. More than one jump can be queued for a measure, and
   // they are executed in FIFO order. Jumps will target another measure (but in practise reset beat
   // counter to the first beat queue entry related to the target measure.)
+  // Rouch sketch of data model:
   // measures = [
   //    { jumps: [3,7], length: 0.125, beats: [{note}, {note, delay}],
   //          timeSignature: {numerator, denominator}, tempoInBPM },
   //  ]
-  // also variables currentMeasure, currentBeatInMeasure, measureCompletedTime
-  // onBeat: check if measureCompletedTime >= measure.length  -> increase currentMeasure and reset currentBeatInMeasure (we're done with that one)
+  // also variables currentMeasure, currentBeatInMeasure, measureCompletedTime to track state
+  // onBeat: if event.detail.countdown do nothing (well, perhaps upbeat..)
+  // check if measureCompletedTime >= measure.length  -> increase currentMeasure and reset currentBeatInMeasure (we're done with that one)
   // if currentMeasure >= measures.length, tune finished
   // if jump, set currentMeasure (again!)
   // if new measure and time signature different, change it
@@ -98,21 +103,32 @@
       }
       for (let i = 0; i < notes.length; i++) {
         let note = notes[i];
-        let measureIndex = note.dataset.measure;
+        let start = parseFloat(note.dataset.timeStart);
+        let measureIndex = parseInt(note.dataset.measure);
         let measure = measureList[measureIndex] || { notes: [] }; // the right-of-|| part should never happen
-        let start = note.dataset.timeStart;
         // pick up changing time signatures..
         if (measure.timeSignature) {
           beatDuration = 1 / measure.timeSignature.numerator;
         }
-        // we use duration of a beat in this measure + note start point
-        // to calculate beat - this does not work with incomplete measures
-        // so skip this for first measure if upbeat
-        if (!(measureIndex === 0 && upbeat)) {
-          beatInMeasure = Math.floor((start - measure.start) / beatDuration);
+        let end = parseFloat(note.dataset.timeEnd);
+
+        // Important: if it's the first measure and it is an upbeat,
+        // we need to calculate the timing of the note from the *end*
+        // of the measure.
+        if (upbeat && measureIndex === 0) {
+          const normalMeasureDuration = timeNumerator / timeDenominator;
+
+          console.log({upbeat, start, end, measureDuration: measure.duration, normalMeasureDuration})
+          // this is an upbeat note. The metronome logic will pretend it is a normal,
+          // full measure, so shift the timing accordingly towards the end
+          start += (normalMeasureDuration - measure.duration);
+        } else if (measureIndex > 0) {
+          // start is in seconds since beginning of the piece,
+          // but it's easire to calculate if relative to measure
+          start -= measure.start;
         }
-        let end = note.dataset.timeEnd;
-        
+        let beat = Math.floor(start / beatDuration);
+
         if (start % beatDuration === 0) {
           // this note starts exactly on the beat
           pushQueue(measure, beatInMeasure, { note });
@@ -176,7 +192,17 @@
   // trigger & schedule note movements according to beat queue entry
 
   function onBeat(evt) {
-    console.log('onBeat', evt.detail, currentMeasure, currentBeatInMeasure)
+    if (evt.detail.countdown) {
+      dispatch('countdown', {last: evt.detail.countsLeft === 0}); // RecordUI will count visually down
+      if (!upbeat) {
+        return; // nothing to do here
+      }
+      // if upbeat, we have an initial measure which we want the _timeNumerator_
+      // last beats from the countdown to "play"
+      if(upbeat && evt.detail.countsLeft > timeNumerator) {
+        return;
+      }
+    }
     let measure = measureList[currentMeasure];
     if (measureCompletedTime >= measure.duration) {
       console.log('measure is finished', measureCompletedTime, measure.duration)
@@ -185,7 +211,7 @@
       currentBeatInMeasure = -1;
       if (currentMeasure >= measureList.length) {
         dispatch('ended');
-        met.stop();
+        metronome.stop();
         currentMeasure = 0;
         clearHighlight();
         return;
@@ -214,10 +240,10 @@
   }
 
   export function initPlaythrough() {
-    met.play();
+    metronome.play();
   }
   export function stopPlaythrough() {
-    met.stop();
+    metronome.stop();
     currentMeasure = 0;
     currentBeatInMeasure = -1;
     clearHighlight();
@@ -258,24 +284,26 @@
 <svelte:window bind:innerHeight={winHeight} />
 
 <Metronome
-  bind:this={met}
-  on:beat={onBeat}
+  bind:this={metronome}
   {tempo}
-  {upbeat}
   {timeNumerator}
   {timeDenominator}
+  {soundRecorder}
+  on:beat={onBeat}
 />
 {#if renderingMusic}
   <div class="loading"><Loading /></div>
 {/if}
 
-<button on:click={met.play()}>start/stop</button>
+<!--
+<button on:click={metronome.play()}>start/stop</button>
+-->
 
 <div class="note-box" bind:clientWidth={elemWidth}>
   {@html svg}
 </div>
 
-<button on:click={met.play}>start/stop</button>
+<button on:click={metronome.play}>start/stop</button>
 
 <style>
   :global(.activeNote),

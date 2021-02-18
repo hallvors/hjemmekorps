@@ -57,7 +57,7 @@
 
 <div class="main-wrapper" class:loading>
   <div class="display">
-    {#if project && user && !loading}
+    {#if project && user}
       <ScrollableListToolsRight>
         <RecordUI {project} {user} on:start={startPlay} on:stop={stopPlay} />
         <div slot="aside">
@@ -96,6 +96,7 @@
     padding: 50px 0;
     width: 90%;
     margin: 0 auto;
+    padding-top: 10vw;
   }
   .main-wrapper.loading {
     cursor: wait;

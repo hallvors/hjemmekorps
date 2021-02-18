@@ -8,17 +8,22 @@
   export let tempo = 96;
   export let timeNumerator = 3;
   export let timeDenominator = 4;
-  export let upbeat = 0.0;
-  // how many heartbeats is the upbeat? Required to accent the first note in each measure
-  $: upbeat16s = upbeat / (1 / 16);
+  export let soundRecorder;
   let fBuffer;
   let aBuffer;
   let ac;
+  // How many 16ths are required for the countdown?
+  // A typical 1 - 2 - 1 - 2 - 3 - 4 seems to be 2 measures, first counted at half speed
+  // If a measure is 4 quarters, two are 32 16ths
+  // So a 4/4 countdown is 32 16ths, 3/4 should be .. 24? 6/8 32?
+  // for now use a 4/4 countdown for everything - TODO: improve..
+  let countDown16ths = 32;
+  let countDownBeats = [0, 8, 0, 4, 8, 12]; // 1, 2, 1, 2, 3, 4 ..
   var unlocked = false;
   var isPlaying = false; // Are we currently playing?
   var startTime; // The start time of the entire sequence.
-  // What note is currently last scheduled? If upbeat, a negative number.
-  var current16thNote = upbeat16s / -1;
+  // What note is currently last scheduled?
+  var current16thNote = 0;
   var lookahead = 50.0; // How frequently to call scheduling function
   //(in milliseconds)
   var scheduleAheadTime = 0.2; // How far ahead to schedule audio (sec)
@@ -36,9 +41,9 @@
     '4': QUARTERS,
     '2': HALVES,
   };
-  $: noteResolution = resolutions[timeDenominator]; // 0 == 16th, 1 == 8th, 2 == quarter note
+  $: noteResolution = resolutions[String(timeDenominator)]; // 0 == 16th, 1 == 8th, 2 == quarter note
   if (!noteResolution) {
-    console.warn('Unsupported time signature!', timeDenominator);
+    console.warn('Unsupported time signature!', timeDenominator, typeof timeDenominator);
     noteResolution = QUARTERS; //TODO: what makes sense to do here?
   }
   var timerWorker = null; // The Web Worker used to fire timer messages
@@ -92,15 +97,39 @@
     // schedule them and advance the pointer.
     while (nextHeartbeatTime < ac.currentTime + scheduleAheadTime) {
       scheduleNote(current16thNote, nextHeartbeatTime);
-      nextNote();
+
+      // Advance current note and time by a 16th note...
+      // Notice this picks up the CURRENT
+      // tempo value and time signature to calculate beat length.
+      var secondsPerBeat = 60.0 / tempo;
+      // how many 16ths are there in one "denominator"? Well, 16 / denominator.
+      // so next 16th is in seconds per beat divided by number of 16ths in a denominator
+      nextHeartbeatTime += secondsPerBeat / (16 / timeDenominator); // Add beat length to last beat time
+
+      current16thNote++; // Advance the beat number, wrap to zero
+      if (current16thNote == timeNumerator * (16 / timeDenominator)) {
+        current16thNote = 0;
+      }
     }
   }
 
   function scheduleNote(beatNumber, time) {
-    console.log({ beat: beatNumber, upbeat16s, time: time });
-    if (noteResolution == EIGTHS && beatNumber % 2) return; // we're not playing non-8th 16th notes
-    if (noteResolution == QUARTERS && beatNumber % 4) return; // we're not playing non-quarter 8th notes
-    if (noteResolution == HALVES && beatNumber % 8) return; // we're not playing non-half 4th notes
+    console.log({ beat: beatNumber, upbeat16s, time: time, countDown16ths });
+    let recordBeat = false;
+    if (countDown16ths) {
+      // we're in countdown mode
+      countDown16ths--;
+      recordBeats = countDown16ths < 16;
+      if (beatNumber === countDownBeats[0]) {
+        countDownBeats.shift();
+      } else {
+        return; // no sound on this beat
+      }
+    } else {
+      if (noteResolution == EIGTHS && beatNumber % 2) return; // we're not playing non-8th 16th notes
+      if (noteResolution == QUARTERS && beatNumber % 4) return; // we're not playing non-quarter 8th notes
+      if (noteResolution == HALVES && beatNumber % 8) return; // we're not playing non-half 4th notes
+    }
     let source = ac.createBufferSource();
     if (beatNumber === 0) {
       // 0th beat in measure == high pitch
@@ -110,27 +139,18 @@
       source.buffer = fBuffer;
     }
     source.connect(ac.destination);
+    if (recordBeat) {
+      source.connect(analyzer);
+    }
     source.start(time);
+    let countdown = Boolean(countDown16ths);
     setTimeout(function () {
       dispatch('beat', {
         timestamp: ac.currentTime - startTime,
+        countdown,
+        countsLeft: countDownBeats.length,
       });
     }, (time - ac.currentTime) * 1000);
-  }
-
-  function nextNote() {
-    // Advance current note and time by a 16th note...
-    // Notice this picks up the CURRENT
-    // tempo value and time signature to calculate beat length.
-    var secondsPerBeat = 60.0 / tempo;
-    // how many 16ths are there in one "denominator"? Well, 16 / denominator.
-    // so next 16th is in seconds per beat divided by number of 16ths in a denominator
-    nextHeartbeatTime += secondsPerBeat / (16 / timeDenominator); // Add beat length to last beat time
-
-    current16thNote++; // Advance the beat number, wrap to zero
-    if (current16thNote == timeNumerator * (16 / timeDenominator)) {
-      current16thNote = 0;
-    }
   }
 
   export function play() {
@@ -147,16 +167,14 @@
 
     if (isPlaying) {
       // start playing
-      current16thNote = upbeat16s / -1;
+      current16thNote = 0;
       startTime = ac.currentTime;
       nextHeartbeatTime = ac.currentTime;
       timerWorker.postMessage('start');
-      return 'playing';
     } else {
       current16thNote = null;
       startTime = nextHeartbeatTime = 0.0;
       timerWorker.postMessage('stop');
-      return 'stopped';
     }
   }
 
