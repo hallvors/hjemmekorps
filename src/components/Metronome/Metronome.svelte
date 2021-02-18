@@ -30,6 +30,7 @@
   // This is calculated from lookahead, and overlaps
   // with next interval (in case the timer is late)
   var nextHeartbeatTime = 0.0; // when the next 16th note is due (we may play a beat or not).
+
   const SIXTEENTHS = 0;
   const EIGTHS = 1;
   const QUARTERS = 2;
@@ -42,8 +43,8 @@
     '2': HALVES,
   };
   $: noteResolution = resolutions[String(timeDenominator)]; // 0 == 16th, 1 == 8th, 2 == quarter note
-  if (!noteResolution) {
-    console.warn('Unsupported time signature!', timeDenominator, typeof timeDenominator);
+  if (typeof noteResolution === 'undefined') {
+    console.warn('Unsupported time signature!', timeDenominator);
     noteResolution = QUARTERS; //TODO: what makes sense to do here?
   }
   var timerWorker = null; // The Web Worker used to fire timer messages
