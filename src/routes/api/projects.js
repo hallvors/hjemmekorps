@@ -4,6 +4,7 @@ const storage = multer.memoryStorage();
 const multerUpload = multer({ storage: storage });
 
 import sClient from '../../lib/sanity_client';
+import { generateSVGImage } from '../../lib/mxml_to_svg';
 import {
   parseFile,
   getName,
@@ -25,8 +26,7 @@ export async function post(req, res, next) {
     }
     const bandId = req.body.band;
     const mxlmData = parseFile(req.file);
-    return sClient.getMembers(bandId)
-    .then(bandMembers => {
+    return sClient.getMembers(bandId).then(bandMembers => {
       const partslist = getPartsList(mxlmData);
       const projName = getName(mxlmData);
       return sClient
@@ -41,8 +41,24 @@ export async function post(req, res, next) {
         )
         .then(project => {
           res.json(project);
+          // process parts, convert to SVG
+          return Promise.all(
+            project.partslist.map(async partinfo => {
+              const svgMarkup = await generateSVGImage(
+                req.file.buffer.toString('utf-8'),
+                partinfo.part,
+                800,
+                0,
+                true
+              );
+              return await sClient.addPartFile(
+                project._id,
+                partinfo.part,
+                Buffer.from(svgMarkup[0], 'utf8')
+              );
+            })
+          );
         });
-
-    })
+    });
   });
 }

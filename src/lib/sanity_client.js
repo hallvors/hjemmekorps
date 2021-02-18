@@ -169,18 +169,22 @@ function getProject(userId, projectId, mustBeFresh) {
     let project = results[0];
     let recordings = results[1];
     let userIsBandAdmin =
-      project.owner._ref === userId ||
-      Boolean(project.bandAdmins.find(bA => bA._ref === userId));
+      (project.owner && project.owner._ref === userId) ||
+      Boolean(
+        project.bandAdmins && project.bandAdmins.find(bA => bA._ref === userId)
+      );
 
     console.log('requested by owner or band admin?', userIsBandAdmin);
     // We allow band admins, project owner and members who have parts to load data
     if (
       !(
         userIsBandAdmin ||
-        project.partslist.find(
-          part =>
-            part.members && part.members.find(member => member._ref === userId)
-        )
+        (project.partslist &&
+          project.partslist.find(
+            part =>
+              part.members &&
+              part.members.find(member => member._ref === userId)
+          ))
       )
     ) {
       // the user is not a musician for this project.. odd!
@@ -272,6 +276,57 @@ function addProject(userId, bandId, name, mxmlFile, partslist, bpm, members) {
         })
         .then(project => getProject(userId, project._id, true));
     });
+}
+
+async function getPartFile(projectId, partName) {
+  const client = getSanityClient();
+  const existing = await client.fetch(
+    `*[_id == $projectId] {
+    partslist[part == $partName]{
+      "url": sheetmusic.asset->url
+    }
+  }`,
+    { projectId, partName }
+  );
+  if (existing[0] && existing[0].partslist && existing[0].partslist[0]) {
+    return existing[0].partslist[0].url;
+  }
+}
+
+async function addPartFile(projectId, partName, fileDataBuffer) {
+  const client = getSanityClient();
+  const existing = await client.fetch(
+    `*[_id == $projectId] {
+    partslist[part == $partName]
+  }`,
+    { projectId, partName }
+  );
+  let part;
+  if (existing[0] && existing[0].partslist && existing[0].partslist[0]) {
+    part = existing[0].partslist[0];
+  } else {
+    // should never happen
+    console.error('part name wrong?');
+  }
+  if (part.sheetmusic && part.sheetmusic.asset && part.sheetmusic.asset._ref) {
+    // remove old file
+    console.log('deleting', part.sheetmusic.asset._ref);
+    await client.delete(part.sheetmusic.asset._ref);
+  }
+  let doc = await client.assets.upload('file', fileDataBuffer, {
+    filename: partName + '.svg',
+  });
+  if (part) {
+    part.sheetmusic = {
+      _type: 'file',
+      asset: { _type: 'reference', _ref: doc._id },
+    };
+    await client
+      .patch(projectId)
+      .unset(['partslist[part == "' + partName + '"]'])
+      .append('partslist', [part])
+      .commit();
+  }
 }
 
 function updateProject(userId, projectId, data) {
@@ -503,6 +558,8 @@ module.exports = {
 
   getProject,
   addProject,
+  getPartFile,
+  addPartFile,
   addProjectRecording,
 
   removeHelpRecording,

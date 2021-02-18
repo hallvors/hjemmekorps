@@ -11,5 +11,10 @@ export default {
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'member' }] }],
     },
+    {
+      title: "Notefil",
+      name: "sheetmusic",
+      type: "file",
+    },
   ],
 };

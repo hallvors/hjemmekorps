@@ -23,6 +23,13 @@ function getPartsList(mxmlData) {
     mxmlData['score-partwise']['part-list'] &&
     mxmlData['score-partwise']['part-list']['score-part']
   ) {
+    if (
+      !(mxmlData['score-partwise']['part-list']['score-part'] instanceof Array)
+    ) {
+      return [
+        mxmlData['score-partwise']['part-list']['score-part']['part-name'],
+      ];
+    }
     return mxmlData['score-partwise']['part-list']['score-part'].map(
       part => part['part-name']
     );
