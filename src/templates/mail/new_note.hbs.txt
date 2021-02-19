@@ -1,0 +1,12 @@
+Hei,
+dirigent {{friend_name}} har lagt inn nye noter for {{member}}.
+
+Her er en hilsen fra {{friend_name}}:
+
+{{message}}
+
+Klikk her for å se notene og øve:
+
+https://{{domain}}/?t={{token}}
+
+Du kan ikke svare på denne eposten. Dersom du har spørsmål, ta kontakt med {{friend_name}}.
