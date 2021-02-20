@@ -1,24 +1,26 @@
-const mailgun = require('mailgun-js');
+import * as env from '../config/environment';
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mgObj = new Mailgun(formData);
 
-const env = require('../config/environment');
-const DOMAIN = 'hjemmekorps.no';
 const KEY = env.config.mailgun.apikey;
 
-const mg = mailgun({ apiKey: KEY, domain: DOMAIN, testMode: !env.production });
+const mg = mgObj.client({
+  username: 'api',
+  key: KEY,
+  url: 'https://api.eu.mailgun.net',
+});
 
-export async function send(to, subject, text) {
+export async function send(to, user, subject, text, html) {
+  console.log({to, subject})
   const data = {
-    from: 'ikkesvar@hjemmekorps.no',
+    from: `"${user.name} via ${env.domain}" <ikkesvar@${env.domain}>`,
     to,
     subject,
     text,
+    html,
+   // 'o:testmode': env.development ? 'yes' : 'no',
   };
-  return new Promise((resolve, reject) => {
-      mg.messages().send(data, function (error, body) {
-          if (error) {
-              reject(error);
-          }
-        resolve(body);
-      });
-  });
+  
+  return mg.messages.create('kom.hjemmekorps.no', data);
 }
