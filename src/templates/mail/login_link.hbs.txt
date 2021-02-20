@@ -1,0 +1,11 @@
+Hei {{user.name}},
+du kan logge inn til {{domain}} ved å klikke her:
+
+{{{link}}}
+
+Innlogging varer normalt i omkring to uker. Etterpå kan du gå til denne eposten og klikke logg inn på nytt, eller få ny lenke tilsendt ved å legge inn epost-adressa på forsida på {{domain}}.
+
+Takk for at du bruker nettsida!
+Hilsen utviklerne
+
+PS: Du kan ikke svare på denne eposten.

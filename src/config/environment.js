@@ -1,6 +1,12 @@
 const env = process.env.NODE_ENV || 'development';
 const port = process.env.PORT || 3000;
-const APP_ENV_VARS = ['sanity__token', 'site__tokensecret', 'sanity__dataset'];
+const APP_ENV_VARS = [
+  'sanity__token',
+  'site__tokensecret',
+  'sanity__dataset',
+  'mailgun__apikey',
+];
+
 // Order of priorities for config:
 // 1. defaults ..can be overwritten by
 // 2. app-environment-specific ..can be overwritten by
@@ -21,7 +27,7 @@ function objectMerge(a, b) {
   }
 }
 
-const config = require('./defaults.json');
+const config = require( './defaults.json');
 let appEnvConf = {};
 if (env === 'test') {
   appEnvConf = require('./test.json');
@@ -38,7 +44,7 @@ APP_ENV_VARS.forEach(varName => {
   if (process.env[varName]) {
     let parts = varName.split('__');
     if (envConf[parts[0]]) {
-      objectMerge(envConf[parts[0]], {[parts[1]]: process.env[varName]});
+      objectMerge(envConf[parts[0]], { [parts[1]]: process.env[varName] });
     } else {
       envConf[parts[0]] = { [parts[1]]: process.env[varName] };
     }
@@ -52,6 +58,7 @@ module.exports = {
   test: env === 'test',
   development: env === 'development',
   production: env === 'production',
+  domain: env === 'production' ? 'hjemmekorps.no' : 'test.hjemmekorps.no',
   port,
   config,
 };
