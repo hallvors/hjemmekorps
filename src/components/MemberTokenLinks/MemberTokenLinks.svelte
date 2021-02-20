@@ -79,6 +79,6 @@
     <p>Kunne ikke kopiere, støttes ikke i din nettleser</p>
   {/if}
 
-  <button on:click={triggerSelectAndCopy}>Kopier</button>
+  <button on:click={triggerSelectAndCopy}>Kopier alle lenker</button>
   <a href="/prosjekt/{project._id}">Tilbake</a>
 </div>

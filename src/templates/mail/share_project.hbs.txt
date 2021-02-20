@@ -1,12 +1,11 @@
-Hei,
-dirigent {{friend_name}} har lagt inn nye noter for {{member}}.
+Hei, {{name}}!
 
-Her er en hilsen fra {{friend_name}}:
+Dirigent {{friendly_name}} sender nye noter til deg. Du skal øve på {{project_name}}! Melding fra dirigenten:
 
 {{message}}
 
-Klikk her for å se notene og øve:
+Klikk her for å se notene og sende inn opptak:
 
 https://{{domain}}/?t={{token}}
 
-Du kan ikke svare på denne eposten. Dersom du har spørsmål, ta kontakt med {{friend_name}}.
+Du kan ikke svare på denne eposten. Dersom du har spørsmål, ta kontakt med {{friendly_name}}.

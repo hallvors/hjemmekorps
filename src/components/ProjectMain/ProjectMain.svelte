@@ -6,6 +6,7 @@
   import ProjectPartsLinks from './ProjectPartsLinks.svelte';
   import ScrollableListToolsRight from '../../structure/ScrollableListAndTools/ScrollableListToolsRight.svelte';
   import TagTrigger from '../TagTrigger/TagTrigger.svelte';
+  import LinkedBox from '../LinkedBox/LinkedBox.svelte';
 
   export let project;
   export let band;
@@ -110,7 +111,6 @@
   function stopAudio() {
     audioElements.forEach(elm => elm.pause());
   }
-
 </script>
 
 <div class="project-main">
@@ -161,6 +161,16 @@
         {/if}
       {/if}
     </div>
+    {#if assignments && assignments[project._id] && Object.keys(assignments[project._id]).length}
+      <div class="send">
+        <LinkedBox href="/prosjekt/{project._id}/send">
+          <p class="send-button">
+            <i class="fa fa-paper-plane" aria-hidden="true" />
+            Send noter
+          </p>
+        </LinkedBox>
+      </div>
+    {/if}
   </div>
   <div slot="aside">
     <h2>Stemmer</h2>
@@ -176,27 +186,22 @@
         on:deactivate={evt => (activeTagValue = null)}
       />
     {/each}
+
     {#if audioElements.length}
       <h2>Spill av opptak</h2>
       <p><a href="/prosjekt/{project._id}/opptak">Liste over opptak</a></p>
-      <p><em>
-        Du kan prøve å høre alle samtidig her, men det er usikkert om det vil høres fint ut..
-
-      </em></p>
-        <button on:click={startAudio}>start</button><button on:click={stopAudio}
+      <p>
+        <em>
+          Du kan prøve å høre alle samtidig her, men det er usikkert om det vil
+          høres fint ut..
+        </em>
+      </p>
+      <button on:click={startAudio}>start</button><button on:click={stopAudio}
         >stop</button
       >
     {/if}
   </div>
 </ScrollableListToolsRight>
-
-{#if !listOptions[selectedOption].list}
-  <p>
-    For å dele <em>{project.name}</em>-noter med musikantene som har fått
-    tildelt stemmer, gå til
-    <a href="/prosjekt/{project._id}/liste">lenker til musikantenes sider</a>.
-  </p>
-{/if}
 
 <h2>Noter</h2>
 <ProjectPartsLinks {project} />
@@ -208,8 +213,8 @@
 
   .project-title {
     text-align: center;
-    padding-bottom: .8em;
-    padding-top: .8em;
+    padding-bottom: 0.8em;
+    padding-top: 0.8em;
     margin: 0;
   }
 
@@ -236,6 +241,16 @@
     text-align: center;
     padding-bottom: 1em;
     font-size: xlarge;
+  }
+
+  .send {
+    width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .send-button {
+    padding: 1em;
   }
 
   /* .audio {

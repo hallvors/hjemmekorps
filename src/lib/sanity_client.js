@@ -51,7 +51,9 @@ function getAdminUserData(email) {
       }
     )
     .then(userData => {
-      sanityCache.set(email, userData);
+      if (userData) {
+        sanityCache.set(email, userData);
+      }
       return userData;
     });
 }
