@@ -13,8 +13,9 @@ function isOkWithoutSession(url) {
 		// A few other pages are shown without a user session too - /om/personvern for example
 		return true;
 	}
-	if (url === '/') {
+	if (url === '/' || url === '/api/communications/loginlink') {
 		// there is some front page content for non-session guests
+		// also API route for creating login links must be available
 		return true;
 	}
 	return false;
