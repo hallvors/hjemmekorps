@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
   import LibLoader from '../utils/LibLoader.svelte';
@@ -39,8 +39,6 @@
   var recordingData;
   // audio element for playback
   let audioElm;
-  let snapElm;
-  let snapSource;
   let analyser;
 
   var meta = [];
@@ -50,24 +48,28 @@
   let volumePercElm;
   let volumeLoud = false;
 
+  onMount(() => {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.minDecibels = -127;
+    analyser.maxDecibels = 0;
+    analyser.smoothingTimeConstant = 0.4;
+  });
+
   function start() {
     meta.push({ timestamp: 0 });
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then(function (stream) {
         theStream = stream;
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
         input = audioContext.createMediaStreamSource(stream);
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 512;
-        analyser.minDecibels = -127;
-        analyser.maxDecibels = 0;
-        analyser.smoothingTimeConstant = 0.4;
         input.connect(analyser);
 
         const volumes = new Uint8Array(analyser.frequencyBinCount);
         const volumeCallback = () => {
-          if (!volumePercElm) { // only exists while recording
+          if (!volumePercElm) {
+            // only exists while recording
             return;
           }
           analyser.getByteFrequencyData(volumes);
@@ -77,7 +79,7 @@
             ((volume / volumes.length) * 100) / 127
           );
           volumePercElm.style.width = averageVolume + '%';
-          volumeLoud = averageVolume > 90 ? true : false;
+          volumeLoud = averageVolume > 92 ? true : false;
         };
         volumeInterval = setInterval(volumeCallback, 200);
         recorder = new WebAudioRecorder(analyser, {
@@ -125,12 +127,13 @@
     xhr.send(fd);
   }
 
-  function countdownUi(evt) {
+  function countdownUiUpdate(evt) {
+    count++;
+    console.log('countdown evt ', count, evt, evt.detail.last);
     countdown = !evt.detail.last;
     recState = RECORDING;
-    count++;
-    if (count === 2 && firstCount) {
-      count = 0;
+    if (count === 3 && firstCount) {
+      count = 1;
       firstCount = false;
     }
   }
@@ -144,9 +147,8 @@
       audioElm.pause();
       meta = [];
       firstCount = true;
-      clearInterval(metronomeInterval);
       clearInterval(volumeInterval);
-      count = 1;
+      count = 0;
       recState = STOPPED;
     }
   }
@@ -225,10 +227,11 @@
 <NoteBox
   {project}
   {trackName}
+  {audioContext}
   soundRecorder={analyser}
   bind:this={theBox}
   on:ended={endOfNote}
-  on:countdown={countdownUi}
+  on:countdown={countdownUiUpdate}
 />
 
 <style>

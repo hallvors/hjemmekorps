@@ -9,6 +9,7 @@
   export let project;
   export let trackName = null;
   export let soundRecorder;
+  export let audioContext;
 
   let elemWidth = 0;
   let tempo = project.bpm || 96;
@@ -122,6 +123,7 @@
           // this is an upbeat note. The metronome logic will pretend it is a normal,
           // full measure, so shift the timing accordingly towards the end
           start += (normalMeasureDuration - measure.duration);
+          measure.duration = normalMeasureDuration;
         } else if (measureIndex > 0) {
           // start is in seconds since beginning of the piece,
           // but it's easire to calculate if relative to measure
@@ -134,7 +136,7 @@
           pushQueue(measure, beatInMeasure, { note });
         } else {
           // should highlight at _delay_ after beat
-          let delay = start % beatDuration; // measure unit, not time
+          let delay = start % beatDuration;
           pushQueue(measure, beatInMeasure, {
             delay,
             note,
@@ -275,25 +277,28 @@
   }
   function scrollIfRequired(elm) {
     let offset = getOffset(elm);
-    if (offset.top > winHeight * 0.7) {
+    //if (offset.top > winHeight * 0.7) {
       let scrollable = getScrollParent(elm);
-      scrollable.scrollTop += winHeight * 0.15;
-    }
+      console.log('scrollable', scrollable, scrollable.scrollBy)
+      scrollable.scrollTo({top: offset.top - 100});
+    //}
   }
   let winHeight;
 </script>
 
 <svelte:window bind:innerHeight={winHeight} />
-
+{#if audioContext}
 <Metronome
   bind:this={metronome}
   {tempo}
   {timeNumerator}
   {timeDenominator}
+  {audioContext}
   {soundRecorder}
   on:beat={onBeat}
 />
-{#if renderingMusic}
+{/if}
+{#if renderingMusic || !audioContext}
   <div class="loading"><Loading /></div>
 {/if}
 
@@ -305,7 +310,7 @@
   {@html svg}
 </div>
 
-<button on:click={metronome.play}>start/stop</button>
+<button on:click={metronome.toggle}>start/stop</button>
 
 <style>
   :global(.activeNote),

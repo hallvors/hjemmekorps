@@ -42,7 +42,11 @@
     console.log('pre-mix, songlength ' + songLength);
     mix = audioContext.createBufferSource();
     //call our function here
-    mix.buffer = mixDown(buffers, songLength, 2);
+    if (recordings.length > 1) {
+      mix.buffer = mixDown(buffers, songLength, 2);
+    } else {
+      mix.buffer = buffers[0];
+    }
     console.log('post-mix, ready!');
     mix.connect(audioContext.destination);
     dispatch('loadend');
@@ -51,7 +55,9 @@
 
   export function start() {
     //will playback the entire mix
-    mix.start();
+    if (mix) {
+      mix.start();
+    }
   }
   export function stop() {
     mix.stop();
