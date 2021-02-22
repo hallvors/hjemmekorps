@@ -74,6 +74,8 @@
                 on:deactivate={handleClick}
               />
             {/each}
+            {:else}
+            <p><em>Ingen stemmer spilt inn enda <i class="fas fa-music"></i> - blir din den første?</em></p>
           {/if}
         </div>
         {#if activeRecordings && activeRecordings.length}
