@@ -1,9 +1,12 @@
 <script>
   import SendLoginLink from '../SendLoginLink/SendLoginLink.svelte';
 </script>
-
+<h1>Velkommen!</h1>
 <p>
-  Hjemmekorps skal inspirere korpsmusikanter til hjemmeøving ved å gjøre leksene
+  
+</p>
+<p>
+  Hjemmekorps.no skal inspirere korpsmusikanter til hjemmeøving ved å gjøre leksene
   til en del av felles prosjekter. Dirigenten legger inn noter, musikantene
   spiller inn stemmene hjemme og får høre det kombinerte resultatet - enten rett
   etter innspilling eller på neste øvelse.
@@ -22,7 +25,7 @@
 </p>
 
 <p>
-  Dersom du allerede bruker Hjemmekorps, skriv inn epost-adresse for å få
+  Dersom du allerede bruker Hjemmekorps.no, skriv inn epost-adresse for å få
   tilsendt innloggingslenke:
 </p>
 
