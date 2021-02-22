@@ -1,6 +1,6 @@
 Hei, {{name}}!
 
-Dirigent {{friendly_name}} sender nye noter til deg. Du skal øve på {{project_name}}! Melding fra dirigenten:
+Her kommer det nye noter fra dirigent {{friendly_name}}. Du skal øve på {{project_name}}! Melding fra dirigenten:
 
 {{message}}
 

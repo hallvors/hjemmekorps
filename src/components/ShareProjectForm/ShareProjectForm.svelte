@@ -23,7 +23,7 @@
         <b>Hei, NAVN</b>!
       </p>
       <p>
-        Dirigent {user.friendly_name} sender nye noter til deg. Du skal øve på
+        Her kommer det nye noter fra dirigent {user.friendly_name}. Du skal øve på
         <em>{project.name}</em>! Melding fra dirigenten:
       </p>
       <input type="hidden" name="projectId" value={project._id} />
