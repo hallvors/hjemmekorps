@@ -9,10 +9,13 @@
     let id = page.params.id;
     const res = await this.fetch(`/api/project/${id}`);
     const preloadProject = await res.json();
+    const res2 = await this.fetch(`/api/bands`);
+    const preloadBands = await res2.json();
 
     return {
       id,
       preloadProject,
+      preloadBands,
       host: page.host,
       protocol: session.protocol,
       user: session.user,
@@ -23,16 +26,21 @@
 <script>
   import fetch from 'cross-fetch';
   import Loading from '../../../components/Loading/Loading.svelte';
-  import { projects, addProject } from '../../../lib/datastore';
+  import { projects, addProject, updateBands } from '../../../lib/datastore';
 
   export let id;
   export let host;
   export let protocol;
   export let user;
   export let preloadProject;
+  export let preloadBands;
 
   if (preloadProject) {
     addProject(preloadProject);
+  }
+
+  if (preloadBands) {
+    updateBands(preloadBands);
   }
 
   let projectPromise = $projects[id]
