@@ -412,9 +412,9 @@ function addProjectRecording(projectId, memberId, instrument, filepath) {
     .then(oldRecordings => {
       return Promise.all(
         oldRecordings.map(recording => {
-          return cl
-            .delete(recording._id)
-            .then(() => cl.delete(recording.file.asset._ref));
+          return cl.delete(recording._id).then(() => {
+            cl.delete(recording.file.asset._ref);
+          });
         })
       );
     })
@@ -460,27 +460,37 @@ function getRecordings(projectId) {
   );
 }
 
-// OLD code
-
-function addHelpRecording(projectName, filepath) {
+function addCombinedRecording(projectId, filepath) {
   const cl = getSanityClient();
-  return getProject(projectName).then(project => {
-    return cl.assets.upload('file', fs.createReadStream(filepath)).then(doc => {
-      return cl
-        .patch(project._id)
-        .set({
-          helprecording: {
-            _type: 'file',
-            asset: {
-              _type: 'reference',
-              _ref: doc._id,
-            },
-          },
-        })
-        .commit();
+  return cl
+    .fetch('*[_type == "project" && _id == $id]', { id: projectId })
+    .then(project => {
+      let oldFileRef;
+      if (project.generated_soundfile) {
+        oldFileRef = project.generated_soundfile.asset._ref;
+      }
+      return cl.assets
+        .upload('file', fs.createReadStream(filepath))
+        .then(doc => {
+          return cl
+            .patch(projectId)
+            .set({
+              generated_soundfile: {
+                _type: 'file',
+                asset: { _type: 'reference', _ref: doc._id },
+              },
+            })
+            .commit()
+            .then(result => {
+              if (oldFileRef) {
+                return cl.delete(oldFileRef);
+              }
+            });
+        });
     });
-  });
 }
+
+// OLD code
 
 function removeHelpRecording(projectName, fileId) {
   const cl = getSanityClient();
@@ -516,33 +526,6 @@ function addImage(projectName, filepath) {
   });
 }
 
-function addRecording(projectName, pupil, meta, filepath) {
-  const cl = getSanityClient();
-  return getProject(projectName).then(project => {
-    return cl.assets
-      .upload('file', fs.createReadStream(filepath), {
-        filename: pupil + '-opptak.mp3',
-      })
-      .then(doc => {
-        return cl.create({
-          _type: 'recording',
-          pupil,
-          project: {
-            _ref: project._id,
-          },
-          recording: {
-            _type: 'file',
-            asset: {
-              _type: 'reference',
-              _ref: doc._id,
-            },
-          },
-          meta,
-        });
-      });
-  });
-}
-
 function purgeCache() {
   sanityCache.flushAll();
 }
@@ -563,9 +546,9 @@ module.exports = {
   getPartFile,
   addPartFile,
   addProjectRecording,
+  addCombinedRecording,
 
   removeHelpRecording,
-  addRecording,
   addImage,
   getRecordings,
   purgeCache,
