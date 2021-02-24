@@ -112,10 +112,10 @@
     var xhr = new XMLHttpRequest();
     xhr.open('post', '/api/project/' + project._id + '/recordings', true);
     xhr.onload = function () {
-      document.body.className = '';
-      //document.getElementById("state-indicator").src = "/images/rec.png";
       alert('Ferdig! Opptaket er sendt. Tusen takk :)');
       recState = STOPPED;
+      recordingData = null;
+      audioElm.controls = false;
     };
     var fd = new FormData();
     fd.append('file', recordingData, 'opptak.wav');
@@ -221,7 +221,7 @@
   {/if}
 
   <!-- svelte-ignore a11y-media-has-caption -->
-  <audio id="audio-elm" bind:this={audioElm} on:ended={pausePlayRecording} />
+  <audio id="audio-elm" class={recordingData === 0 ? 'hide' : ''} bind:this={audioElm} on:ended={pausePlayRecording} />
 </nav>
 
 <NoteBox
@@ -302,6 +302,10 @@
   }
   #audio-elm {
     width: 100%;
+  }
+
+  #audio-elm.hide {
+    display: none;
   }
 
   .start-stop-btn {
