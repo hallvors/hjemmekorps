@@ -48,7 +48,9 @@
     "opensheetmusicdisplay": "^0.8.7",
     "polka": "^0.5.2",
     "sirv": "^1.0.0",
+    "tmp": "^0.2.1",
     "underscore": "^1.12.0",
+    "wavefile": "^11.0.0",
     "web-audio-recorder-js": "^0.0.2",
     "xmldom": "^0.4.0"
   },
