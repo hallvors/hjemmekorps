@@ -12,28 +12,45 @@
   pickInstruments()
 </script>
 
-<div class="loading">
-  {#each rndInstr as instrument, idx}
+<div class="background">
+
+  <div class="loading">
+    {#each rndInstr as instrument, idx}
     <img
-      class="i{idx}"
+    class="i{idx}"
       src="/images/instruments/{instrument.value}.png"
       alt=""
-    />
-  {/each}
-<p>{message}</p>
-</div>
+      />
+      {/each}
+      <p>{message}</p>
+    </div>
+  </div>
 
 <style>
+  .background {
+    background-color: #999;
+    opacity: .5;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+  }
   .loading {
     position: relative;
-    width: 100%;
-    height: 100%;
+    width: 76%;
+    height: 76%;
+    background: #fff;
+    margin-top: 4%;
+    margin-left: 12%;
+    padding-top: 8%;
+    border-radius: 100px;
   }
   p {
-      color: #999;
+    color: #999;
     letter-spacing: 8%;
     font-size: 5vw;
-    text-align: center;    
+    text-align: center;
   }
   img {
     width: 10%;
@@ -41,15 +58,15 @@
   }
 
   img.i0 {
-    top: 35%;
+    top: 45%;
     left: 15%;
   }
   img.i1 {
-    top: 35%;
+    top: 45%;
     left: 45%;
   }
   img.i2 {
-    top: 35%;
+    top: 45%;
     left: 75%;
   }
   img {
