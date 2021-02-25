@@ -242,7 +242,7 @@
     left: 0;
     height: 100%;
     z-index: 300;
-    background: rgba(200, 200, 200, 0.6);
+    background: rgba(200, 200, 200, 0.4);
     font-size: 6em;
     text-align: center;
     padding-top: 3em;
