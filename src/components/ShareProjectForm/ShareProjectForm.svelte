@@ -19,13 +19,23 @@
     action="/api/communications/shareproject"
   >
     <div class="email">
+      <div class="header">
+        <b>Til: </b><span><em>Musikantene med tildelte stemmer</em></span>
+        <b>Fra: </b><span
+          >{user.name} via hjemmekorps.no &lt;ikkesvar@hjemmekorps.no&gt;</span
+        >
+        <b>Emne: </b><span>Nye noter: {project.name}</span>
+      </div>
       <p>
-        <b>Hei, NAVN</b>!
+        <b>Hei, <em>navn</em></b>!
       </p>
       <p>
-        Her kommer det nye noter fra dirigent {user.friendly_name}. Du skal øve på
-        <em>{project.name}</em>! Melding fra dirigenten:
+        Her kommer det nye noter fra dirigent {user.friendly_name}. Du skal øve
+        på
+        <em>{project.name}</em>!
       </p>
+
+      <p>Melding fra dirigenten:</p>
       <input type="hidden" name="projectId" value={project._id} />
       <textarea
         name="message"
@@ -64,5 +74,14 @@
     padding: 1em 3em;
     margin-bottom: 1em;
     max-width: 800px;
+  }
+  .header {
+    display: grid;
+  }
+  .header b {
+    grid-column-start: 1;
+  }
+  .header span {
+    grid-column-start: 2;
   }
 </style>
