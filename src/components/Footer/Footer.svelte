@@ -1,7 +1,9 @@
 <footer>
   <p>
     <small
-      >Hjemmekorps - <a href="/om/hjemmekorps">Om</a> |
+      >Hjemmekorps -
+      <a href="/om/hjemmekorps">Om</a> |
+      <a href="/om/kontakt">Kontakt</a> |
       <a href="/om/personvern">Personvern</a>
     </small>
   </p>

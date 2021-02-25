@@ -20,7 +20,7 @@
   dirigenten trenger å gjøre, er å laste opp noter i MusicXML-format og sende ut
   lenker til musikantenes opptaks-sider.
 </p>
-<p>For å få bruke Hjemmekorps.no til ditt korps eller orkester, ta kontakt.</p>
+<p>For å få bruke Hjemmekorps.no til ditt korps eller orkester, <a href="/om/kontakt">ta kontakt</a>.</p>
 
 <h2>Rulletekster..</h2>
 <p>
