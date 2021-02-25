@@ -120,7 +120,7 @@
 </div>
 
 <ScrollableListToolsRight>
-  <div>
+  <main>
     <h2>Musikanter</h2>
     <div class="list">
       <select bind:value={selectedOption}>
@@ -163,6 +163,7 @@
     </div>
     {#if assignments && assignments[project._id] && Object.keys(assignments[project._id]).length}
       <div class="send">
+        <h2>Send noter</h2>
         <LinkedBox href="/prosjekt/{project._id}/send">
           <p class="send-button">
             <i class="fa fa-paper-plane" aria-hidden="true" />
@@ -171,9 +172,12 @@
         </LinkedBox>
       </div>
     {/if}
-  </div>
-  <div slot="aside">
+
     <h2>Stemmer</h2>
+    <ProjectPartsLinks {project} />
+  </main>
+  <div slot="aside">
+    <h2>Tildel stemme</h2>
     {#each project.partslist as partslist}
       <TagTrigger
         tagName="part"
@@ -202,9 +206,6 @@
     {/if}
   </div>
 </ScrollableListToolsRight>
-
-<h2>Noter</h2>
-<ProjectPartsLinks {project} />
 
 <style>
   :root {
@@ -241,6 +242,13 @@
     text-align: center;
     padding-bottom: 1em;
     font-size: xlarge;
+  }
+
+  main h2 {
+    padding-top: 3em;
+  }
+  main h2:first-child {
+    padding-top: 0;
   }
 
   .send {

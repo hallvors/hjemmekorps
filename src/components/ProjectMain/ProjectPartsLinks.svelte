@@ -16,7 +16,7 @@
     <span class="audio">
       <!-- svelte-ignore a11y-media-has-caption -->
       <!-- We can not create captions for user-generated music files :) -->
-      <audio controls src={project.generated_soundfile}>
+      <audio controls src={project.generated_soundfile.url}>
         Audio does not work
       </audio>
     </span>
@@ -34,5 +34,8 @@
     padding-bottom: 30px;
     border: var(--border);
     box-shadow: var(--shadow);
+  }
+  audio {
+    width: 100%;
   }
 </style>
