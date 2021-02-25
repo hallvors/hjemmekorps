@@ -22,16 +22,23 @@ function parseUrl(req, res, next) {
 
 function setCookie(req, res, next) {
   res.setCookie = function (name, value, options) {
-    console.log('will set c ' + name);
-    let exp =
-      options && options.expires
-        ? '; Expires=' + options.expires.toGMTString()
-        : '';
+    const cookieOpts = [];
+    if(options && options.expires) {
+      cookieOpts.push('Expires=' + options.expires.toGMTString());
+    }
+    if (options && options.path) {
+      cookieOpts.push('Path=' + options.path);
+    }
+    let optsString = '';
+    if (cookieOpts.length) {
+      optsString = '; ' + cookieOpts.join('; ');
+    }
     res.setHeader(
       'Set-Cookie',
-      `${encodeURIComponent(name)}=${encodeURIComponent(value)}${exp}`
+      `${encodeURIComponent(name)}=${encodeURIComponent(value)}${optsString}`
     );
   };
+
   next();
 }
 
