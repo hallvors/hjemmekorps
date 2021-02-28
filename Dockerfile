@@ -1,5 +1,4 @@
-# node:12.18.4-stretch
-FROM node@sha256:8cfe7e8dc60095a4f9d25a3f0f208503559fa033a15e2ddd87dee85bec101a2e
+FROM node:14.16.0-stretch
 
 RUN apt-get update -y && apt-get install -y ffmpeg
 
