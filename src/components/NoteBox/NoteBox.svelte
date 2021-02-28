@@ -299,8 +299,8 @@
   on:beat={onBeat}
 />
 {/if}
-{#if renderingMusic || !audioContext}
-  <div class="loading"><Loading /></div>
+{#if renderingMusic}
+  <div class="loading"><Loading message="Tilpasser notene til din skjerm.." /></div>
 {/if}
 
 <!--
@@ -321,9 +321,14 @@
       brightness(60%) contrast(101%);
   }
   .note-box {
-    margin-top: 30px;
-    padding: 5%;
-    height: 85vh;
+    /*
+      Whoever embeds a NoteBox should style margins
+      and padding - our task is to fill all the space
+      we're given with sheet music.
+    */
+    margin: 0;
+    padding: 0;
+    height: 100%;
     overflow: auto;
   }
   .loading {
