@@ -164,7 +164,7 @@
         } else {
           clearHighlight();
           beatInfo.note.classList.add('activeNote');
-          scrollIfRequired(beatInfo.note);
+          //scrollIfRequired(beatInfo.note);
         }
       }
     }
