@@ -25,7 +25,7 @@ const app = polka();
 app
   .use(json(), urlencoded({ extended: false }), cookieParser())
   .use(utils.jsonSender, utils.parseUrl, utils.setCookie) // Some stuff Express does by default.
-  //.use('/', authenticate) // set req.user if cookie or URL token exists, redirects to error message otherwise
+  .use(utils.ensureHttps) // redirect to https if http
   .use(
     compression({ threshold: 0 }), // enable gzip compression of transferred data
     sirv('static', { dev }), // serve files in "static" dir (in root) as-is

@@ -42,6 +42,20 @@ function setCookie(req, res, next) {
   next();
 }
 
+function ensureHttps(req, res, next) {
+  if (req.connection && ! req.connection.encrypted) {
+    let url = req.location.origin + req.url;
+    if (!/:\/\/localhost/.test(url)) {
+      url = url.replace(/^http:/, 'https:');
+      res.statusCode = 302;
+      res.setHeader('Location', url);
+      res.end();
+      return;
+    }
+  }
+  next();
+}
+
 function filterInstrumentName(someName, instrumentList) {
   let instrumentFromList = instrumentList.find(instrument => {
     return someName.toLowerCase().indexOf(instrument.value) > -1;
@@ -59,6 +73,7 @@ module.exports = {
   jsonSender,
   parseUrl,
   setCookie,
+  ensureHttps,
   filterInstrumentName,
   getRandomInt,
 };
