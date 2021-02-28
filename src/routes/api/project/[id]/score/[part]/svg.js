@@ -3,13 +3,18 @@ import sClient from '../../../../../../lib/sanity_client';
 import got from 'got';
 
 export async function get(req, res) {
-  let url = await sClient.getPartFile(req.params.id, req.params.part);
-  console.log({url})
+  // We possibly have an SVG generated for 800px width
+  // We'll use this SVG for screens between 700 and 1000,
+  // otherwise generate one on the fly
+  let width = parseInt(req.query.width);
   let svgMarkup;
-  if (url) {
-    let result = await got(url);
-    if (result) {
-      svgMarkup = result.body;
+  if (width > 700 && width < 1000) {
+    let url = await sClient.getPartFile(req.params.id, req.params.part);
+    if (url) {
+      let result = await got(url);
+      if (result) {
+        svgMarkup = result.body;
+      }
     }
   }
 
