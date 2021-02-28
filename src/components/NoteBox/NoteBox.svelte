@@ -19,6 +19,7 @@
   let metronome;
   let svg;
   let upbeat = 0;
+  let dev = typeof location !== 'undefined' && /localhost/.test(location.hostname);
 
   // To move a cursor correctly, we need to know about _beats, measures and jumps_
   // Beat signals arrive from the metronome and potentially cause cursor movements.
@@ -309,9 +310,9 @@
 <div class="note-box" bind:clientWidth={elemWidth}>
   {@html svg}
 </div>
-
+{#if dev}
 <button on:click={metronome.toggle}>start/stop</button>
-
+{/if}
 <style>
   :global(.activeNote),
   :global(.activeNote path),
