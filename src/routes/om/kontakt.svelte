@@ -5,7 +5,7 @@
 </p>
 <p>
   <b>Utvikler:</b>
-  <a href="mailto:hallvord&64;hallvord.com">Hallvord R. M. Steen</a>.
+  <a href="mailto:hallvord&#064;hallvord.com">Hallvord R. M. Steen</a>.
 </p>
 <p>
   <b>Skjema for interessenter:</b>
