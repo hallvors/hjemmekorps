@@ -29,21 +29,22 @@
 <style>
   .background {
     background-color: #999;
-    opacity: .5;
+    opacity: .8;
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     right: 0;
+    z-index: 10;
   }
   .loading {
     position: relative;
-    width: 76%;
-    height: 76%;
+    width: 86%;
+    height: 86%;
     background: #fff;
     margin-top: 4%;
-    margin-left: 12%;
-    padding-top: 8%;
+    margin-left: 7%;
+    padding-top: 4%;
     border-radius: 100px;
   }
   p {
