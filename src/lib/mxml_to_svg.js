@@ -85,6 +85,11 @@ export async function generateSVGImage(
     pageFormat: pageFormat,
     // defaultFontFamily: 'Arial',
     drawTitle: false,
+    drawSubtitle: false,
+    drawComposer: false,
+    drawLyricist: false,
+    drawPartNames: false,
+    drawMetronomeMarks: false,
   });
   // for more options check OSMDOptions.ts
   await osmdInstance.load(mxmlData);
