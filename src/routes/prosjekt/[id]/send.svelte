@@ -10,9 +10,9 @@
   import { projects, bands, selectedBand, user } from '../../../lib/datastore';
   import ShareProjectForm from '../../../components/ShareProjectForm/ShareProjectForm.svelte';
   import MemberTokenLinks from '../../../components/MemberTokenLinks/MemberTokenLinks.svelte';
-  import UsageHint from '../../../components/UsageHint/UsageHint.svelte';
 
 </script>
+<svelte:head><title>{$projects[id].name} : Send lenker - hjemmekorps.no</title></svelte:head>
 
 <ShareProjectForm project={$projects[id]} user={$user} />
 

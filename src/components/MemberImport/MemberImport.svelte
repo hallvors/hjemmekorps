@@ -1,6 +1,7 @@
 <script>
  import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
+import UsageHint from '../UsageHint/UsageHint.svelte';
 
 export let band;
   let importData = '';
@@ -62,14 +63,15 @@ export let band;
     });
   }
 </script>
+<svelte:head><title>Importer musikanter - hjemmekorps.no</title></svelte:head>
 
 {#if importSuccess}
   <p>Import fullført. <a href="/musikanter?reload={Math.random()}">Til musikantliste</a></p>
 {:else}
-  <p>
-    For å importere data, kopier en tabell fra et regneark og lim inn her.
-    Musikantens navn må stå i første kolonne:
-  </p>
+  <UsageHint
+    message="For å importere data, kopier en tabell fra et regneark og lim inn her.
+    Musikantens navn må stå i første kolonne. Tips: bare kopier alle data med Ctrl-A
+    og Ctrl-C, importen velger ut det som ser ut som nyttig informasjon." textAlign="left" />
   <textarea
     bind:value={importData}
     on:input={parseData}

@@ -26,6 +26,7 @@
   }
   let project = $projects[id];
 </script>
+<svelte:head><title>{project.name} - hjemmekorps.no</title></svelte:head>
 
 <ProjectMain
   {project}

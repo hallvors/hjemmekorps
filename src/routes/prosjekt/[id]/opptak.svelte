@@ -24,6 +24,10 @@
   }
 </script>
 
+<svelte:head><title>{$projects[id].name} : Opptak - hjemmekorps.no</title></svelte:head>
+
+<h1>Opptak</h1>
+
 {#each Object.entries($assignments[id]) as [memberId, data]}
   <Audio
     member={$members[memberId]}
