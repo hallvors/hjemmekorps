@@ -1,4 +1,5 @@
 <script>
+  import UsageHint from '../UsageHint/UsageHint.svelte';
   export let project;
   export let members;
   let ulElement;
@@ -34,7 +35,6 @@
   }
 
   document.addEventListener('copy', event => {
-    console.log('event fires', event)
     const plainTextLinks = [];
     const links = ulElement.getElementsByTagName('a');
     for (let i = 0; i < links.length; i++) {
@@ -42,7 +42,6 @@
       plainTextLinks.push(links[i].href);
       plainTextLinks.push('');
     }
-    console.log({plainTextLinks})
     event.clipboardData.setData('text/plain', plainTextLinks.join('\n'));
     event.clipboardData.setData('text/html', ulElement.outerHTML);
     event.preventDefault();
@@ -62,11 +61,26 @@
 </script>
 
 <div>
+  <p>
+    Du kan også kopiere lenker for å sende hver enkelt eller lime inn i en annen
+    epost.
+  </p>
+  <p>Lenkene under går til innspillings-sider for hver enkelt musikant.</p>
+
+  <UsageHint
+    message="Tips: vil du se musikantenes sider for øving og opptak?
+    Høyre-klikk lenka og velg 'åpne i privat vindu'. Da er du fortsatt
+    logget inn som dirigent i dette vinduet, og kan se sida musikantene
+    skal bruke i det nye."
+    textAlign="left"
+  />
+
   <ul bind:this={ulElement}>
     {#each project.partslist as part}
       {#each part.members as memRef}
         <li>
-          <a href={'/?t=' + memRef.token} on:click={areYouSure}>{nameMap[memRef._ref]}</a
+          <a href={'/?t=' + memRef.token} on:click={areYouSure}
+            >{nameMap[memRef._ref]}</a
           >
         </li>
       {/each}

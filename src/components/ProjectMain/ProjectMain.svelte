@@ -7,6 +7,7 @@
   import ScrollableListToolsRight from '../../structure/ScrollableListAndTools/ScrollableListToolsRight.svelte';
   import TagTrigger from '../TagTrigger/TagTrigger.svelte';
   import LinkedBox from '../LinkedBox/LinkedBox.svelte';
+  import UsageHint from '../UsageHint/UsageHint.svelte';
 
   export let project;
   export let band;
@@ -117,99 +118,112 @@
   <div class="project-info">
     <h1 class="h1-bigger project-title">{project.name}</h1>
   </div>
-</div>
+  <ScrollableListToolsRight>
+    <main>
+      <h2>Musikanter</h2>
+      <UsageHint
+        message="Velg stemme til høyre og klikk på alle musikantene som skal spille den."
+      />
 
-<ScrollableListToolsRight>
-  <main>
-    <h2>Musikanter</h2>
-    <div class="list">
-      <select bind:value={selectedOption}>
-        {#each listOptions as list, index}
-          <option value={index}>{list.title}</option>
-        {/each}
-      </select>
-    </div>
-    <div class="members-list">
-      {#if listOptions[selectedOption].list}
-        {#each listOptions[selectedOption].list || [] as member}
-          <div class="member">
-            <DeltakerDisplay
-              member={members[member._id]}
-              projectName={project.name}
-              assignmentInfo={(assignments[project._id] || {})[member._id]}
-              on:click={memberClicked}
-              registerAudioElement={elm =>
-                (audioElements = [...audioElements, elm])}
-            />
-          </div>
-        {/each}
-      {:else}
-        <!-- render based on parts list -->
-        {#if assignments && assignments[project._id]}
-          {#each Object.entries(assignments[project._id]) as [memberId, data]}
+      <div class="list">
+        <select bind:value={selectedOption}>
+          {#each listOptions as list, index}
+            <option value={index}>{list.title}</option>
+          {/each}
+        </select>
+      </div>
+      <div class="members-list">
+        {#if listOptions[selectedOption].list}
+          {#each listOptions[selectedOption].list || [] as member}
             <div class="member">
               <DeltakerDisplay
-                member={members[memberId]}
+                member={members[member._id]}
                 projectName={project.name}
-                assignmentInfo={data}
+                assignmentInfo={(assignments[project._id] || {})[member._id]}
                 on:click={memberClicked}
                 registerAudioElement={elm =>
                   (audioElements = [...audioElements, elm])}
               />
             </div>
           {/each}
+        {:else}
+          <!-- render based on parts list -->
+          {#if assignments && assignments[project._id]}
+            {#each Object.entries(assignments[project._id]) as [memberId, data]}
+              <div class="member">
+                <DeltakerDisplay
+                  member={members[memberId]}
+                  projectName={project.name}
+                  assignmentInfo={data}
+                  on:click={memberClicked}
+                  registerAudioElement={elm =>
+                    (audioElements = [...audioElements, elm])}
+                />
+              </div>
+            {/each}
+          {/if}
         {/if}
+      </div>
+      {#if assignments && assignments[project._id] && Object.keys(assignments[project._id]).length}
+        <div class="send">
+          <h2>Send noter</h2>
+          <UsageHint
+            message="Send lenker til musikantene her, eller sjekk hvordan musikantenes sider ser ut."
+          />
+          <LinkedBox href="/prosjekt/{project._id}/send">
+            <p class="send-button">
+              <i class="fa fa-paper-plane" aria-hidden="true" />
+              Send noter
+            </p>
+          </LinkedBox>
+        </div>
+      {/if}
+
+      <h2>Stemmer</h2>
+      <UsageHint
+        message="Her kan du sjekke at de ulike stemmene for låta har blitt lagt inn korrekt."
+      />
+      <ProjectPartsLinks {project} />
+    </main>
+    <div slot="aside">
+      <h2>Tildel stemme</h2>
+      {#each project.partslist as partslist}
+        <TagTrigger
+          tagName="part"
+          tagValue={partslist.part}
+          active={activeTagValue === partslist.part}
+          on:activate={evt => {
+            activeTagValue = evt.detail.tagValue;
+            activeTagName = evt.detail.tagName;
+          }}
+          on:deactivate={evt => (activeTagValue = null)}
+        />
+      {/each}
+
+      {#if audioElements.length}
+        <h2>Spill av opptak</h2>
+        <p><a href="/prosjekt/{project._id}/opptak">Liste over opptak</a></p>
+        <p>
+          <em>
+            Du kan prøve å høre alle samtidig her, men det er usikkert om det
+            vil høres fint ut..
+          </em>
+        </p>
+        <button on:click={startAudio}>start</button><button on:click={stopAudio}
+          >stop</button
+        >
       {/if}
     </div>
-    {#if assignments && assignments[project._id] && Object.keys(assignments[project._id]).length}
-      <div class="send">
-        <h2>Send noter</h2>
-        <LinkedBox href="/prosjekt/{project._id}/send">
-          <p class="send-button">
-            <i class="fa fa-paper-plane" aria-hidden="true" />
-            Send noter
-          </p>
-        </LinkedBox>
-      </div>
-    {/if}
-
-    <h2>Stemmer</h2>
-    <ProjectPartsLinks {project} />
-  </main>
-  <div slot="aside">
-    <h2>Tildel stemme</h2>
-    {#each project.partslist as partslist}
-      <TagTrigger
-        tagName="part"
-        tagValue={partslist.part}
-        active={activeTagValue === partslist.part}
-        on:activate={evt => {
-          activeTagValue = evt.detail.tagValue;
-          activeTagName = evt.detail.tagName;
-        }}
-        on:deactivate={evt => (activeTagValue = null)}
-      />
-    {/each}
-
-    {#if audioElements.length}
-      <h2>Spill av opptak</h2>
-      <p><a href="/prosjekt/{project._id}/opptak">Liste over opptak</a></p>
-      <p>
-        <em>
-          Du kan prøve å høre alle samtidig her, men det er usikkert om det vil
-          høres fint ut..
-        </em>
-      </p>
-      <button on:click={startAudio}>start</button><button on:click={stopAudio}
-        >stop</button
-      >
-    {/if}
-  </div>
-</ScrollableListToolsRight>
+  </ScrollableListToolsRight>
+</div>
 
 <style>
   :root {
     --padding-top: 30px;
+  }
+
+  main {
+    width: 90%;
   }
 
   .project-title {
@@ -227,14 +241,11 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    width: 90%;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   .member {
     flex: 0 1 auto;
-    width: 45%;
+    width: 48%;
     box-sizing: border-box;
   }
 
@@ -249,12 +260,6 @@
   }
   main h2:first-child {
     padding-top: 0;
-  }
-
-  .send {
-    width: 85%;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   .send-button {

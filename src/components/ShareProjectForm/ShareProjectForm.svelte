@@ -1,6 +1,7 @@
 <script>
   import { goto } from '@sapper/app';
   import { createSubmitHandler } from '../utils/forms';
+  import UsageHint from '../UsageHint/UsageHint.svelte';
   export let project;
   export let user;
   const handleSubmit = createSubmitHandler(() => {
@@ -11,7 +12,10 @@
 
 <div>
   <h1>Send epost</h1>
-  <p>Fullfør eposten med en liten hilsen til musikantene.</p>
+  <UsageHint message="Fullfør eposten med en liten hilsen til
+   musikantene. Den sendes til foresatte, og til musikanten 
+   dersom vi har adresse. Lenker til notene for hver enkelt
+   legges inn automatisk." textAlign="left" />
 
   <form
     method="post"
@@ -54,12 +58,10 @@
         >
       </p>
     </div>
-    <button type="submit" class="fa fa-paper-plane">Send</button>
+    <nav>
+      <button type="submit" class="fa fa-paper-plane">Send</button>
+    </nav>
   </form>
-  <p>
-    Eposten sendes til foresatte - og til musikanten dersom vi har adresse.
-    Lenker til notene for hver enkelt legges inn automatisk.
-  </p>
 </div>
 
 <style>
@@ -73,7 +75,6 @@
     box-shadow: 5px 5px 4px -3px #000000;
     padding: 1em 3em;
     margin-bottom: 1em;
-    max-width: 800px;
   }
   .header {
     display: grid;
@@ -83,5 +84,12 @@
   }
   .header span {
     grid-column-start: 2;
+  }
+  nav {
+    text-align: right;
+  }
+  nav button {
+    font-size: 1.5em;
+    padding: 0.5em;
   }
 </style>
