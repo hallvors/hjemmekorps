@@ -45,7 +45,7 @@ function setCookie(req, res, next) {
 function ensureHttps(req, res, next) {
   let url = req.location.origin + req.url;
   if (req.headers["x-forwarded-proto"] !== "https") {
-    if (!/:\/\/localhost/.test(url)) {
+    if (!req.locals.env.development) {
       url = url.replace(/^http:/, 'https:');
       res.statusCode = 302;
       res.setHeader('Location', url);
