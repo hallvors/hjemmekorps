@@ -56,8 +56,12 @@
     svg = await request.text();
     // We throw in a timeout to let Svelte
     // render the SVG variable
-    setTimeout(function () {
+    setTimeout(function svgLoaded() {
       let svgElm = document.getElementsByTagName('svg')[0];
+      if (!svgElm) {
+        setTimeout(svgLoaded, 30);
+        return;
+      }
       renderingMusic = false;
       // measureList comes from the server, but we'll augment it per data model
       measureList = JSON.parse(svgElm.dataset.measureList);
