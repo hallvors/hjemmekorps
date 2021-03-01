@@ -291,6 +291,7 @@
 </script>
 
 <svelte:window bind:innerHeight={winHeight} />
+
 {#if audioContext}
 <Metronome
   bind:this={metronome}
@@ -305,8 +306,8 @@
 {#if renderingMusic}
   <div class="loading"><Loading message="Tilpasser notene til din skjerm.." /></div>
 {/if}
-
-<div class="note-box" bind:clientWidth={elemWidth}>
+<div bind:clientWidth={elemWidth}></div>
+<div class="note-box">
   {@html svg}
 </div>
 <style>
