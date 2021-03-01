@@ -43,12 +43,13 @@
     '2': HALVES,
   };
   $: noteResolution = resolutions[String(timeDenominator)]; // 0 == 16th, 1 == 8th, 2 == quarter note
-  if (typeof noteResolution === 'undefined') {
-    noteResolution = QUARTERS; //TODO: what makes sense to do here?
-  }
+
   var timerWorker = null; // The Web Worker used to fire timer messages
 
   function setup() {
+    if (typeof noteResolution === 'undefined') {
+      noteResolution = QUARTERS; //TODO: what makes sense to do here?
+    }
     // audioContext.sampleRate is 44100 (samples per second)
     // divide 44100 by 50 gets us 882 - number of samples for 1/50th = 0,02 second
     var duration_frames = audioContext.sampleRate / 50;
