@@ -33,17 +33,14 @@
   //    { jumps: [3,7], length: 0.125, beats: [{note}, {note, delay}],
   //          timeSignature: {numerator, denominator}, tempoInBPM },
   //  ]
-  // also variables currentMeasure, currentBeatInMeasure, measureCompletedTime to track state
+  // also variables measureCompletedTime to track state
   // onBeat: if event.detail.countdown do nothing (well, perhaps upbeat..)
-  // check if measureCompletedTime >= measure.length  -> increase currentMeasure and reset currentBeatInMeasure (we're done with that one)
-  // if currentMeasure >= measures.length, tune finished
-  // if jump, set currentMeasure (again!)
+  // if measureCount >= measures.length, tune finished
+  // if jump, set measureCount (again!)
   // if new measure and time signature different, change it
   // trigger & schedule note movements according to beat queue entry
 
   let measureList;
-  let currentMeasure = 0;
-  let currentBeatInMeasure = -1;
   let measureCompletedTime = 0.0;
 
   onMount(async function () {
@@ -63,93 +60,100 @@
         return;
       }
       renderingMusic = false;
-      // measureList comes from the server, but we'll augment it per data model
-      measureList = JSON.parse(svgElm.dataset.measureList);
-      let repeats = JSON.parse(svgElm.dataset.repeats);
-      upbeat = parseFloat(svgElm.dataset.upbeat);
-      console.log({ upbeat, measureList, repeats });
-      // turn repeat data into jump instructions
-      // CAVEAT: OSMD might change representation of repeat data?
-      let repeatStarts = [];
-      repeats.forEach((repeat, idx) => {
-        if (repeat.type === 0) {
-          // start of repetition - |:
-          repeatStarts.push(repeat);
-        } else if (repeat.type === 2) {
-          // end of repetition - :|
-          let jpmIdx = repeat.measureIndex + 1;
-          let target = repeatStarts.length
-            ? repeatStarts.shift().measureIndex
-            : 0;
-          measureList[jpmIdx].jumps.push(target);
-        } else if (repeat.type === 3 && repeat.endingIndices.includes(1)) {
-          // start of "house" - ending 1
-          // looking forward to find house two..
-          // first time we get here, we do nothing - next time we jump ahead to 2
-          let jpmIdx = repeat.measureIndex;
-          measureList[jpmIdx].jumps.push(jpmIdx); // do nothing on first touch
-          let target = repeats.find(
-            (item, itemIdx) =>
-              itemIdx > idx && item.type === 3 && item.endingIndices.includes(2)
-          );
-          if (target) {
-            measureList[jpmIdx].jumps.push(target.measureIndex); // jump here on second touch
-          }
+      measureList = processMusicData(svgElm);
+    }, 10);
+    //console.log({ measureList });
+  });
+
+  function processMusicData(svgElm) {
+    // measureList comes from the server, but we'll augment it per data model
+    let measureList = JSON.parse(svgElm.dataset.measureList);
+    if (measureList[0] && measureList[0].tempoInBPM) {
+      tempo = measureList[0].tempoInBPM;
+    }
+    let repeats = JSON.parse(svgElm.dataset.repeats);
+    upbeat = parseFloat(svgElm.dataset.upbeat);
+    // turn repeat data into jump instructions
+    // CAVEAT: OSMD might change representation of repeat data?
+    let repeatStarts = [];
+    repeats.forEach((repeat, idx) => {
+      if (repeat.type === 0) {
+        // start of repetition - |:
+        repeatStarts.push(repeat);
+      } else if (repeat.type === 2) {
+        // end of repetition - :|
+        let jpmIdx = repeat.measureIndex + 1;
+        let target = repeatStarts.length
+          ? repeatStarts.shift().measureIndex
+          : 0;
+        measureList[jpmIdx].jumps.push(target);
+      } else if (repeat.type === 3 && repeat.endingIndices.includes(1)) {
+        // start of "house" - ending 1
+        // looking forward to find house two..
+        // first time we get here, we do nothing - next time we jump ahead to 2
+        let jpmIdx = repeat.measureIndex;
+        measureList[jpmIdx].jumps.push(jpmIdx); // do nothing on first touch
+        let target = repeats.find(
+          (item, itemIdx) =>
+            itemIdx > idx && item.type === 3 && item.endingIndices.includes(2)
+        );
+        if (target) {
+          measureList[jpmIdx].jumps.push(target.measureIndex); // jump here on second touch
         }
-      });
-      // We want an array of arrays of notes within the "beat"
-      // one *complete* measure is timeNumerator items
-      // Caveat: we may have a first *incomplete* measure in case of upbeats
-      let beatDuration = 1 / timeNumerator; // 0.25 for 4/4, 0.125 for 6/8 ..
-      let notes = document.getElementsByClassName('vf-stavenote');
-      let beatInMeasure = 0;
+      }
+    });
+    // We want an array of arrays of notes within the "beat"
+    // one *complete* measure is timeNumerator items
+    // Caveat: we may have a first *incomplete* measure in case of upbeats
+    let beatDuration = 1 / timeNumerator; // 0.25 for 4/4, 0.125 for 6/8 ..
+    let notes = document.getElementsByClassName('vf-stavenote');
+    let beatInMeasure = 0;
+    /*
       if (upbeat) {
         // TODO: set beatInMeasure initially to last whole beat before upbeat
       }
-      for (let i = 0; i < notes.length; i++) {
-        let note = notes[i];
-        let start = parseFloat(note.dataset.timeStart);
-        let measureIndex = parseInt(note.dataset.measure);
-        let measure = measureList[measureIndex] || { notes: [] }; // the right-of-|| part should never happen
-        // pick up changing time signatures..
-        if (measure.timeSignature) {
-          beatDuration = 1 / measure.timeSignature.numerator;
-        }
-        let end = parseFloat(note.dataset.timeEnd);
-
-        // Important: if it's the first measure and it is an upbeat,
-        // we need to calculate the timing of the note from the *end*
-        // of the measure.
-        if (upbeat && measureIndex === 0) {
-          const normalMeasureDuration = timeNumerator / timeDenominator;
-
-          console.log({upbeat, start, end, measureDuration: measure.duration, normalMeasureDuration})
-          // this is an upbeat note. The metronome logic will pretend it is a normal,
-          // full measure, so shift the timing accordingly towards the end
-          start += (normalMeasureDuration - measure.duration);
-          measure.duration = normalMeasureDuration;
-        } else if (measureIndex > 0) {
-          // start is in seconds since beginning of the piece,
-          // but it's easire to calculate if relative to measure
-          start -= measure.start;
-        }
-        beatInMeasure = Math.floor(start / beatDuration);
-
-        if (start % beatDuration === 0) {
-          // this note starts exactly on the beat
-          pushQueue(measure, beatInMeasure, { note });
-        } else {
-          // should highlight at _delay_ after beat
-          let delay = start % beatDuration;
-          pushQueue(measure, beatInMeasure, {
-            delay,
-            note,
-          });
-        }
+*/
+    for (let i = 0; i < notes.length; i++) {
+      let note = notes[i];
+      let start = parseFloat(note.dataset.timeStart);
+      let measureIndex = parseInt(note.dataset.measure);
+      let measure = measureList[measureIndex] || { notes: [] }; // the right-of-|| part should never happen
+      // pick up changing time signatures..
+      if (measure.timeSignature) {
+        beatDuration = 1 / measure.timeSignature.numerator;
       }
-    }, 10);
-    console.log(measureList);
-  });
+      let end = parseFloat(note.dataset.timeEnd);
+
+      // Important: if it's the first measure and it is an upbeat,
+      // we need to calculate the timing of the note from the *end*
+      // of the measure.
+      if (upbeat && measureIndex === 0) {
+        const normalMeasureDuration = timeNumerator / timeDenominator;
+        // this is an upbeat note. The metronome logic will pretend it is a normal,
+        // full measure, so shift the timing accordingly towards the end
+        start += normalMeasureDuration - upbeat;
+        measure.duration = normalMeasureDuration;
+      } else if (measureIndex >= 0) {
+        // start is in seconds since beginning of the piece,
+        // but it's easire to calculate if relative to measure
+        start -= measure.start;
+      }
+      beatInMeasure = Math.floor(start / beatDuration);
+
+      if (start % beatDuration === 0) {
+        // this note starts exactly on the beat
+        pushQueue(measure, beatInMeasure, { note });
+      } else {
+        // should highlight at _delay_ after beat
+        let delay = start % beatDuration;
+        pushQueue(measure, beatInMeasure, {
+          delay,
+          note,
+        });
+      }
+    }
+    return measureList;
+  }
 
   function pushQueue(measure, beat, noteObj) {
     if (!measure.beats[beat]) {
@@ -191,44 +195,42 @@
     }, delay * msPerMeasure);
   }
 
-  // onBeat: check if measureCompletedTime >= measure.length  -> increase currentMeasure and reset currentBeatInMeasure (we're done with that one)
-  // if currentMeasure >= measures.length, tune finished
-  // if jump, set currentMeasure (again!)
+  // if measureCount >= measures.length, tune finished
+  // if jump, set measureCount (again!)
   // if new measure and time signature different, change it
   // trigger & schedule note movements according to beat queue entry
-
+  let previousMeasure;
   function onBeat(evt) {
+    // Two first measures are countdown - if upbeat,
+    // upbeat starts during second measure
+    let measureCount = evt.detail.measureCount;
     if (evt.detail.countdown) {
-      dispatch('countdown', {last: evt.detail.countsLeft === 0}); // RecordUI will count visually down
+      // RecordUI will count visually down
+      dispatch(
+        'countdown',
+        Object.assign({ last: evt.detail.countdown === null }, evt.detail)
+      );
       if (!upbeat) {
         return; // nothing to do here
       }
-      // if upbeat, we have an initial measure which we want the _timeNumerator_
-      // last beats from the countdown to "play"
-      if(upbeat && evt.detail.countsLeft > timeNumerator) {
-        return;
-      }
     }
-    let measure = measureList[currentMeasure];
-    if (measureCompletedTime >= measure.duration) {
-      console.log('measure is finished', measureCompletedTime, measure.duration)
-      // next measure!
-      currentMeasure++;
-      currentBeatInMeasure = -1;
-      if (currentMeasure >= measureList.length) {
+    let measure = measureList[measureCount];
+    if (!measure) {
+      if (measureCount >= measureList.length) {
         dispatch('ended');
         metronome.stop();
-        currentMeasure = 0;
         clearHighlight();
-        return;
-      } else {
-        measure = measureList[currentMeasure];
-        measureCompletedTime = 0;
-        if (measure.jumps.length) {
-          console.log('jumping from ' + currentMeasure + ' to ' + measure.jumps[0])
-          currentMeasure = measure.jumps.shift();
-          measure = measureList[currentMeasure];
-        }
+      }
+      return;
+    }
+
+    if (previousMeasure !== measureCount) {
+      // we're entering a new measure
+      measureCompletedTime = 0;
+      if (measure.jumps.length) {
+        measureCount = measure.jumps.shift();
+        measure = measureList[measureCount];
+        metronome.jumpToMeasure(measureCount);
       }
       // did the time signature change?
       if (measure.timeSignature) {
@@ -293,23 +295,26 @@
 <svelte:window bind:innerHeight={winHeight} />
 
 {#if audioContext}
-<Metronome
-  bind:this={metronome}
-  {tempo}
-  {timeNumerator}
-  {timeDenominator}
-  {audioContext}
-  {soundRecorder}
-  on:beat={onBeat}
-/>
+  <Metronome
+    bind:this={metronome}
+    {tempo}
+    {upbeat}
+    {timeNumerator}
+    {audioContext}
+    {soundRecorder}
+    on:beat={onBeat}
+  />
 {/if}
 {#if renderingMusic}
-  <div class="loading"><Loading message="Tilpasser notene til din skjerm.." /></div>
+  <div class="loading">
+    <Loading message="Tilpasser notene til din skjerm.." />
+  </div>
 {/if}
-<div bind:clientWidth={elemWidth}></div>
+<div bind:clientWidth={elemWidth} />
 <div class="note-box">
   {@html svg}
 </div>
+
 <style>
   :global(.activeNote),
   :global(.activeNote path),
