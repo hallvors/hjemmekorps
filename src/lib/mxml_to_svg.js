@@ -90,6 +90,7 @@ export async function generateSVGImage(
     drawLyricist: false,
     drawPartNames: false,
     drawMetronomeMarks: false,
+    disableCursor: true,
   });
   // for more options check OSMDOptions.ts
   await osmdInstance.load(mxmlData);
