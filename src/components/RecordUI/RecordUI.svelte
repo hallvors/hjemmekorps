@@ -9,11 +9,10 @@
   export let project;
   export let user;
   var recorder, input, theStream;
-
+  let unlocked = false;
   // variables for metronome countdown before recording
   let count = 0;
   let countdown = false;
-  let firstCount = true;
 
   let trackName;
   if (project.partslist) {
@@ -58,7 +57,16 @@
   });
 
   function start() {
-    meta.push({ timestamp: 0 });
+    if (!unlocked) {
+      // play silent buffer to unlock the audio on certain platforms (hi Apple)
+      var buffer = audioContext.createBuffer(1, 1, 22050);
+      var node = audioContext.createBufferSource();
+      node.buffer = buffer;
+      node.connect(audioContext.destination);
+      node.start(0);
+      unlocked = true;
+    }
+
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then(function (stream) {
@@ -101,6 +109,7 @@
         });
 
         //start the recording process
+        meta.push({ start: audioContext.currentTime });
         recorder.startRecording();
         dispatch('start'); // starts playing other tracks - if any
         theBox.initPlaythrough(); // Tell NoteBox to start metronome
@@ -128,14 +137,10 @@
   }
 
   function countdownUiUpdate(evt) {
-    count++;
-    console.log('countdown evt ', count, evt, evt.detail.last);
+    meta.push({ countdown: audioContext.currentTime });
+    count = evt.detail.countdown;
     countdown = !evt.detail.last;
     recState = RECORDING;
-    if (count === 3 && firstCount) {
-      count = 1;
-      firstCount = false;
-    }
   }
 
   function cancel() {
@@ -146,7 +151,6 @@
       audioElm.controls = false;
       audioElm.pause();
       meta = [];
-      firstCount = true;
       clearInterval(volumeInterval);
       count = 0;
       recState = STOPPED;
@@ -166,7 +170,6 @@
   }
 
   function endOfNote() {
-    console.log('finished notification');
     clearInterval(volumeInterval);
     stop();
   }
