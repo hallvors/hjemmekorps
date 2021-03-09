@@ -224,7 +224,12 @@
   {/if}
 
   <!-- svelte-ignore a11y-media-has-caption -->
-  <audio id="audio-elm" class={recordingData === 0 ? 'hide' : ''} bind:this={audioElm} on:ended={pausePlayRecording} />
+  <audio
+    id="audio-elm"
+    class={recordingData === 0 ? 'hide' : ''}
+    bind:this={audioElm}
+    on:ended={pausePlayRecording}
+  />
 </nav>
 
 <NoteBox
