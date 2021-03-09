@@ -14,7 +14,7 @@
   }
 </script>
 
-<main style="background-color: {backgroundColor}; color: {foregroundColor}">
+<nav style="background-color: {backgroundColor}; color: {foregroundColor}">
   {#if $user && $user._type === 'adminUser'}
     <AdminNavbar {logo} {foregroundColor} {navbarHeight} user={$user} />
   {:else if $user && $user._type === 'member'}
@@ -35,10 +35,10 @@
       </svg>
     </a>
   {/if}
-</main>
+</nav>
 
 <style>
-  main {
+  nav {
     position: fixed;
     top: 0;
     z-index: 100;

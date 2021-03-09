@@ -3,11 +3,11 @@ export let user;
 
 </script>
 
-<main>
+<div>
     <h1>Hei {user.name}!</h1>
-</main>
+</div>
 <style>
-    main {
+    div {
         text-align: center;
     }
 </style>
