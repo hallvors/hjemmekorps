@@ -1,8 +1,15 @@
 <script>
   import { goto } from '@sapper/app';
-  import { bands, selectedBand, addProject, updateProjectList } from '../../lib/datastore';
+  import {
+    bands,
+    selectedBand,
+    addProject,
+    updateProjectList,
+  } from '../../lib/datastore';
+  import Loading from '../../components/Loading/Loading.svelte';
 
   let bpm = 96;
+  let loading = false;
 
   let files;
   let band = $bands[$selectedBand]._id;
@@ -17,17 +24,21 @@
       formData.append('band', band);
       formData.append('bpm', bpm);
       formData.append('file', files[0]);
+      loading = true;
       const response = await fetch('/api/projects', {
         method: 'POST',
         body: formData,
       });
       statusCode = response.status;
+      loading = false;
       if (statusCode === 200) {
         // redirect to /prosjekt/ID
         let projData = await response.json();
         addProject(projData);
-        updateProjectList({_id: projData._id, title: projData.title});
+        updateProjectList({ _id: projData._id, title: projData.title });
         goto('/prosjekt/' + projData._id);
+      } else {
+        alert('Opplasting lyktes muligens ikke - feilkode ' + statusCode);
       }
     }
   }
@@ -63,3 +74,7 @@
 
   <input type="submit" value="Last opp" />
 </form>
+
+{#if loading}
+<Loading message="Laster opp.." />
+{/if}

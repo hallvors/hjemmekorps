@@ -41,6 +41,7 @@ export async function post(req, res, next) {
         )
         .then(project => {
           res.json(project);
+          res.end();
           // process parts, convert to SVG
           return Promise.all(
             project.partslist.map(async partinfo => {
@@ -51,11 +52,15 @@ export async function post(req, res, next) {
                 0,
                 true
               );
-              return await sClient.addPartFile(
-                project._id,
-                partinfo.part,
-                Buffer.from(svgMarkup[0], 'utf8')
-              );
+              if (svgMarkup[0]) {
+                return await sClient.addPartFile(
+                  project._id,
+                  partinfo.part,
+                  Buffer.from(svgMarkup[0], 'utf8')
+                );
+              } else {
+                console.error('No SVG generated for ' + partinfo.part);
+              }
             })
           );
         });
