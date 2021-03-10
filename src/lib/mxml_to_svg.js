@@ -79,6 +79,8 @@ export async function generateSVGImage(
   debug('div.height: ' + div.height, DEBUG);
   // ---- end browser hacks (hopefully) ----
 
+  mxmlData = getSpecificPart(mxmlData, partName);
+
   const osmdInstance = new OSMD.OpenSheetMusicDisplay(div, {
     autoResize: true,
     backend: 'svg',
@@ -97,12 +99,7 @@ export async function generateSVGImage(
   await osmdInstance.load(mxmlData);
   debug('xml loaded', DEBUG);
   try {
-    // TODO: use our mxml helpers to remove the non-wanted parts instead
-    osmdInstance.sheet.instruments.forEach(instrument => {
-      instrument.Visible = instrument.nameLabel.text === partName;
-    });
     osmdInstance.render();
-
     // add meta data to SVG notes
     let time = 0;
     for (let i = 0; i < osmdInstance.graphic.MeasureList.length; i++) {
@@ -212,4 +209,26 @@ function debug(msg, debugEnabled) {
   if (debugEnabled) {
     console.log(msg);
   }
+}
+
+function getSpecificPart(mxmlData, partName) {
+  const dom = new jsdom.JSDOM('');
+  const DOMParser = dom.window.DOMParser;
+  const parser = new DOMParser();
+  const svgDom = parser.parseFromString(mxmlData, 'text/xml');
+  const partsList = svgDom.getElementsByTagName('score-part');
+  for (let i = partsList.length - 1; i >= 0; i--) {
+    let nameElm = partsList[i].getElementsByTagName('part-name')[0];
+    if (!(nameElm && nameElm.textContent === partName)) {
+      let id = partsList[i].id;
+      partsList[i].parentNode.removeChild(partsList[i]);
+      let actualPart = svgDom.getElementById(id);
+      if (actualPart) {
+        actualPart.parentNode.removeChild(actualPart);
+      }
+    }
+  }
+  return (
+    '<?xml version="1.0" encoding="UTF-8" ?>' + svgDom.documentElement.outerHTML
+  );
 }
