@@ -113,7 +113,11 @@
       let note = notes[i];
       let start = parseFloat(note.dataset.timeStart);
       let measureIndex = parseInt(note.dataset.measure);
-      let measure = measureList[measureIndex] || { notes: [] }; // the right-of-|| part should never happen
+      let measure = measureList[measureIndex];
+      if (!measure) {
+        console.warn('no measure for index ' + measureIndex)
+        continue;
+      }
       // pick up changing time signatures..
       if (measure.timeSignature) {
         beatDuration = 1 / measure.timeSignature.numerator;
