@@ -17,7 +17,7 @@
   let timeNumerator = 4;
   let timeDenominator = 4;
   let metronome;
-  let svg;
+  let svg = '';
   let upbeat = 0;
 
   // To move a cursor correctly, we need to know about _beats, measures and jumps_
