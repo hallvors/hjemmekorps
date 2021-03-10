@@ -31,6 +31,7 @@ export async function generateSVGImage(
   pageHeight,
   DEBUG = false
 ) {
+  const renderStartTime = Date.now();
   const markupStrings = [];
   pageWidth = parseInt(pageWidth);
   pageHeight = parseInt(pageHeight);
@@ -203,6 +204,7 @@ export async function generateSVGImage(
   while (document.body.firstChild) {
     document.body.removeChild(document.body.firstChild);
   }
+  console.log('finished in ' + (Date.now() - renderStartTime) + 'ms')
   return markupStrings;
 }
 
