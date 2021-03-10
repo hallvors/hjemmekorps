@@ -46,6 +46,7 @@
   var volumeInterval;
   let volumePercElm;
   let volumeLoud = false;
+  let first = true;
 
   onMount(() => {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -108,6 +109,7 @@
           //mp3: { bitRate: 160 },
         });
 
+        first = true;
         //start the recording process
         meta.push({ start: audioContext.currentTime });
         recorder.startRecording();
@@ -135,11 +137,19 @@
     meta = [];
     xhr.send(fd);
   }
-
   function countdownUiUpdate(evt) {
     meta.push({ countdown: audioContext.currentTime });
     count = evt.detail.countdown;
-    countdown = !evt.detail.last;
+    if (first && count === 3 && evt.detail.beatInMeasure === 2) {
+      count = 2;
+      first = false;
+    }
+    countdown = true;
+    if (evt.detail.last) {
+      setTimeout(() => {
+        countdown = false;
+      }, 100);
+    }
     recState = RECORDING;
   }
 
