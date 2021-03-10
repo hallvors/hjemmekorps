@@ -268,7 +268,7 @@
   #volume {
     width: 100%;
     position: absolute;
-    border: 1px solid grey;
+    border: none;
 
     bottom: 0px;
     left: 50%;
