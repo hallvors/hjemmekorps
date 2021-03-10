@@ -172,7 +172,7 @@
         } else {
           clearHighlight();
           beatInfo.note.classList.add('activeNote');
-          //scrollIfRequired(beatInfo.note);
+          scrollIfRequired(beatInfo.note);
         }
       }
     }
@@ -239,56 +239,48 @@
       }
       // detect tempo changes
       if (measure.tempoInBPM && measure.tempoInBPM !== tempo) {
-        console.log('tempo change')
+        console.log('tempo change');
         tempo = measure.tempoInBPM;
       }
     }
+
     let beatDuration = 1 / timeNumerator;
     measureCompletedTime += beatDuration;
-    currentBeatInMeasure++;
-    highlightBeat(currentMeasure, currentBeatInMeasure);
+    highlightBeat(measureCount, evt.detail.beatInMeasure);
+    previousMeasure = measureCount;
   }
 
   export function initPlaythrough() {
+    measureCompletedTime = 0.0;
     metronome.play();
   }
   export function stopPlaythrough() {
     metronome.stop();
-    currentMeasure = 0;
-    currentBeatInMeasure = -1;
     clearHighlight();
+    // reset music data (repeats are "used" when cursor goes through data)
+    let svgElm = document.getElementsByTagName('svg')[0];
+    measureList = processMusicData(svgElm);
   }
 
-  // https://stackoverflow.com/a/35940276
-  function getScrollParent(node) {
-    if (node == null) {
-      return null;
-    }
-
-    if (node.scrollHeight > node.clientHeight && node.clientHeight > 0) {
-      return node;
-    } else {
-      return getScrollParent(node.parentNode);
-    }
-  }
-  // https://stackoverflow.com/a/47768164
-  function getOffset(element) {
-    var bound = element.getBoundingClientRect();
-    var html = document.documentElement;
-
-    return {
-      top: bound.top + window.pageYOffset - html.clientTop,
-      left: bound.left + window.pageXOffset - html.clientLeft,
-    };
-  }
   function scrollIfRequired(elm) {
-    let offset = getOffset(elm);
-    //if (offset.top > winHeight * 0.7) {
-      let scrollable = getScrollParent(elm);
-      console.log('scrollable', scrollable, scrollable.scrollBy)
-      scrollable.scrollTo({top: offset.top - 100});
-    //}
+    let rect = elm.getBoundingClientRect();
+    let navs = document.getElementsByTagName('nav');
+    let navbarHeight = navs[0].offsetHeight;
+    for (let i = 0; i < navs.length; i++) {
+      navbarHeight = Math.max(
+        navbarHeight,
+        navs[i].getBoundingClientRect().bottom
+      );
+    }
+    let tooHigh = rect.y < navbarHeight * 1.1;
+    let tooLow = rect.bottom > winHeight - rect.height;
+    if (tooHigh || tooLow) {
+      let scroll =
+        rect.y + document.documentElement.scrollTop - navbarHeight * 1.2;
+      document.documentElement.scrollTop = scroll;
+    }
   }
+
   let winHeight;
 </script>
 
@@ -321,6 +313,9 @@
   :global(.activeNote g) {
     filter: invert(29%) sepia(82%) saturate(4448%) hue-rotate(174deg)
       brightness(60%) contrast(101%);
+  }
+  :global(html) {
+    scroll-behavior: smooth;
   }
   .note-box {
     /*
