@@ -108,11 +108,7 @@
     let beatDuration = 1 / timeNumerator; // 0.25 for 4/4, 0.125 for 6/8 ..
     let notes = document.getElementsByClassName('vf-stavenote');
     let beatInMeasure = 0;
-    /*
-      if (upbeat) {
-        // TODO: set beatInMeasure initially to last whole beat before upbeat
-      }
-*/
+
     for (let i = 0; i < notes.length; i++) {
       let note = notes[i];
       let start = parseFloat(note.dataset.timeStart);
