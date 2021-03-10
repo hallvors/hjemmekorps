@@ -29,7 +29,7 @@
 <style>
   .background {
     background-color: #999;
-    opacity: .8;
+    opacity: .9;
     position: fixed;
     top: 0;
     left: 0;
@@ -48,7 +48,7 @@
     border-radius: 100px;
   }
   p {
-    color: #999;
+    color: #444;
     letter-spacing: 8%;
     font-size: 5vw;
     text-align: center;
