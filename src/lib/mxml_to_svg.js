@@ -130,9 +130,15 @@ export async function generateSVGImage(
                 let svgElm = note.getSVGGElement();
                 if (svgElm) {
                   svgElm.setAttribute('data-measure', i);
-                  svgElm.setAttribute('data-time-start', parseFloat(time).toFixed(3));
+                  svgElm.setAttribute(
+                    'data-time-start',
+                    parseFloat(time).toFixed(3)
+                  );
                   time += note.sourceNote.length.realValue;
-                  svgElm.setAttribute('data-time-end', parseFloat(time).toFixed(3));
+                  svgElm.setAttribute(
+                    'data-time-end',
+                    parseFloat(time).toFixed(3)
+                  );
                 }
               }
             }
@@ -140,7 +146,6 @@ export async function generateSVGImage(
         }
       }
     }
-    //osmdInstance.graphic.MeasureList[0][0].staffEntries[0].graphicalVoiceEntries[0].notes[0].getSVGGElement();
   } catch (ex) {
     console.log('renderError: ' + ex);
   }
@@ -201,7 +206,7 @@ export async function generateSVGImage(
   while (document.body.firstChild) {
     document.body.removeChild(document.body.firstChild);
   }
-  console.log('finished in ' + (Date.now() - renderStartTime) + 'ms')
+  console.log('finished in ' + (Date.now() - renderStartTime) + 'ms');
   return markupStrings;
 }
 
