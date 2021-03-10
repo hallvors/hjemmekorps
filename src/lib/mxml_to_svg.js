@@ -82,7 +82,7 @@ export async function generateSVGImage(
   mxmlData = getSpecificPart(mxmlData, partName);
 
   const osmdInstance = new OSMD.OpenSheetMusicDisplay(div, {
-    autoResize: true,
+    autoResize: false,
     backend: 'svg',
     pageBackgroundColor: '#FFFFFF',
     pageFormat: pageFormat,
