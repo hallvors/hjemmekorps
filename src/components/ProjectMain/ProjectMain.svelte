@@ -122,7 +122,7 @@
     <main>
       <h2>Musikanter</h2>
       <UsageHint
-        message="Velg stemme til høyre og klikk på alle musikantene som skal spille den."
+        message="For å fordele stemmer, velg stemme til høyre og klikk på alle musikantene som skal spille den."
       />
 
       <div class="list">
