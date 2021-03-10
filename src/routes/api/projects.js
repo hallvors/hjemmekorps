@@ -41,7 +41,8 @@ export async function post(req, res, next) {
         )
         .then(project => {
           res.json(project);
-          res.end();
+          // TODO: how to make Polka / Node HTTP server flush data HERE?
+          // user should not wait for the slow parts below..
           // process parts, convert to SVG
           return Promise.all(
             project.partslist.map(async partinfo => {
@@ -60,6 +61,7 @@ export async function post(req, res, next) {
                 );
               } else {
                 console.error('No SVG generated for ' + partinfo.part);
+                console.error(svgMarkup)
               }
             })
           );
