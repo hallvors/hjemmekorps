@@ -203,8 +203,8 @@ export async function generateSVGImage(
     svgElement.setAttribute('data-repeats', JSON.stringify(repeats));
     markupStrings.push(svgElement.outerHTML);
   }
-  while (document.body.firstChild) {
-    document.body.removeChild(document.body.firstChild);
+  while (div.firstChild) {
+    div.removeChild(div.firstChild);
   }
   console.log('finished in ' + (Date.now() - renderStartTime) + 'ms');
   return markupStrings;
