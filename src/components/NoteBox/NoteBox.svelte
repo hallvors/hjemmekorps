@@ -12,7 +12,7 @@
   export let audioContext;
 
   let elemWidth = 0;
-  let tempo = project.bpm || 96;
+  let tempo = project.bpm || 65;
   let renderingMusic = true;
   let timeNumerator = 4;
   let timeDenominator = 4;
@@ -69,7 +69,7 @@
     // measureList comes from the server, but we'll augment it per data model
     let measureList = JSON.parse(svgElm.dataset.measureList);
     if (measureList[0] && measureList[0].tempoInBPM) {
-      tempo = measureList[0].tempoInBPM;
+      //tempo = measureList[0].tempoInBPM;
     }
     let repeats = JSON.parse(svgElm.dataset.repeats);
     upbeat = parseFloat(svgElm.dataset.upbeat);
@@ -240,7 +240,7 @@
       // detect tempo changes
       if (measure.tempoInBPM && measure.tempoInBPM !== tempo) {
         console.log('tempo change');
-        tempo = measure.tempoInBPM;
+        //tempo = measure.tempoInBPM;
       }
     }
 
