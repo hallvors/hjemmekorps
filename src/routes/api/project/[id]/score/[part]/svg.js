@@ -8,7 +8,7 @@ export async function get(req, res) {
   // otherwise generate one on the fly
   let width = parseInt(req.query.width);
   let svgMarkup;
-  if (width > 700 && width < 1000) {
+  //if (width > 700 && width < 1000) {
     let url = await sClient.getPartFile(req.params.id, req.params.part);
     if (url) {
       let result = await got(url);
@@ -16,7 +16,7 @@ export async function get(req, res) {
         svgMarkup = result.body;
       }
     }
-  }
+  //}
 
   if (!svgMarkup) {
     let project = await sClient.getProjectScoreData(req.params.id);
