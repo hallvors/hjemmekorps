@@ -14,6 +14,7 @@
   export let trackName = null;
   export let soundRecorder;
   export let audioContext;
+  export let hasPartFile = false;
 
   let sheetMusicRenderer; // OSMD instance
   let sheetmusicElm;
@@ -54,15 +55,18 @@
 
   onMount(async function () {
     const module = await import('opensheetmusicdisplay');
-    let request = await fetch(
-      `/api/project/${project._id}/score/${
-        trackName ? encodeURIComponent(trackName) : ''
-      }/svg`,
-      { credentials: 'same-origin' }
-    );
+    let request;
+    if (hasPartFile) {
+      request = await fetch(
+        `/api/project/${project._id}/score/${
+          trackName ? encodeURIComponent(trackName) : ''
+        }/svg`,
+        { credentials: 'same-origin' }
+        );
+        console.log('svg req', request)
+      }
     let markup;
-    console.log('svg req', request)
-    if (request.ok) {
+    if (request && request.ok) {
       svg = await request.text();
     } else {
       request = await fetch(

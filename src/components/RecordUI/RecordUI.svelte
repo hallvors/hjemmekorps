@@ -16,6 +16,7 @@
 
   // name of the part this specific user will play
   let trackName;
+  let hasPartFile = false;
   if (project.partslist) {
     for (let i = 0; i < project.partslist.length; i++) {
       if (
@@ -23,6 +24,7 @@
         project.partslist[i].members.find(member => member._ref === user._id)
       ) {
         trackName = project.partslist[i].part;
+        hasPartFile = Boolean(project.partslist[i].sheetmusic);
         break;
       }
     }
@@ -248,6 +250,7 @@
   {trackName}
   {audioContext}
   soundRecorder={analyser}
+  hasPartFile={hasPartFile}
   bind:this={theBox}
   on:ended={endOfNote}
   on:countdown={countdownUiUpdate}
