@@ -31,7 +31,7 @@
       const formData = new FormData();
       formData.append('band', band);
       if (id) {
-        formData.append('id', id);
+        formData.append('projectId', id);
       }
       formData.append('bpm', bpm);
       formData.append('file', files[0]);
