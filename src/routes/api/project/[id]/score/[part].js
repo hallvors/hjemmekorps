@@ -35,3 +35,11 @@ export async function get(req, res, next) {
     res.end(markup);
   });
 }
+
+export async function post(req, res, next) {
+  let projectId = req.params.id;
+  let partName = req.params.part;
+  let svgMarkup = req.body.svgMarkup;
+  await sClient.addPartFile(projectId, partName, Buffer.from(svgMarkup));
+  res.json({status: 'ok'});
+}
