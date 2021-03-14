@@ -14,7 +14,7 @@ export async function get(req, res, next) {
     for (let i = scoreParts.length - 1; i >= 0; i--) {
       let id = scoreParts[i].getAttribute('id');
       let name = scoreParts[i].getElementsByTagName('part-name')[0].textContent;
-      if (name === req.params.part) {
+      if (name.trim() === req.params.part.trim()) {
         keepIds.push(id);
       } else {
         scoreParts[i].parentNode.removeChild(scoreParts[i]);
