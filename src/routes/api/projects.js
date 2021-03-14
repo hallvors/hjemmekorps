@@ -33,6 +33,7 @@ export async function post(req, res, next) {
         .addProject(
           req.user._id,
           bandId,
+          req.body.projectId,
           projName,
           req.file,
           partslist,

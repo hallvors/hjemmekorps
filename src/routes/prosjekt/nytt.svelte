@@ -1,3 +1,10 @@
+<script context="module">
+  export async function preload(page) {
+    let id = page.query.id;
+    return { id };
+  }
+</script>
+
 <script>
   import { goto } from '@sapper/app';
   import {
@@ -8,6 +15,7 @@
   } from '../../lib/datastore';
   import Loading from '../../components/Loading/Loading.svelte';
 
+  export let id;
   let bpm = 96;
   let loading = false;
 
@@ -22,6 +30,9 @@
     if (files && files.length > 0) {
       const formData = new FormData();
       formData.append('band', band);
+      if (id) {
+        formData.append('id', id);
+      }
       formData.append('bpm', bpm);
       formData.append('file', files[0]);
       loading = true;

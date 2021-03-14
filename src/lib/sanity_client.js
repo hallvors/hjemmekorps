@@ -220,51 +220,73 @@ function getProject(userId, projectId, mustBeFresh) {
   });
 }
 
-function addProject(userId, bandId, name, mxmlFile, partslist, bpm, members) {
+function addProject(
+  userId,
+  bandId,
+  projectId,
+  name,
+  mxmlFile,
+  partslist,
+  bpm,
+  members
+) {
   const client = getSanityClient();
-  return client.assets
-    .upload('file', mxmlFile.buffer, { filename: mxmlFile.originalname })
-    .then(filedoc => {
-      const tempMapping = {};
-      partslist = partslist
-        .map(part => {
-          // The name of the part might be "Trumpet 1" etc
-          // but it might also mention the name of a member,
-          // in the latter case we can complete the assignment
-          const member = members.find(member => {
-            return (
-              part
-                .toLowerCase()
-                .indexOf(member.name.toLowerCase().split(' ')[0]) > -1
-            );
-          });
-          if (member) {
-            // this score part mentions a name
-            if (tempMapping[part]) {
-              // We have assigned somebody else already, add to the list
-              tempMapping[part].push({ _type: 'reference', _ref: member._id });
-              return;
+  return (projectId
+    ? client.fetch('*[_id == $id]', { id: projectId })
+    : Promise.resolve()
+  ).then(oldProject => {
+    return client.assets
+      .upload('file', mxmlFile.buffer, { filename: mxmlFile.originalname })
+      .then(filedoc => {
+        const tempMapping = {};
+        partslist = partslist
+          .map(part => {
+            if (oldProject) {
+              let oldAssignment = oldProject.partslist.find(oldPart => oldPart.part === part);
+              if (oldAssignment) {
+                delete oldAssignment.sheetmusic;
+                return oldAssignment;
+              }
             }
-            const assignmentObj = {
+            // The name of the part might be "Trumpet 1" etc
+            // but it might also mention the name of a member,
+            // in the latter case we can complete the assignment
+            const member = members.find(member => {
+              return (
+                part
+                  .toLowerCase()
+                  .indexOf(member.name.toLowerCase().split(' ')[0]) > -1
+              );
+            });
+            if (member) {
+              // this score part mentions a name
+              if (tempMapping[part]) {
+                // We have assigned somebody else already, add to the list
+                tempMapping[part].push({
+                  _type: 'reference',
+                  _ref: member._id,
+                });
+                return;
+              }
+              const assignmentObj = {
+                _key: nanoid(),
+                _type: 'projectassignment',
+                part,
+                members: [{ _type: 'reference', _ref: member._id }],
+              };
+              tempMapping[part] = assignmentObj.members;
+              return assignmentObj;
+            }
+            // This is a generic part name, no musician assigned (which we know about)
+            return {
               _key: nanoid(),
-              _type: 'projectassignment',
               part,
-              members: [{ _type: 'reference', _ref: member._id }],
+              _type: 'projectassignment',
+              members: [],
             };
-            tempMapping[part] = assignmentObj.members;
-            return assignmentObj;
-          }
-          // This is a generic part name, no musician assigned (which we know about)
-          return {
-            _key: nanoid(),
-            part,
-            _type: 'projectassignment',
-            members: [],
-          };
-        })
-        .filter(obj => obj); // remove any nulls
-      return client
-        .create({
+          })
+          .filter(obj => obj); // remove any nulls
+        const projectData = {
           _type: 'project',
           owner: { _type: 'reference', _ref: userId },
           band: { _type: 'reference', _ref: bandId },
@@ -275,9 +297,15 @@ function addProject(userId, bandId, name, mxmlFile, partslist, bpm, members) {
             asset: { _type: 'reference', _ref: filedoc._id },
           },
           partslist,
-        })
-        .then(project => getProject(userId, project._id, true));
-    });
+        };
+        if (projectId) {
+          projectData._id = projectId;
+        }
+        return client
+          .createOrReplace(projectData)
+          .then(project => getProject(userId, project._id, true));
+      });
+  });
 }
 
 async function getPartFile(projectId, partName) {
@@ -296,6 +324,7 @@ async function getPartFile(projectId, partName) {
 }
 
 async function addPartFile(projectId, partName, fileDataBuffer) {
+  console.log('add or replace part file for ', projectId, partName);
   const client = getSanityClient();
   const existing = await client.fetch(
     `*[_id == $projectId] {
