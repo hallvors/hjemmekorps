@@ -1,14 +1,11 @@
-import { generateSVGImage } from '../../../../../../lib/mxml_to_svg';
+//import { generateSVGImage } from '../../../../../../lib/mxml_to_svg';
 import sClient from '../../../../../../lib/sanity_client';
 import got from 'got';
 
 export async function get(req, res) {
-  // We possibly have an SVG generated for 800px width
-  // We'll use this SVG for screens between 700 and 1000,
-  // otherwise generate one on the fly
-  let width = parseInt(req.query.width);
+  // We possibly have an SVG generated, either from the upload
+  // or cached when rendered earlier..
   let svgMarkup;
-  //if (width > 700 && width < 1000) {
     let url = await sClient.getPartFile(req.params.id, req.params.part);
     if (url) {
       let result = await got(url);
@@ -16,8 +13,7 @@ export async function get(req, res) {
         svgMarkup = result.body;
       }
     }
-  //}
-
+/*
   if (!svgMarkup) {
     let project = await sClient.getProjectScoreData(req.params.id);
     let result = await got(project.sheetmusicFile);
@@ -31,7 +27,13 @@ export async function get(req, res) {
     );
     svgMarkup = array[0];
   }
+*/
   //console.log(svgMarkup)
-  res.setHeader('Content-type', 'image/svg+xml; charset=utf-8');
-  res.end(svgMarkup);
+  if (svgMarkup) {
+    res.setHeader('Content-type', 'image/svg+xml; charset=utf-8');
+    res.end(svgMarkup);
+  } else {
+    res.statusCode = 404;
+    res.end('');
+  }
 }

@@ -3,7 +3,11 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import Loading from '../Loading/Loading.svelte';
   import Metronome from '../Metronome/Metronome.svelte';
-
+  import {
+    extractNoteMetaData,
+    extractMeasureData,
+    extractUpbeatTime,
+  } from '../../lib/osmd_helpers';
   const dispatch = createEventDispatcher();
 
   export let project;
@@ -11,14 +15,20 @@
   export let soundRecorder;
   export let audioContext;
 
-  let elemWidth = 0;
+  let sheetMusicRenderer; // OSMD instance
+  let sheetmusicElm;
   let tempo = project.bpm || 65;
   let renderingMusic = true;
   let timeNumerator = 4;
   let timeDenominator = 4;
   let metronome;
-  let svg = '';
   let upbeat = 0;
+  let measureList;
+  let noteData;
+  let repeats = [];
+  let svg = '';
+  // Enable feature sending generated SVG files to server
+  const OPT_SAVE_GENERATED_SVG = false;
 
   // To move a cursor correctly, we need to know about _beats, measures and jumps_
   // Beat signals arrive from the metronome and potentially cause cursor movements.
@@ -40,39 +50,83 @@
   // if new measure and time signature different, change it
   // trigger & schedule note movements according to beat queue entry
 
-  let measureList;
   let measureCompletedTime = 0.0;
 
   onMount(async function () {
+    const module = await import('opensheetmusicdisplay');
     let request = await fetch(
       `/api/project/${project._id}/score/${
         trackName ? encodeURIComponent(trackName) : ''
-      }/svg?width=${elemWidth}`,
+      }/svg`,
       { credentials: 'same-origin' }
     );
-    svg = await request.text();
-    // We throw in a timeout to let Svelte
-    // render the SVG variable
-    setTimeout(function svgLoaded() {
-      let svgElm = document.getElementsByTagName('svg')[0];
-      if (!svgElm) {
-        setTimeout(svgLoaded, 30);
-        return;
+    let markup;
+    console.log('svg req', request)
+    if (request.ok) {
+      svg = await request.text();
+    } else {
+      request = await fetch(
+        `/api/project/${project._id}/score/${
+          trackName ? encodeURIComponent(trackName) : ''
+        }`,
+        { credentials: 'same-origin' }
+      );
+      markup = await request.text();
+    }
+    if (markup) {
+      sheetMusicRenderer = new module.default.OpenSheetMusicDisplay(
+        sheetmusicElm,
+        {
+          autoResize: false, // important! OSMD must not redraw notes with new IDs
+          backend: 'svg',
+          pageBackgroundColor: '#FFFFFF',
+          drawTitle: false,
+          drawSubtitle: false,
+          drawComposer: false,
+          drawLyricist: false,
+          drawPartNames: false,
+          drawMetronomeMarks: false,
+          disableCursor: true,
+        }
+      );
+      await sheetMusicRenderer.load(markup);
+      sheetMusicRenderer.render();
+      console.log('render done')
+      if (OPT_SAVE_GENERATED_SVG && window.innerWidth >= 768 && window.innerWidth <= 1280) {
+        console.log('window size ok-Ish')
+        await saveSVGToServer();
+        console.log('saved!')
       }
-      renderingMusic = false;
-      measureList = processMusicData(svgElm);
-    }, 10);
-    //console.log({ measureList });
+      top.osmd = sheetMusicRenderer; // Debug. TODO: remove
+    }
+    renderingMusic = false;
   });
 
-  function processMusicData(svgElm) {
-    // measureList comes from the server, but we'll augment it per data model
-    let measureList = JSON.parse(svgElm.dataset.measureList);
-    if (measureList[0] && measureList[0].tempoInBPM) {
-      //tempo = measureList[0].tempoInBPM;
+  function initMusicData() {
+    let svgElm = sheetmusicElm.getElementsByTagName('svg')[0];
+    if (svgElm.dataset.measureList) {
+      // measureList comes from the server, but we'll augment it per data model
+      measureList = JSON.parse(svgElm.dataset.measureList);
+      repeats = JSON.parse(svgElm.dataset.repeats);
+      noteData = JSON.parse(svgElm.dataset.noteData);
+      upbeat = parseFloat(svgElm.dataset.upbeat);
+    } else {
+      measureList = extractMeasureData(sheetMusicRenderer, repeats);
+      noteData = extractNoteMetaData(sheetMusicRenderer);
+      upbeat = extractUpbeatTime(sheetMusicRenderer);
+      if (OPT_SAVE_GENERATED_SVG && !svg) {
+        // include meta data when saving generated SVG to server..
+        svgElm.setAttribute('data-measure-list', JSON.stringify(measureList));
+        svgElm.setAttribute('data-note-data', JSON.stringify(noteData));
+        svgElm.setAttribute('data-repeats', JSON.stringify(repeats));
+        svgElm.setAttribute('data-upbeat', JSON.stringify(upbeat));
+      }
     }
-    let repeats = JSON.parse(svgElm.dataset.repeats);
-    upbeat = parseFloat(svgElm.dataset.upbeat);
+    console.log(measureList);
+    if (measureList[0] && measureList[0].tempoInBPM) {
+      tempo = measureList[0].tempoInBPM;
+      console.log('initial tempo set ', tempo);
+    }
     // turn repeat data into jump instructions
     // CAVEAT: OSMD might change representation of repeat data?
     let repeatStarts = [];
@@ -111,18 +165,17 @@
 
     for (let i = 0; i < notes.length; i++) {
       let note = notes[i];
-      let start = parseFloat(note.dataset.timeStart);
-      let measureIndex = parseInt(note.dataset.measure);
+      let start = parseFloat(noteData[note.id].timeStart);
+      let measureIndex = parseInt(noteData[note.id].measure);
       let measure = measureList[measureIndex];
       if (!measure) {
-        console.warn('no measure for index ' + measureIndex)
+        console.warn('no measure for index ' + measureIndex);
         continue;
       }
       // pick up changing time signatures..
       if (measure.timeSignature) {
         beatDuration = 1 / measure.timeSignature.numerator;
       }
-      let end = parseFloat(note.dataset.timeEnd);
 
       // Important: if it's the first measure and it is an upbeat,
       // we need to calculate the timing of the note from the *end*
@@ -239,8 +292,8 @@
       }
       // detect tempo changes
       if (measure.tempoInBPM && measure.tempoInBPM !== tempo) {
-        console.log('tempo change');
-        //tempo = measure.tempoInBPM;
+        tempo = measure.tempoInBPM;
+        console.log('tempo changed! New: ', tempo);
       }
     }
 
@@ -251,6 +304,7 @@
   }
 
   export function initPlaythrough() {
+    initMusicData();
     measureCompletedTime = 0.0;
     metronome.play();
   }
@@ -259,7 +313,7 @@
     clearHighlight();
     // reset music data (repeats are "used" when cursor goes through data)
     let svgElm = document.getElementsByTagName('svg')[0];
-    measureList = processMusicData(svgElm);
+    initMusicData();
   }
 
   function scrollIfRequired(elm) {
@@ -280,7 +334,22 @@
       document.documentElement.scrollTop = scroll;
     }
   }
-
+  function saveSVGToServer() {
+    initMusicData();
+    let svgElm = sheetmusicElm.getElementsByTagName('svg')[0];
+    return fetch(
+      `/api/project/${project._id}/score/${encodeURIComponent(trackName)}`,
+      {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: JSON.stringify({ svgMarkup: svgElm.outerHTML }),
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  }
   let winHeight;
 </script>
 
@@ -302,9 +371,10 @@
     <Loading message="Tilpasser notene til din skjerm.." />
   </div>
 {/if}
-<div bind:clientWidth={elemWidth} />
-<div class="note-box">
-  {@html svg}
+<div class="note-box" bind:this={sheetmusicElm} id="sheetmusic">
+  {#if svg}
+    {@html svg}
+  {/if}
 </div>
 
 <style>

@@ -1,9 +1,14 @@
-import Blob from 'cross-blob';
+// import Blob from 'cross-blob';
 import jsdom from 'jsdom';
-
+import {
+  extractNoteMetaData,
+  extractMeasureData,
+  extractUpbeatTime,
+} from './osmd_helpers';
 // this path is prepared by prep-files.sh - but should we skip that
 // and reference node_modules?
-let osmdBuildDir = __dirname + '../../static/js/opensheetmusicdisplay/';
+
+//let osmdBuildDir = __dirname + '../../static/js/opensheetmusicdisplay/';
 
 let window, document;
 let pageFormat = 'Endless';
@@ -98,93 +103,19 @@ export async function generateSVGImage(
   // for more options check OSMDOptions.ts
   await osmdInstance.load(mxmlData);
   debug('xml loaded', DEBUG);
+  let noteData, measureData;
+  let repeats = [];
+  let upbeat;
   try {
     osmdInstance.render();
-    // add meta data to SVG notes
-    let time = 0;
-    for (let i = 0; i < osmdInstance.graphic.MeasureList.length; i++) {
-      for (let j = 0; j < osmdInstance.graphic.MeasureList[i].length; j++) {
-        for (
-          let k = 0;
-          k < osmdInstance.graphic.MeasureList[i][j].staffEntries.length;
-          k++
-        ) {
-          for (
-            let l = 0;
-            l <
-            osmdInstance.graphic.MeasureList[i][j].staffEntries[k]
-              .graphicalVoiceEntries.length;
-            l++
-          ) {
-            for (
-              let m = 0;
-              m <
-              osmdInstance.graphic.MeasureList[i][j].staffEntries[k]
-                .graphicalVoiceEntries[l].notes.length;
-              m++
-            ) {
-              let note =
-                osmdInstance.graphic.MeasureList[i][j].staffEntries[k]
-                  .graphicalVoiceEntries[l].notes[m];
-              if (note.getSVGGElement && note.sourceNote.length) {
-                let svgElm = note.getSVGGElement();
-                if (svgElm) {
-                  svgElm.setAttribute('data-measure', i);
-                  svgElm.setAttribute(
-                    'data-time-start',
-                    parseFloat(time).toFixed(3)
-                  );
-                  time += note.sourceNote.length.realValue;
-                  svgElm.setAttribute(
-                    'data-time-end',
-                    parseFloat(time).toFixed(3)
-                  );
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    noteData = extractNoteMetaData(osmdInstance);
+    measureData = extractMeasureData(osmdInstance, repeats);
+    upbeat = extractUpbeatTime(osmdInstance);
   } catch (ex) {
     console.log('renderError: ' + ex);
   }
   debug('rendered', DEBUG);
-  let repeats = [];
-  let upbeat = 0;
-  let durationSoFar = 0;
-  let measureData = osmdInstance.sheet.sourceMeasures.map(measure => {
-    // Choose some properties of this measure and prepare client-side code
-    let info = {
-      tempoInBPM: measure.tempoInBPM,
-      duration: measure.duration.realValue,
-      jumps: [],
-      beats: [],
-      start: durationSoFar,
-    };
-    durationSoFar += info.duration;
-    if (measure.RhythmPrinted) {
-      // nice shortcut to "does the signature change here?"
-      info.timeSignature = {
-        numerator: measure.activeTimeSignature.numerator,
-        denominator: measure.activeTimeSignature.denominator,
-      };
-    }
-    if (measure.firstRepetitionInstructions) {
-      repeats = repeats.concat(measure.firstRepetitionInstructions);
-    }
-    if (measure.lastRepetitionInstructions) {
-      repeats = repeats.concat(measure.lastRepetitionInstructions);
-    }
-    return info;
-  });
-  if (
-    osmdInstance.sheet.sourceMeasures[0] &&
-    osmdInstance.sheet.sourceMeasures[0].duration.realValue <
-      osmdInstance.sheet.sourceMeasures[0].activeTimeSignature.realValue
-  ) {
-    upbeat = osmdInstance.sheet.sourceMeasures[0].duration.realValue;
-  }
+
   let svgElement;
   // This loop supports all the pages you might possibly wish for, no?
   for (
@@ -201,6 +132,7 @@ export async function generateSVGImage(
     svgElement.setAttribute('data-measure-list', JSON.stringify(measureData));
     svgElement.setAttribute('data-upbeat', upbeat);
     svgElement.setAttribute('data-repeats', JSON.stringify(repeats));
+    svgElement.setAttribute('data-note-data', JSON.stringify(noteData));
     markupStrings.push(svgElement.outerHTML);
   }
   while (div.firstChild) {
@@ -216,7 +148,7 @@ function debug(msg, debugEnabled) {
   }
 }
 
-function getSpecificPart(mxmlData, partName) {
+export function getSpecificPart(mxmlData, partName) {
   const dom = new jsdom.JSDOM('');
   const DOMParser = dom.window.DOMParser;
   const parser = new DOMParser();

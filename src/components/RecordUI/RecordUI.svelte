@@ -14,6 +14,7 @@
   let count = 0;
   let countdown = false;
 
+  // name of the part this specific user will play
   let trackName;
   if (project.partslist) {
     for (let i = 0; i < project.partslist.length; i++) {
