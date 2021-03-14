@@ -24,7 +24,7 @@ console.log({
 const app = polka();
 app
   .use((req, res, next) => {req.locals = {env}; next();})
-  .use(json(), urlencoded({ extended: false }), cookieParser())
+  .use(json({limit: '25MB'}), urlencoded({ extended: false, limit: '25MB' }), cookieParser())
   .use(utils.jsonSender, utils.parseUrl, utils.setCookie) // Some stuff Express does by default.
   .use(utils.ensureHttps) // redirect to https if http
   .use(
