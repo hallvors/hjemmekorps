@@ -339,10 +339,9 @@ async function addPartFile(projectId, partName, fileDataBuffer) {
     // should never happen
     console.error('part name wrong?');
   }
+  let deleteme;
   if (part.sheetmusic && part.sheetmusic.asset && part.sheetmusic.asset._ref) {
-    // remove old file
-    console.log('deleting', part.sheetmusic.asset._ref);
-    await client.delete(part.sheetmusic.asset._ref);
+    deleteme = part.sheetmusic.asset._ref;
   }
   let doc = await client.assets.upload('file', fileDataBuffer, {
     filename: partName + '.svg',
@@ -357,6 +356,16 @@ async function addPartFile(projectId, partName, fileDataBuffer) {
       .unset(['partslist[part == "' + partName + '"]'])
       .append('partslist', [part])
       .commit();
+    if (deleteme) {
+      // remove old file
+      console.log('deleting', deleteme);
+      try {
+        await client.delete(deleteme);
+      } catch (err) {
+        // some other project also references this file?
+        console.error(err);
+      }
+    }
   }
 }
 
