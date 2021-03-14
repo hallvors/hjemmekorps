@@ -30,7 +30,7 @@
   let svg = '';
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
-
+const timeStart = Date.now();
   // To move a cursor correctly, we need to know about _beats, measures and jumps_
   // Beat signals arrive from the metronome and potentially cause cursor movements.
   // We set up a queue (sparse array) of beats that may cause a note highlight
@@ -104,6 +104,8 @@
       top.osmd = sheetMusicRenderer; // Debug. TODO: remove
     }
     renderingMusic = false;
+    let hasElm = Boolean(document.getElementsByTagName('svg')[0])
+    console.log('render time: ' + (Date.now() - timeStart) + 'ms', hasElm);
   });
 
   function initMusicData() {
