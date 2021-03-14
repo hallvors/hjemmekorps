@@ -96,8 +96,6 @@
 <style>
   .main-wrapper {
     padding: 50px 0;
-    width: 90%;
-    margin: 0 auto;
     padding-top: 10vw;
   }
   .main-wrapper.loading {

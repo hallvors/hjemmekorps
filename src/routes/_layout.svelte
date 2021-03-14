@@ -42,11 +42,15 @@
 <style>
   main {
     position: relative;
-    max-width: 70vw;
     background-color: var(--light);
     padding: 2em;
-    margin: 0 auto;	
-	box-sizing: border-box;
-	margin-top: var(--navbarHeight);
+    margin: 0 auto;
+    box-sizing: border-box;
+    margin-top: var(--navbarHeight);
+  }
+  @media (min-width: 1280px) {
+    main {
+      max-width: 70vw;
+    }
   }
 </style>
