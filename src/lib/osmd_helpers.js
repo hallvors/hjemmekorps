@@ -60,12 +60,13 @@ export function extractMeasureData(osmdInstance) {
   let measureList = osmdInstance.sheet.sourceMeasures.map(measure => {
     // Choose some properties of this measure and prepare client-side code
     let info = {
-      duration: measure.duration.realValue,
+      duration: measure.duration.realValue, // in measures (?)
       jumps: [],
       beats: [],
       start: durationSoFar,
       isReducedToMultiRest: measure.isReducedToMultiRest,
     };
+
     durationSoFar += info.duration;
     if (measure.RhythmPrinted) {
       // nice shortcut to "does the signature change here?"

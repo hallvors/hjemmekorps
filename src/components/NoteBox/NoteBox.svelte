@@ -20,22 +20,25 @@
   let sheetmusicElm;
   let renderingMusic = true;
   // stuff metronome needs
+  let metronome;
   let beatUnit = 'quarter';
   let dotted = false;
   let bpm = 65;
   let timeNumerator = 4;
   let timeDenominator = 4;
-  let metronome;
+  let beatUnitNumber = tempoUnitAsNumber(beatUnit);
+  let nthBeatSounded = (timeDenominator / beatUnitNumber) * (dotted ? 1.5 : 1);
+  let delayBetweenBeats = 60 / bpm / nthBeatSounded;
   // cursor movement stuff
   let upbeat = 0;
   let measureList;
   let noteData;
   let repeats = [];
   let svg = '';
+
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
   const timeStart = Date.now();
-  $: beatUnitNumber = tempoUnitAsNumber(beatUnit);
 
   // To move a cursor correctly, we need to know about _beats, measures and jumps_
   // Beat signals arrive from the metronome and potentially cause cursor movements.
@@ -50,14 +53,11 @@
   //    { jumps: [3,7], length: 0.125, beats: [{note}, {note, delay}],
   //          timeSignature: {numerator, denominator}, tempoInBPM },
   //  ]
-  // also variables measureCompletedTime to track state
   // onBeat: if event.detail.countdown do nothing (well, perhaps upbeat..)
   // if measureCount >= measures.length, tune finished
   // if jump, set measureCount (again!)
   // if new measure and time signature different, change it
   // trigger & schedule note movements according to beat queue entry
-
-  let measureCompletedTime = 0.0;
 
   onMount(async function () {
     const module = await import('opensheetmusicdisplay');
@@ -94,7 +94,7 @@
           drawComposer: false,
           drawLyricist: false,
           drawPartNames: false,
-          drawMetronomeMarks: false,
+          drawMetronomeMarks: true,
           disableCursor: true,
         }
       );
@@ -118,6 +118,8 @@
   });
 
   function initMusicData() {
+    // This code needs to deal with units. Mainly three types of units:
+    // measures, beats and seconds
     let svgElm = sheetmusicElm.getElementsByTagName('svg')[0];
     repeats.length = 0;
     if (svgElm.dataset.measureList) {
@@ -141,18 +143,7 @@
         svgElm.setAttribute('data-upbeat', JSON.stringify(upbeat));
       }
     }
-    //console.log(measureList);
-    if (measureList[0] && measureList[0].metronome) {
-      bpm = measureList[0].metronome.bpm;
-      beatUnit = measureList[0].metronome.beatUnit;
-      dotted = measureList[0].metronome.dotted === 'true';
-    }
-    if (measureList[0].timeSignature) {
-      timeNumerator = measureList[0].timeSignature.numerator;
-      timeDenominator = measureList[0].timeSignature.denominator;
-      console.log(`${timeNumerator}/${timeDenominator}`);
-    }
-
+    setGlobalMetronomeVars(measureList[0]);
     // turn repeat data into jump instructions
     // CAVEAT: OSMD might change representation of repeat data?
     let repeatStarts = [];
@@ -183,15 +174,17 @@
       }
     });
     // We want an array of arrays of notes within the "beat"
-    // one *complete* measure is timeNumerator items
+    // one *complete* measure is timeNumerator beats
     // Caveat: we may have a first *incomplete* measure in case of upbeats
+    // Beat duration - unit here is measures. No seconds involved yet..
     let beatDuration = 1 / timeNumerator; // 0.25 for 4/4, 0.125 for 6/8 ..
     let notes = document.getElementsByClassName('vf-stavenote');
     let beatInMeasure = 0;
-
+    // Go through the actual SVG note elements and match
+    // them to measures using meta data.
     for (let i = 0; i < notes.length; i++) {
       let note = notes[i];
-      let start = parseFloat(noteData[note.id].timeStart);
+      let start = parseFloat(noteData[note.id].timeStart); // in fractions of measure
       let measureIndex = parseInt(noteData[note.id].measure);
       let measure = measureList[measureIndex];
       if (!measure) {
@@ -212,11 +205,9 @@
         // full measure, so shift the timing accordingly towards the end
         start += normalMeasureDuration - upbeat;
         measure.duration = normalMeasureDuration;
-      } else if (measureIndex >= 0) {
-        // start is in seconds since beginning of the piece,
-        // but it's easire to calculate if relative to measure
-        start -= measure.start;
       }
+
+      // which beat in *this* measure is the note played for?
       beatInMeasure = Math.floor(start / beatDuration);
 
       if (start % beatDuration === 0) {
@@ -231,7 +222,7 @@
         });
       }
     }
-    return measureList;
+    console.log(measureList);
   }
 
   function pushQueue(measure, beat, noteObj) {
@@ -289,10 +280,7 @@
     let measureCount = evt.detail.measureCount;
     if (evt.detail.countdown) {
       // RecordUI will count visually down
-      dispatch(
-        'countdown',
-        Object.assign({ last: evt.detail.countdown === null }, evt.detail)
-      );
+      dispatch('countdown', Object.assign({}, evt.detail));
       if (!upbeat) {
         return; // nothing to do here
       }
@@ -309,44 +297,63 @@
 
     if (previousMeasure !== measureCount) {
       // we're entering a new measure
-      measureCompletedTime = 0;
       if (measure.jumps.length) {
         measureCount = measure.jumps.shift();
         measure = measureList[measureCount];
         metronome.jumpToMeasure(measureCount);
       }
-      // did the time signature change?
-      if (measure.timeSignature) {
-        timeNumerator = measure.timeSignature.numerator;
-        timeDenominator = measure.timeSignature.denominator;
-        console.log(`${timeNumerator}/${timeDenominator}`);
-      }
-      // detect tempo changes
-      if (measure.metronome) {
-        bpm = measure.metronome.bpm;
-        beatUnit = measure.metronome.beatUnit;
-        dotted = measure.metronome.dotted === 'true';
-        console.log('tempo settings changed! New: ', measure.metronome);
-      }
+      setGlobalMetronomeVars(measure);
+      // if this is a multi-rest measure, we have no new notes
+      // to highlight but still want to remove the old one
+      clearHighlight();
     }
 
     let beatDuration = 1 / timeNumerator;
-    measureCompletedTime += beatDuration;
     highlightBeat(measureCount, evt.detail.beatInMeasure);
     previousMeasure = measureCount;
   }
 
+  function setGlobalMetronomeVars(measure) {
+    // did the time signature change?
+    if (
+      measure.timeSignature &&
+      (measure.timeSignature.numerator !== timeNumerator ||
+        measure.timeSignature.denominator !== timeDenominator)
+    ) {
+      timeNumerator = measure.timeSignature.numerator;
+      timeDenominator = measure.timeSignature.denominator;
+      console.log(`${timeNumerator}/${timeDenominator}`);
+    }
+    // detect tempo changes
+    if (measure.metronome) {
+      // Svelte makes these changes cascade somewhat, it's good for performance
+      // to check if they really change before assignment
+      if (
+        bpm !== measure.metronome.bpm ||
+        beatUnit !== measure.metronome.beatUnit ||
+        dotted !== measure.metronome.dotter
+      ) {
+        bpm = measure.metronome.bpm;
+        beatUnit = measure.metronome.beatUnit;
+        dotted = [true, 'true'].includes(measure.metronome.dotted);
+        console.log('tempo settings changed! New: ', measure.metronome);
+        document.title = beatUnit + ' ' + dotted;
+        beatUnitNumber = tempoUnitAsNumber(beatUnit);
+        nthBeatSounded =
+          (timeDenominator / beatUnitNumber) * (dotted ? 1.5 : 1);
+        delayBetweenBeats = 60 / bpm / nthBeatSounded;
+      }
+    }
+  }
+
   export function initPlaythrough() {
+    // init music data every time (repeats are "used" when cursor goes through data)
     initMusicData();
-    measureCompletedTime = 0.0;
-    metronome.play();
+    metronome.play(upbeat);
   }
   export function stopPlaythrough() {
     metronome.stop();
     clearHighlight();
-    // reset music data (repeats are "used" when cursor goes through data)
-    let svgElm = document.getElementsByTagName('svg')[0];
-    initMusicData();
   }
 
   function scrollIfRequired(elm) {
@@ -386,9 +393,11 @@
 
   function tempoUnitAsNumber(unit) {
     return {
+      whole: 1,
       half: 2,
       quarter: 4,
       eight: 8,
+      sixteenth: 16, // hopefully never..?
     }[unit];
   }
   let winHeight;
@@ -399,12 +408,9 @@
 {#if audioContext}
   <Metronome
     bind:this={metronome}
-    {beatUnitNumber}
-    {dotted}
-    {bpm}
-    {upbeat}
     {timeNumerator}
-    {timeDenominator}
+    {nthBeatSounded}
+    {delayBetweenBeats}
     {audioContext}
     {soundRecorder}
     on:beat={onBeat}

@@ -23,16 +23,11 @@
    *
    */
 
-  export let dotted;
-  export let bpm;
   export let timeNumerator = 4;
-  export let timeDenominator = 4;
+  export let nthBeatSounded;
+  export let delayBetweenBeats;
   export let soundRecorder;
   export let audioContext;
-  export let upbeat;
-  export let beatUnitNumber;
-  $: nthBeatSounded = (timeDenominator / beatUnitNumber) * (dotted ? 1.5 : 1);
-  $: delayUntilBeat = 60 / bpm / nthBeatSounded;
   let fBuffer;
   let aBuffer;
   // How many beats are required for the countdown?
@@ -70,21 +65,21 @@
     // while there are notes that will need to play before the next interval,
     // schedule them and advance the pointer.
     while (nextBeatTime < audioContext.currentTime + scheduleAheadTime) {
-      scheduleBeat(nextBeatCounter, nextBeatTime);
+      scheduleBeat(measureCount, nextBeatCounter, nextBeatTime);
 
       // Add beat length to last beat time
-      nextBeatTime += delayUntilBeat;
+      nextBeatTime += delayBetweenBeats;
 
       // Advance the beat number, wrap to zero
       nextBeatCounter++;
-      if (nextBeatCounter == timeNumerator) {
+      if (nextBeatCounter >= timeNumerator) {
         nextBeatCounter = 0; // new measure..
         measureCount++;
       }
     }
   }
 
-  function scheduleBeat(beatNumber, time) {
+  function scheduleBeat(measure, beatNumber, time) {
     let recordBeat = false;
     if (countDownBeats.length) {
       // we're in countdown mode
@@ -110,12 +105,12 @@
       source.start(Math.max(time, audioContext.currentTime));
     }
     let beat = {
-      measureCount,
+      measureCount: measure,
       beatInMeasure: beatNumber,
       timestamp: audioContext.currentTime - startTime,
     };
     beat.countdown = countDownBeats.length ? beatNumber + 1 : null;
-    beat.last = countDownBeats.length === 1;
+    beat.lastCountdown = countDownBeats.length === 1;
     setTimeout(function () {
       dispatch('beat', beat);
     }, Math.max(0, (time - audioContext.currentTime) * 1000));
@@ -125,7 +120,7 @@
     }
   }
 
-  export function play() {
+  export function play(upbeat) {
     isPlaying = true;
     // A typical 1 - 2 - 1 - 2 - 3 - 4 is 2 measures, first counted at half speed
     if (timeNumerator === 4) {
@@ -149,7 +144,6 @@
     nextBeatCounter = 0;
     startTime = audioContext.currentTime;
     nextBeatTime = audioContext.currentTime;
-    //debugger;
     scheduler();
     timerWorker.postMessage('start');
   }

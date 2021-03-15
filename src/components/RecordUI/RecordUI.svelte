@@ -148,7 +148,7 @@
       first = false;
     }
     countdown = true;
-    if (evt.detail.last) {
+    if (evt.detail.lastCountdown) {
       setTimeout(() => {
         countdown = false;
       }, 100);
