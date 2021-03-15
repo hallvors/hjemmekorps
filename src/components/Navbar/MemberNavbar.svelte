@@ -7,13 +7,16 @@
 <div style="height: {navbarHeight}px">
 	<!-- Logo -->
 	{#if logo}
-        <img class="logo" src={logo} alt="Korpslogo">
+        <span class="logo">
+            <img src={logo} alt="Korpslogo">
+        </span>
 	{/if}
     <h1>Hei {user.name}!</h1>
 </div>
 <style>
     h1 {
         text-align: center;
+        flex-basis: 60%;
     }
 
     div {
@@ -26,6 +29,9 @@
 		height: 100%;
 		margin-right: 20px;
         flex-basis: 20%;
+	}
+	.logo img {
+		max-height: var(--navbarHeight);
 	}
 
 </style>
