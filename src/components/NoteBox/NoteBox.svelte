@@ -35,6 +35,8 @@
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
   const timeStart = Date.now();
+  $: beatUnitNumber = tempoUnitAsNumber(beatUnit);
+
   // To move a cursor correctly, we need to know about _beats, measures and jumps_
   // Beat signals arrive from the metronome and potentially cause cursor movements.
   // We set up a queue (sparse array) of beats that may cause a note highlight
@@ -118,6 +120,7 @@
 
   function initMusicData() {
     let svgElm = sheetmusicElm.getElementsByTagName('svg')[0];
+    repeats.length = 0;
     if (svgElm.dataset.measureList) {
       // measureList comes from the server, but we'll augment it per data model
       measureList = JSON.parse(svgElm.dataset.measureList);
@@ -125,9 +128,13 @@
       noteData = JSON.parse(svgElm.dataset.noteData);
       upbeat = parseFloat(svgElm.dataset.upbeat);
     } else {
-      measureList = extractMeasureData(sheetMusicRenderer, repeats);
+      // this call also sets repeats
+      let temp = extractMeasureData(sheetMusicRenderer, repeats);
+      measureList = temp.measureList;
+      repeats = temp.repeats;
       noteData = extractNoteMetaData(sheetMusicRenderer);
       upbeat = extractUpbeatTime(sheetMusicRenderer);
+      console.log(noteData);
       if (OPT_SAVE_GENERATED_SVG && !svg) {
         // include meta data when saving generated SVG to server..
         svgElm.setAttribute('data-measure-list', JSON.stringify(measureList));
@@ -143,9 +150,9 @@
       dotted = measureList[0].metronome.dotted === 'true';
     }
     if (measureList[0].timeSignature) {
-        timeNumerator = measureList[0].timeSignature.numerator;
-        timeDenominator = measureList[0].timeSignature.denominator;
-        console.log(`${timeNumerator}/${timeDenominator}`)
+      timeNumerator = measureList[0].timeSignature.numerator;
+      timeDenominator = measureList[0].timeSignature.denominator;
+      console.log(`${timeNumerator}/${timeDenominator}`);
     }
 
     // turn repeat data into jump instructions
@@ -262,7 +269,11 @@
   }
 
   function highlightAfterDelay(delay, note) {
-    let msPerMeasure = (60 / tempo) * timeNumerator * 1000;
+    let msPerMeasure =
+      (60 / bpm / (timeDenominator / beatUnitNumber)) *
+      (dotted ? 1.5 : 1) *
+      timeNumerator *
+      1000;
     setTimeout(function () {
       clearHighlight();
       note.classList.add('activeNote');
@@ -374,6 +385,14 @@
       }
     );
   }
+
+  function tempoUnitAsNumber(unit) {
+    return {
+      half: 2,
+      quarter: 4,
+      eight: 8,
+    }[unit];
+  }
   let winHeight;
 </script>
 
@@ -382,7 +401,7 @@
 {#if audioContext}
   <Metronome
     bind:this={metronome}
-    {beatUnit}
+    {beatUnitNumber}
     {dotted}
     {bpm}
     {upbeat}

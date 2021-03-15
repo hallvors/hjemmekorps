@@ -12,18 +12,17 @@
    * - is this beat silent or sounded (for dotted units etc)?
    *
    * If we have a 4/4 and quarter = 120, no dot - easy.
-   * - delay is 60 / 120 * 4/4
+   * - delay is 60 / 120
    * - first beat is nextBeatCounter = 0
    * - every beat is sounded
    *
    * If we have a 6/8 and eight dotted = 120 it's a bit trickier
    * - we actually want to send beat events for each eight
    * - however, only beats 0 and 3 sould be sounded
-   * - and we should have 120 of those sounded beats per min
+   * - and we should have 120 of those *sounded* beats per min
    *
    */
 
-  export let beatUnit;
   export let dotted;
   export let bpm;
   export let timeNumerator = 4;
@@ -31,7 +30,7 @@
   export let soundRecorder;
   export let audioContext;
   export let upbeat;
-  $: beatUnitNumber = tempoUnitAsNumber(beatUnit);
+  export let beatUnitNumber;
   $: nthBeatSounded = (timeDenominator / beatUnitNumber) * (dotted ? 1.5 : 1);
   $: delayUntilBeat = 60 / bpm / nthBeatSounded;
   let fBuffer;
@@ -96,7 +95,7 @@
     }
 console.log({
   beatNumber, nthBeatSounded, delayUntilBeat, timeNumerator, timeDenominator,
-  beatUnit, beatUnitNumber, dotted, bpm,
+  beatUnitNumber, dotted, bpm,
 })
     if (beatNumber % nthBeatSounded === 0 || countDownBeats.length) {
       let source = audioContext.createBufferSource();
@@ -205,11 +204,4 @@ console.log({
     return buffer;
   }
 
-  function tempoUnitAsNumber(unit) {
-    return {
-      half: 2,
-      quarter: 4,
-      eight: 8,
-    }[unit];
-  }
 </script>

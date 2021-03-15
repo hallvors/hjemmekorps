@@ -42,8 +42,8 @@ export function extractNoteMetaData(osmdInstance) {
                   measure: i,
                   timeStart: parseFloat(time).toFixed(3),
                 };
-                //                time += note.sourceNote.length.realValue;
-                //                data[svgElm.id].timeEnd = parseFloat(time).toFixed(3);
+                time += note.sourceNote.length.realValue;
+                data[svgElm.id].timeEnd = parseFloat(time).toFixed(3);
               }
             }
           }
@@ -54,9 +54,10 @@ export function extractNoteMetaData(osmdInstance) {
   return data;
 }
 
-export function extractMeasureData(osmdInstance, repeats) {
+export function extractMeasureData(osmdInstance) {
   let durationSoFar = 0;
-  return osmdInstance.sheet.sourceMeasures.map(measure => {
+  let repeats = [];
+  let measureList = osmdInstance.sheet.sourceMeasures.map(measure => {
     // Choose some properties of this measure and prepare client-side code
     let info = {
       duration: measure.duration.realValue,
@@ -88,6 +89,7 @@ export function extractMeasureData(osmdInstance, repeats) {
     }
     return info;
   });
+  return {measureList, repeats}
 }
 
 export function extractUpbeatTime(osmdInstance) {
