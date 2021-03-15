@@ -21,4 +21,4 @@
 
 <NoteBox project={$projects[id]} trackName={part} />
 
-<p><a href="/prosjekt/{id}">Tilbake</a></p>
+<p><a href="/prosjekt/{id}" on:click={() => history.back()}>Tilbake</a></p>
