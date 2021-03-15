@@ -43,10 +43,14 @@
   main {
     position: relative;
     background-color: var(--light);
-    padding: 2em;
     margin: 0 auto;
     box-sizing: border-box;
     margin-top: var(--navbarHeight);
+  }
+  @media (min-width: 768px) {
+    main {
+      padding: 2em;
+    }
   }
   @media (min-width: 1280px) {
     main {

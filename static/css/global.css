@@ -78,10 +78,10 @@ ul a {
   font-size: 25px;
   border: var(--border);
 }
-
+/*
 a:visited {
-  /* color: rgb(96, 119, 143); */
-}
+   color: rgb(96, 119, 143); 
+}*/
 
 label {
   display: block;

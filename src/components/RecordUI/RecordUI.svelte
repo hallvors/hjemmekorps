@@ -273,8 +273,7 @@
     width: 100%;
     position: absolute;
     border: none;
-
-    bottom: 0px;
+    bottom: -20px;
     left: 50%;
     -ms-transform: translateX(-50%);
     transform: translateX(-50%);
@@ -295,20 +294,26 @@
     position: fixed;
     z-index: 2;
     height: 10vw;
-    width: 70%;
-    left: 15%;
-    top: 100px; /* Navbarheight */
-
+    width: 100%;
+    left: 0;
+    top: var(--navbarHeight); /* Navbarheight */
     background-color: var(--light);
     border: var(--border);
     border-top: none;
     text-align: center;
     font-size: 2em;
-
     font-weight: 300;
     text-transform: uppercase;
     letter-spacing: 1px;
   }
+
+  @media (min-width: 1280px) {
+    #rec-toolbar {
+      width: 70%;
+      left: 15%;
+    }
+  }
+
   .recording-btn-wrapper {
     height: 70%;
     display: flex;
@@ -347,11 +352,10 @@
     width: max-content;
     margin: 0;
     position: absolute;
-
     top: 50%;
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
-    font-size: 7rem;
+    font-size: 8vw;
   }
 </style>
