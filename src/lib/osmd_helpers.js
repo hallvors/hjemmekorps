@@ -7,6 +7,7 @@ export function extractNoteMetaData(osmdInstance) {
       if (!osmdInstance.graphic.MeasureList[i][j]) {
           continue;
       }
+      time = 0;
       for (
         let k = 0;
         k < osmdInstance.graphic.MeasureList[i][j].staffEntries.length;
