@@ -31,7 +31,7 @@
   setSession(session);
 </script>
 
-<Navbar style="margin-top:0;" />
+<Navbar />
 
 <main>
   <slot />
