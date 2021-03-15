@@ -35,7 +35,7 @@ export function extractNoteMetaData(osmdInstance) {
                 svgElm = note.getSVGGElement();
               } catch (err) {
                 // multi-measure rests have no notes
-                console.error(err);
+                //console.error(err);
               }
               if (svgElm) {
                 data[svgElm.id] = {
@@ -59,7 +59,6 @@ export function extractMeasureData(osmdInstance, repeats) {
   return osmdInstance.sheet.sourceMeasures.map(measure => {
     // Choose some properties of this measure and prepare client-side code
     let info = {
-      tempoInBPM: measure.tempoInBPM,
       duration: measure.duration.realValue,
       jumps: [],
       beats: [],
@@ -79,6 +78,13 @@ export function extractMeasureData(osmdInstance, repeats) {
     }
     if (measure.lastRepetitionInstructions) {
       repeats = repeats.concat(measure.lastRepetitionInstructions);
+    }
+    if (measure.tempoExpressions && measure.tempoExpressions[0]) {
+      info.metronome = {
+        beatUnit: measure.tempoExpressions[0].instantaneousTempo.beatUnit,
+        dotted: measure.tempoExpressions[0].instantaneousTempo.dotted,
+        bpm: measure.tempoExpressions[0].instantaneousTempo.tempoInBpm,
+      }
     }
     return info;
   });

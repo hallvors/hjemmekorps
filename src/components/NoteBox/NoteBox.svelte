@@ -18,11 +18,15 @@
 
   let sheetMusicRenderer; // OSMD instance
   let sheetmusicElm;
-  let tempo = project.bpm || 65;
   let renderingMusic = true;
+  // stuff metronome needs
+  let beatUnit = 'quarter';
+  let dotted = false;
+  let bpm = 65;
   let timeNumerator = 4;
   let timeDenominator = 4;
   let metronome;
+  // cursor movement stuff
   let upbeat = 0;
   let measureList;
   let noteData;
@@ -30,7 +34,7 @@
   let svg = '';
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
-const timeStart = Date.now();
+  const timeStart = Date.now();
   // To move a cursor correctly, we need to know about _beats, measures and jumps_
   // Beat signals arrive from the metronome and potentially cause cursor movements.
   // We set up a queue (sparse array) of beats that may cause a note highlight
@@ -62,9 +66,9 @@ const timeStart = Date.now();
           trackName ? encodeURIComponent(trackName) : ''
         }/svg`,
         { credentials: 'same-origin' }
-        );
-        console.log('svg req', request)
-      }
+      );
+      console.log('svg req', request);
+    }
     let markup;
     if (request && request.ok) {
       svg = await request.text();
@@ -95,16 +99,20 @@ const timeStart = Date.now();
       );
       await sheetMusicRenderer.load(markup);
       sheetMusicRenderer.render();
-      console.log('render done')
-      if (OPT_SAVE_GENERATED_SVG && window.innerWidth >= 768 && window.innerWidth <= 1280) {
-        console.log('window size ok-Ish')
+      console.log('render done');
+      if (
+        OPT_SAVE_GENERATED_SVG &&
+        window.innerWidth >= 768 &&
+        window.innerWidth <= 1280
+      ) {
+        console.log('window size ok-Ish');
         await saveSVGToServer();
-        console.log('saved!')
+        console.log('saved!');
       }
       top.osmd = sheetMusicRenderer; // Debug. TODO: remove
     }
     renderingMusic = false;
-    let hasElm = Boolean(document.getElementsByTagName('svg')[0])
+    let hasElm = Boolean(document.getElementsByTagName('svg')[0]);
     console.log('render time: ' + (Date.now() - timeStart) + 'ms', hasElm);
   });
 
@@ -129,10 +137,17 @@ const timeStart = Date.now();
       }
     }
     console.log(measureList);
-    if (measureList[0] && measureList[0].tempoInBPM) {
-      tempo = measureList[0].tempoInBPM;
-      console.log('initial tempo set ', tempo);
+    if (measureList[0] && measureList[0].metronome) {
+      bpm = measureList[0].metronome.bpm;
+      beatUnit = measureList[0].metronome.beatUnit;
+      dotted = measureList[0].metronome.dotted === 'true';
     }
+    if (measureList[0].timeSignature) {
+        timeNumerator = measureList[0].timeSignature.numerator;
+        timeDenominator = measureList[0].timeSignature.denominator;
+        console.log(`${timeNumerator}/${timeDenominator}`)
+    }
+
     // turn repeat data into jump instructions
     // CAVEAT: OSMD might change representation of repeat data?
     let repeatStarts = [];
@@ -295,11 +310,14 @@ const timeStart = Date.now();
       if (measure.timeSignature) {
         timeNumerator = measure.timeSignature.numerator;
         timeDenominator = measure.timeSignature.denominator;
+        console.log(`${timeNumerator}/${timeDenominator}`)
       }
       // detect tempo changes
-      if (measure.tempoInBPM && measure.tempoInBPM !== tempo) {
-        tempo = measure.tempoInBPM;
-        console.log('tempo changed! New: ', tempo);
+      if (measure.metronome) {
+        bpm = measure.metronome.bpm;
+        beatUnit = measure.metronome.beatUnit;
+        dotted = measure.metronome.dotted === 'true';
+        console.log('tempo settings changed! New: ', measure.metronome);
       }
     }
 
@@ -364,9 +382,12 @@ const timeStart = Date.now();
 {#if audioContext}
   <Metronome
     bind:this={metronome}
-    {tempo}
+    {beatUnit}
+    {dotted}
+    {bpm}
     {upbeat}
     {timeNumerator}
+    {timeDenominator}
     {audioContext}
     {soundRecorder}
     on:beat={onBeat}
