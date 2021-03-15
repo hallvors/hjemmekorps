@@ -437,6 +437,9 @@
   :global(html) {
     scroll-behavior: smooth;
   }
+  :global(svg) {
+    max-width: 100%;
+  }
   .note-box {
     /*
       Whoever embeds a NoteBox should style margins
