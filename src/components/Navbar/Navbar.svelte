@@ -1,4 +1,14 @@
 <script>
+	/* This navigation is used for
+		1. pages that do not need a user session (/feil/*, /om/*)
+			if (!user)
+		2. Normal users (musicians)
+			if (user && user._type === 'member')
+		3. Admin users
+			if (user && user._type === 'adminUser')
+		Rewrite the file to adapt to  the type of user logged in.
+
+	*/
   import AdminNavbar from './AdminNavbar.svelte';
   import MemberNavbar from './MemberNavbar.svelte';
   import { user, bands, selectedBand } from '../../lib/datastore';
@@ -18,7 +28,7 @@
   {#if $user && $user._type === 'adminUser'}
     <AdminNavbar {logo} {foregroundColor} {navbarHeight} user={$user} />
   {:else if $user && $user._type === 'member'}
-    <MemberNavbar {logo} {navbarHeight} user={$user} />
+    <MemberNavbar user={$user} {logo} {navbarHeight} />
   {:else}
     <a href="/" class="logo">
       <svg

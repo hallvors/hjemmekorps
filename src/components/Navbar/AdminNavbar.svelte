@@ -1,16 +1,6 @@
 <script>
 import {bands, selectedBand} from '../../lib/datastore'
 
-	/* This navigation is used for
-		1. pages that do not need a user session (/feil/*, /om/*)
-			if (!user)
-		2. Normal users (musicians)
-			if (user && user._type === 'member')
-		3. Admin users
-			if (user && user._type === 'adminUser')
-		Rewrite the file to adapt to  the type of user logged in.
-
-	*/
 	// NOTE: this module is dependent on the "hamburgers.css" file
 	export let foregroundColor = "white";
 	export let navbarHeight = 100;
