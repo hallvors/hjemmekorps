@@ -69,7 +69,6 @@
         }/svg`,
         { credentials: 'same-origin' }
       );
-      console.log('svg req', request);
     }
     let markup;
     if (request && request.ok) {
@@ -134,7 +133,6 @@
       repeats = temp.repeats;
       noteData = extractNoteMetaData(sheetMusicRenderer);
       upbeat = extractUpbeatTime(sheetMusicRenderer);
-      console.log(noteData);
       if (OPT_SAVE_GENERATED_SVG && !svg) {
         // include meta data when saving generated SVG to server..
         svgElm.setAttribute('data-measure-list', JSON.stringify(measureList));
@@ -143,7 +141,7 @@
         svgElm.setAttribute('data-upbeat', JSON.stringify(upbeat));
       }
     }
-    console.log(measureList);
+    //console.log(measureList);
     if (measureList[0] && measureList[0].metronome) {
       bpm = measureList[0].metronome.bpm;
       beatUnit = measureList[0].metronome.beatUnit;
@@ -321,7 +319,7 @@
       if (measure.timeSignature) {
         timeNumerator = measure.timeSignature.numerator;
         timeDenominator = measure.timeSignature.denominator;
-        console.log(`${timeNumerator}/${timeDenominator}`)
+        console.log(`${timeNumerator}/${timeDenominator}`);
       }
       // detect tempo changes
       if (measure.metronome) {

@@ -93,10 +93,7 @@
       }
       recordBeat = countDownBeats.length > 4;
     }
-console.log({
-  beatNumber, nthBeatSounded, delayUntilBeat, timeNumerator, timeDenominator,
-  beatUnitNumber, dotted, bpm,
-})
+
     if (beatNumber % nthBeatSounded === 0 || countDownBeats.length) {
       let source = audioContext.createBufferSource();
       if (beatNumber === 0) {
