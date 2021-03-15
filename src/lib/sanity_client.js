@@ -242,7 +242,9 @@ function addProject(
         partslist = partslist
           .map(part => {
             if (oldProject) {
-              let oldAssignment = oldProject.partslist.find(oldPart => oldPart.part === part);
+              let oldAssignment = oldProject.partslist.find(
+                oldPart => oldPart.part === part
+              );
               if (oldAssignment) {
                 delete oldAssignment.sheetmusic;
                 return oldAssignment;
@@ -298,12 +300,14 @@ function addProject(
           },
           partslist,
         };
+        let promise;
         if (projectId) {
           projectData._id = projectId;
+          promise = client.createOrReplace(projectData);
+        } else {
+          promise = client.create(projectData);
         }
-        return client
-          .createOrReplace(projectData)
-          .then(project => getProject(userId, project._id, true));
+        return promise.then(project => getProject(userId, project._id, true));
       });
   });
 }
