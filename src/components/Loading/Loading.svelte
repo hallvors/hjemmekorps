@@ -71,9 +71,9 @@
     left: 75%;
   }
   img {
-    -webkit-animation: spin 8s linear infinite;
-    -moz-animation: spin 8s linear infinite;
-    animation: spin 8s linear infinite;
+    -webkit-animation: spin 10s linear infinite;
+    -moz-animation: spin 10s linear infinite;
+    animation: spin 10s linear infinite;
   }
   @-moz-keyframes spin {
     100% {
