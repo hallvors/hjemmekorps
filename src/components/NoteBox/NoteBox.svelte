@@ -35,7 +35,7 @@
   let noteData;
   let repeats = [];
   let svg = '';
-  let loadingMessage = 'Henter notene...';
+  let loadingMessage = 'Vent litt...';
 
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
@@ -62,6 +62,7 @@
 
   onMount(async function () {
     //const module = await import('opensheetmusicdisplay');
+    loadingMessage = 'Henter notene...';
     let request;
     if (hasPartFile) {
       request = await fetch(
