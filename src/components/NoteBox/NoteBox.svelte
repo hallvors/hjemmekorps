@@ -91,7 +91,6 @@
         {
           autoResize: false, // important! OSMD must not redraw notes with new IDs
           backend: 'svg',
-          pageBackgroundColor: '#FFFFFF',
           drawTitle: false,
           drawSubtitle: false,
           drawComposer: false,
