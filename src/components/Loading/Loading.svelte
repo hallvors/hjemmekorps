@@ -1,4 +1,6 @@
 <script>
+  import { onMount } from 'svelte';
+
   import { instruments } from '../../lib/datastore';
   import { getRandomInt } from '../../lib/utils';
   export let message = 'Vent litt...';
@@ -9,7 +11,7 @@
     }
     setTimeout(pickInstruments, 8000);
   }
-  pickInstruments()
+  onMount(() => pickInstruments());
 </script>
 
 <div class="background">
