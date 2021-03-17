@@ -35,6 +35,7 @@
   let noteData;
   let repeats = [];
   let svg = '';
+  let loadingMessage = 'Henter notene...';
 
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
@@ -82,6 +83,7 @@
       );
       markup = await request.text();
     }
+    loadingMessage = 'Tilpasser notene til din skjerm...';
     if (markup) {
       sheetMusicRenderer = new module.default.OpenSheetMusicDisplay(
         sheetmusicElm,
@@ -418,7 +420,7 @@
 {/if}
 {#if renderingMusic}
   <div class="loading">
-    <Loading message="Tilpasser notene til din skjerm.." />
+    <Loading message={loadingMessage} />
   </div>
 {/if}
 <div class="note-box" bind:this={sheetmusicElm} id="sheetmusic">
@@ -432,6 +434,8 @@
   :global(.activeNote path),
   :global(.activeNote g) {
     filter: invert(29%) sepia(82%) saturate(4448%) hue-rotate(174deg)
+      brightness(60%) contrast(101%);
+    -webkit-filter: invert(29%) sepia(82%) saturate(4448%) hue-rotate(174deg)
       brightness(60%) contrast(101%);
   }
   :global(html) {
