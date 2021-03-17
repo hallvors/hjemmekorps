@@ -437,6 +437,8 @@
       brightness(60%) contrast(101%);
     -webkit-filter: invert(29%) sepia(82%) saturate(4448%) hue-rotate(174deg)
       brightness(60%) contrast(101%);
+    fill: #00a4d6;
+    stroke: #00a4d6;
   }
   :global(html) {
     scroll-behavior: smooth;
