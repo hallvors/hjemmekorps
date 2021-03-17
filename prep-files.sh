@@ -13,8 +13,8 @@ cp -f -v node_modules/web-audio-recorder-js/lib-minified/* static/js/web-audio-r
 #mkdir -p static/js/alphatab
 #cp -f -v -r node_modules/@coderline/alphatab/dist/* static/js/alphatab/
 
-# mkdir -p static/js/opensheetmusicdisplay
-# cp -f -v -r node_modules/opensheetmusicdisplay/build/opensheetmusicdisplay.min.js static/js/opensheetmusicdisplay/opensheetmusicdisplay.min.js
+mkdir -p static/js/opensheetmusicdisplay
+cp -f -v -r node_modules/opensheetmusicdisplay/build/opensheetmusicdisplay.min.js static/js/opensheetmusicdisplay/opensheetmusicdisplay.min.js
 
 mkdir -p sanity/hjemmekorps-settings
 echo "export default " > sanity/hjemmekorps-settings/instruments.js

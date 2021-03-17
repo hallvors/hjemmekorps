@@ -61,7 +61,7 @@
   // trigger & schedule note movements according to beat queue entry
 
   onMount(async function () {
-    const module = await import('opensheetmusicdisplay');
+    //const module = await import('opensheetmusicdisplay');
     let request;
     if (hasPartFile) {
       request = await fetch(
@@ -85,7 +85,7 @@
     }
     loadingMessage = 'Tilpasser notene til din skjerm...';
     if (markup) {
-      sheetMusicRenderer = new module.default.OpenSheetMusicDisplay(
+      sheetMusicRenderer = new opensheetmusicdisplay.OpenSheetMusicDisplay(
         sheetmusicElm,
         {
           autoResize: false, // important! OSMD must not redraw notes with new IDs
