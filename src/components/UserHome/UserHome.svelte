@@ -64,7 +64,7 @@
           {#if recordings && recordings.length}
             {#each recordings as rec}
               <TagTrigger
-                tagRendered={rec.member.name}
+                tagRendered={rec.member ? rec.member.name : 'opptak'}
                 tagName=""
                 tagValue={rec.recording.url}
                 active={activeRecordings.includes(rec.recording.url)}
