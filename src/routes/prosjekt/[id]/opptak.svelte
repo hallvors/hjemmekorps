@@ -8,6 +8,9 @@
 <script>
   export let id;
   import Audio from '../../../components/Audio/Audio.svelte';
+  import UsageHint from '../../../components/UsageHint/UsageHint.svelte';
+  import Back from '../../../components/Back/Back.svelte';
+
   import { projects, members, assignments } from '../../../lib/datastore';
 
   const project = $projects[id];
@@ -24,24 +27,65 @@
   }
 </script>
 
-<svelte:head><title>{$projects[id].name} : Opptak - hjemmekorps.no</title></svelte:head>
+<svelte:head
+  ><title>{$projects[id].name} : Opptak - hjemmekorps.no</title></svelte:head
+>
 
-<h1>Opptak</h1>
+<h2>Opptak</h2>
 
-{#each Object.entries($assignments[id]) as [memberId, data]}
-  <Audio
-    member={$members[memberId]}
-    part={data.part}
-    recording={data.recording}
-    volume={(data.volume || 100) / 100}
-    registerAudioElement={registerAudioElement}
+{#if project.generated_soundfile}
+  <div class="merged-audio">
+    <h3>Samlet lydfil</h3>
+    <UsageHint
+      message="Alle opptak har blitt lagt inn i ei lydfil. Dette skjer automatisk, og et godt resultat kan ikke garanteres."
+    />
+    <span class="audio">
+      <!-- svelte-ignore a11y-media-has-caption -->
+      <!-- We can not create captions for user-generated music files :) -->
+      <audio controls src={project.generated_soundfile.url}>
+        Audio does not work
+      </audio>
+    </span>
+  </div>
+{/if}
+
+{#if Object.keys($assignments[id]).length}
+  <h3>Innsendte opptak</h3>
+  <UsageHint
+    message="Her er alle opptak sendt inn så langt. Volumet du setter her brukes neste gang felles lydspor lages. Dersom et opptak ikke skal tas med i generert fil, kan volumet settes til null."
   />
-{/each}
+  {#each Object.entries($assignments[id]) as [memberId, data]}
+    <Audio
+      member={$members[memberId]}
+      part={data.part}
+      recording={data.recording}
+      volume={(data.volume || 100) / 100}
+      {registerAudioElement}
+    />
+  {/each}
 
-<p><em>
-    Du kan prøve å høre alle samtidig her, men det er usikkert om det vil høres fint ut..
-
-  </em></p>
-    <button on:click={startAudio}>start</button><button on:click={stopAudio}
+  <p>
+    <em>
+      Du kan prøve å høre alle samtidig her, men det er usikkert om det vil
+      høres fint ut..
+    </em>
+  </p>
+  <button on:click={startAudio}>start</button><button on:click={stopAudio}
     >stop</button
   >
+{:else}
+  <p>Her er det vist ikke spilt inn noe enda.</p>
+{/if}
+
+<p>
+  <Back {id} />
+</p>
+
+<style>
+  h2, h3 {
+    text-align: center;
+  }
+  audio {
+    width: 100%;
+  }
+</style>

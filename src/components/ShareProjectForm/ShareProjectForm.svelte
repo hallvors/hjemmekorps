@@ -11,7 +11,7 @@
 </script>
 
 <div>
-  <h1>Send epost</h1>
+  <h2>Send epost</h2>
   <UsageHint message="Fullfør eposten med en liten hilsen til
    musikantene. Den sendes til foresatte, og til musikanten 
    dersom vi har adresse. Lenker til notene for hver enkelt
@@ -65,6 +65,9 @@
 </div>
 
 <style>
+  h2 {
+    text-align: center;
+  }
   textarea {
     width: 100%;
     height: 250px;

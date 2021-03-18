@@ -8,9 +8,9 @@
 </script>
 
 <div>
-  {#if recording}{part}
+  {#if recording}Stemme <em>{part}</em>, musikant
     <em>{member.name}</em><br />
-<!--
+    <!--
     TODO: a way to detect and save volume. Maybe custom UI?
     <input type="range" name="volume" bind:value={volume} min="0" max="1" step="0.05" />
 -->
@@ -24,3 +24,9 @@
     />
   {/if}
 </div>
+
+<style>
+  audio {
+    width: 100%;
+  }
+</style>

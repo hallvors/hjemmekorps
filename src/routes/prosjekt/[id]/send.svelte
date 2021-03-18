@@ -10,15 +10,29 @@
   import { projects, bands, selectedBand, user } from '../../../lib/datastore';
   import ShareProjectForm from '../../../components/ShareProjectForm/ShareProjectForm.svelte';
   import MemberTokenLinks from '../../../components/MemberTokenLinks/MemberTokenLinks.svelte';
-
+  import Back from '../../../components/Back/Back.svelte';
 </script>
-<svelte:head><title>{$projects[id].name} : Send lenker - hjemmekorps.no</title></svelte:head>
+
+<svelte:head
+  ><title>{$projects[id].name} : Send lenker - hjemmekorps.no</title
+  ></svelte:head
+>
 
 <ShareProjectForm project={$projects[id]} user={$user} />
 
-<h1>Lenker</h1>
+<h2>Lenker</h2>
 
 <MemberTokenLinks
   project={$projects[id]}
   members={$bands[$selectedBand].members}
 />
+
+<p>
+  <Back {id} />
+</p>
+
+<style>
+  h2 {
+    text-align: center;
+  }
+</style>
