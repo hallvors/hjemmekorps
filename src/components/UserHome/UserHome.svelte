@@ -9,6 +9,10 @@
   // Beklager manglende samsvar mellom data-modellen for admin og musikant
   const project = $projectList[0];
   const band = $bands[0];
+
+  // still working on this feature, will be enabled later
+  const ENABLE_LISTEN_WHILE_RECORDING = false;
+
   export let user;
   let recordings = [];
   if (project.partslist) {
@@ -61,7 +65,7 @@
       <ScrollableListToolsRight>
         <RecordUI {project} {user} on:start={startPlay} on:stop={stopPlay} />
         <div slot="aside">
-          {#if recordings && recordings.length}
+          {#if ENABLE_LISTEN_WHILE_RECORDING && recordings && recordings.length}
             {#each recordings as rec}
               <TagTrigger
                 tagRendered={rec.member ? rec.member.name : 'opptak'}
