@@ -3,6 +3,8 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import Loading from '../Loading/Loading.svelte';
   import Metronome from '../Metronome/Metronome.svelte';
+  import { getMetronomeDefault } from './metronomeDefaults';
+
   import {
     extractNoteMetaData,
     extractMeasureData,
@@ -20,6 +22,7 @@
   let sheetmusicElm;
   let renderingMusic = true;
   // stuff metronome needs
+  // many of these are re-set in the setGlobalMetronomeVars method
   let metronome;
   let beatUnit = 'quarter';
   let dotted = false;
@@ -29,6 +32,7 @@
   let beatUnitNumber = tempoUnitAsNumber(beatUnit);
   let nthBeatSounded = (timeDenominator / beatUnitNumber) * (dotted ? 1.5 : 1);
   let delayBetweenBeats = 60 / bpm / nthBeatSounded;
+  let cachedMetronomeSettings = {};
   // cursor movement stuff
   let upbeat = 0;
   let measureList;
@@ -317,13 +321,17 @@
 
   function setGlobalMetronomeVars(measure) {
     // did the time signature change?
+    let tsChanged = false;
+    let oldMeter;
     if (
       measure.timeSignature &&
       (measure.timeSignature.numerator !== timeNumerator ||
         measure.timeSignature.denominator !== timeDenominator)
     ) {
+      oldMeter = `${timeNumerator}/${timeDenominator}`;
       timeNumerator = measure.timeSignature.numerator;
       timeDenominator = measure.timeSignature.denominator;
+      tsChanged = true;
       console.log(`${timeNumerator}/${timeDenominator}`);
     }
     // detect tempo changes
@@ -333,7 +341,7 @@
       if (
         bpm !== measure.metronome.bpm ||
         beatUnit !== measure.metronome.beatUnit ||
-        dotted !== measure.metronome.dotter
+        dotted !== measure.metronome.dotted
       ) {
         bpm = measure.metronome.bpm;
         beatUnit = measure.metronome.beatUnit;
@@ -343,6 +351,31 @@
         beatUnitNumber = tempoUnitAsNumber(beatUnit);
         nthBeatSounded =
           (timeDenominator / beatUnitNumber) * (dotted ? 1.5 : 1);
+        delayBetweenBeats = 60 / bpm / nthBeatSounded;
+      }
+    } else if (tsChanged) {
+      // whoa, the time signature just changed but the
+      // metronome info did not. We may want to go for
+      // default values for the new meter..
+      let maybeValues =
+        cachedMetronomeSettings[`${timeNumerator}/${timeDenominator}`] ||
+        getMetronomeDefault(timeNumerator, timeDenominator);
+      if (
+        beatUnitNumber !== maybeValues.beatUnitNumber ||
+        dotted !== maybeValues.dotted ||
+        nthBeatSounded !== maybeValues.nthBeatSounded
+      ) {
+        // we're really changing here.. right!
+        cachedMetronomeSettings[oldMeter] = {
+          beatUnit,
+          beatUnitNumber,
+          dotted,
+          nthBeatSounded,
+        };
+        beatUnit = numberToTempoUnit(maybeValues.beatUnitNumber);
+        nthBeatSounded = maybeValues.nthBeatSounded;
+        dotted = maybeValues.dotted;
+        beatUnitNumber = maybeValues.beatUnitNumber;
         delayBetweenBeats = 60 / bpm / nthBeatSounded;
       }
     }
@@ -401,6 +434,15 @@
       eight: 8,
       sixteenth: 16, // hopefully never..?
     }[unit];
+  }
+  function numberToTempoUnit(number) {
+    return {
+      1: 'whole',
+      2: 'half',
+      4: 'quarter',
+      8: 'eight',
+      16: 'sixteenth', // hopefully never..?
+    }[number];
   }
   let winHeight;
 </script>
