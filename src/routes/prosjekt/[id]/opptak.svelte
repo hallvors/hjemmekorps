@@ -49,11 +49,12 @@
   </div>
 {/if}
 
-{#if Object.keys($assignments[id]).length}
+{#if Object.entries($assignments[id]).length}
   <h3>Innsendte opptak</h3>
   <UsageHint
     message="Her er alle opptak sendt inn så langt. Volumet du setter her brukes neste gang felles lydspor lages. Dersom et opptak ikke skal tas med i generert fil, kan volumet settes til null."
   />
+  <p><em>PS: å lagre volumet er ikke implementert enda. Kommer..</em></p>
   {#each Object.entries($assignments[id]) as [memberId, data]}
     <Audio
       member={$members[memberId]}
