@@ -7,9 +7,6 @@ const _ = require('underscore');
 const { nanoid } = require('nanoid');
 const NodeCache = require('node-cache');
 
-const { filterInstrumentName } = require('./utils');
-const { bands } = require('./datastore');
-
 const sanityCache = new NodeCache({
   stdTTL: 60 * 60 * 24 * 7,
   useClones: true,
@@ -18,7 +15,8 @@ const sanityCache = new NodeCache({
 const PROJECT = env.config.sanity.project;
 const TOKEN = env.config.sanity.token;
 const DATASET = env.config.sanity.dataset;
-const instruments = env.instruments;
+
+const dateFormat = new Intl.DateTimeFormat('no-NB');
 
 var sanityClient = null;
 function getSanityClient() {
@@ -152,8 +150,8 @@ function getProject(userId, projectId, mustBeFresh) {
     client.fetch(
       `*[_type == $type && _id == $projectId][0] {
       name, _id, sheetmusic, bpm,
-      "sheetmusicFile": sheetmusic.asset->url,
-      "owner":owner->name, partslist, generated_soundfile,
+      "sheetmusicFile": sheetmusic.asset->url, owner,
+      "ownerName":owner->name, partslist, generated_soundfile,
       "bandAdmins": band->owner,
       _createdAt
     }`,
@@ -170,6 +168,7 @@ function getProject(userId, projectId, mustBeFresh) {
       return null;
     }
     let project = results[0];
+    project._createdAt = dateFormat.format(new Date(project._createdAt));
     let recordings = results[1];
     let userIsBandAdmin =
       (project.owner && project.owner._ref === userId) ||

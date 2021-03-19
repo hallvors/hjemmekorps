@@ -64,7 +64,7 @@
 <main>
   <header class="project-info">
       <h1 class="h1-bigger project-title">{project.name}</h1>
-      <p>Lagt til {project._createdAt} av <em>{project.owner}</em></p>
+      <p>Lagt til {project._createdAt} av <em>{project.ownerName}</em></p>
   </header>
 
 <slot />
