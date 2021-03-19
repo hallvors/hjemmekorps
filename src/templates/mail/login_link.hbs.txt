@@ -1,9 +1,9 @@
 Hei {{user.name}},
-du kan logge inn til {{domain}} ved å klikke her:
+du kan logge inn til {{hostname}} ved å klikke her:
 
 {{{link}}}
 
-Innlogging varer normalt i omkring to uker. Etterpå kan du gå til denne eposten og klikke logg inn på nytt, eller få ny lenke tilsendt ved å legge inn epost-adressa på forsida på {{domain}}.
+Innlogging varer normalt i omkring to uker. Etterpå kan du gå til denne eposten og klikke logg inn på nytt, eller få ny lenke tilsendt ved å legge inn epost-adressa på forsida på {{hostname}}.
 
 Takk for at du bruker nettsida!
 Hilsen utviklerne

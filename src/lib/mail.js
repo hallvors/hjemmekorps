@@ -14,7 +14,7 @@ const mg = mgObj.client({
 export async function send(to, user, subject, text, html) {
   console.log({to, subject})
   const data = {
-    from: `"${user.name} via ${env.domain}" <ikkesvar@${env.domain}>`,
+    from: `"${user.name} via ${env.hostname}" <ikkesvar@${env.hostname}>`,
     to,
     subject,
     text,

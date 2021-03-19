@@ -16,6 +16,7 @@ const dev = NODE_ENV === 'development';
 
 console.log('---- starting server ----');
 console.log({
+  hostname: env.hostname,
   PORT,
   NODE_ENV,
   conf: env.config,
@@ -54,6 +55,7 @@ app
           bands,
           projectList, // holds a list of id, title
           instruments: env.instruments,
+          hostname: env.hostname,
           protocol: dev ? 'http' : 'https',
         };
       },

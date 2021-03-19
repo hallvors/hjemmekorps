@@ -39,7 +39,7 @@ export async function post(req, res, next) {
       friendly_name: req.user.friendly_name,
       project_name: project.name,
       message: req.body.message,
-      domain: env.domain,
+      hostname: env.hostname,
     };
     let templatePlain = Handlebars.compile(templateText);
     let templateRich = Handlebars.compile(templateHTML);
