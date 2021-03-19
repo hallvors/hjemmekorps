@@ -28,9 +28,9 @@ export const projects = writable({});
 export function setSession(newSessionData) {
   //console.log('data from server', newSessionData)
   // called from _layout.svelte with session data from server.js
-  user.update(oldData => Object.assign({}, oldData, newSessionData.user));
-  bands.update(oldData => oldData.concat(newSessionData.bands));
-  projectList.update(oldData => oldData.concat(newSessionData.projectList));
+  user.set(newSessionData.user);
+  bands.set(newSessionData.bands);
+  projectList.set(newSessionData.projectList);
   instruments.set(newSessionData.instruments);
 }
 
