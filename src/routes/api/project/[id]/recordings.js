@@ -32,3 +32,7 @@ export const post = compose([
       });
   },
 ]);
+
+workQueue.on('global:completed', (jobId, result) => {
+  console.log(`Job completed with result ${result}`);
+});

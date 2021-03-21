@@ -15,7 +15,8 @@ let numberOfWorkers = process.env.WEB_CONCURRENCY || 2;
 // to be much lower.
 let maxJobsPerWorker = 1;
 
-function start() {
+function start(id, disconnect) {
+  console.log('started worker ' + id);
   // Connect to the named work queue
   let workQueue = new Queue('processing-jobs', REDIS_URL);
 
@@ -25,8 +26,15 @@ function start() {
     console.log('background worker done');
     return { completed: true };
   });
+
+  // polite cleanup
+  process.on('SIGTERM', () => {
+    console.log(`Worker ${id} exiting (cleanup here)`);
+    workQueue.close();
+    disconnect();
+  });
 }
 
 // Initialize the clustered worker process
 // See: https://devcenter.heroku.com/articles/node-concurrency for more info
-throng({ numberOfWorkers, start });
+throng({ count: numberOfWorkers, worker: start });

@@ -3,7 +3,10 @@ build:
     web: Dockerfile
 
 run:
-  web: npm run start
+  web:
+    image: web
+    command:
+      - npm run start
   worker:
     image: web
     command:
