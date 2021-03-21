@@ -532,6 +532,16 @@ function addCombinedRecording(projectId, filepath) {
     });
 }
 
+function setVolume(recordingId, volume) {
+  volume = parseInt(volume);
+  if (isNaN(volume)) {
+    console.error('bad volume value');
+    return;
+  }
+  const cl = getSanityClient();
+  return cl.patch(recordingId).set({ volume }).commit();
+}
+
 // OLD code
 
 function removeHelpRecording(projectName, fileId) {
@@ -589,6 +599,7 @@ module.exports = {
   addPartFile,
   addProjectRecording,
   addCombinedRecording,
+  setVolume,
 
   removeHelpRecording,
   addImage,

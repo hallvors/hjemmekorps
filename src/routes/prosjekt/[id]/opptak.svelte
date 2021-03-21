@@ -25,6 +25,24 @@
   function registerAudioElement(elm) {
     audioElements = [...audioElements, elm];
   }
+
+  let timeouts = {};
+  function planSavingVolumeFunc(recording) {
+    return function (event) {
+      if (timeouts[recording._id]) {
+        clearTimeout(timeouts[recording._id]);
+        delete timeouts[recording._id];
+      }
+      let volume = event.target.volume * 100;
+      timeouts[recording._id] = setTimeout(function () {
+        fetch(`/api/recording/${recording._id}/volume`, {
+          method: 'POST',
+          body: `volume=` + volume,
+          headers: { 'Content-type': 'application/x-www-form-urlencoded' },
+        });
+      }, 750);
+    };
+  }
 </script>
 
 <svelte:head
@@ -54,14 +72,13 @@
   <UsageHint
     message="Her er alle opptak sendt inn så langt. Volumet du setter her brukes neste gang felles lydspor lages. Dersom et opptak ikke skal tas med i generert fil, kan volumet settes til null."
   />
-  <p><em>PS: å lagre volumet er ikke implementert enda. Kommer..</em></p>
   {#each Object.entries($assignments[id]) as [memberId, data]}
     <Audio
       member={$members[memberId]}
       part={data.part}
       recording={data.recording}
-      volume={(data.volume || 100) / 100}
       {registerAudioElement}
+      volumeChangeHandler={planSavingVolumeFunc(data.recording)}
     />
   {/each}
 
@@ -83,7 +100,8 @@
 </p>
 
 <style>
-  h2, h3 {
+  h2,
+  h3 {
     text-align: center;
   }
   audio {

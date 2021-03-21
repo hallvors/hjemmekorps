@@ -1,10 +1,21 @@
 <script>
+  import { onMount } from 'svelte';
   export let recording;
   export let member;
   export let part;
-  export let volume;
   export let registerAudioElement = () => {};
+  export let volumeChangeHandler = () => {};
   let muted = false;
+  let volume = 1;
+  let elm;
+  onMount(() => {
+    if (recording && !isNaN(recording.volume)) {
+      volume = recording.volume / 100;
+    }
+    if (elm) {
+      elm.volume = volume;
+    }
+  });
 </script>
 
 <div>
@@ -26,9 +37,10 @@
     <audio
       src={recording.url}
       use:registerAudioElement
+      bind:this={elm}
       {muted}
-      {volume}
       controls
+      on:volumechange={volumeChangeHandler}
     />
   {/if}
 </div>
