@@ -3,8 +3,8 @@ build:
     web: Dockerfile
 
 run:
-  web: npm start
+  web: npm run start
   worker:
     image: web
     command:
-      - npm start:worker
+      - npm run start:worker
