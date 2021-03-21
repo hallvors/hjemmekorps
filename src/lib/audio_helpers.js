@@ -19,19 +19,23 @@ async function mergeSoundfiles(projectId) {
   const files = await Promise.all(
     recordings.map(recording => {
       console.log('will get sound file ' + recording.url);
+      if (recording.volume === 0) {
+        return;
+      }
       return got(recording.url, { responseType: 'buffer' }).then(result => {
         const file = path.join(tmpDir.name, recording._id) + '.wav';
         const fHandle = fs.openSync(file, 'w');
         fs.writeFileSync(fHandle, result.body);
         fs.closeSync(fHandle);
         console.log('done writing ', recording.url, file);
-        return file;
+        return { file, volume: recording.volume };
       });
     })
   );
+  files = files.filter(file => Boolean(file));
   console.log('sound files ' + files.length);
   if (files.length === 1) {
-    return sClient.addCombinedRecording(projectId, files[0]);
+    return sClient.addCombinedRecording(projectId, files[0].file);
   }
 
   return new Promise((resolve, reject) => {
@@ -54,14 +58,34 @@ async function mergeSoundfiles(projectId) {
           ' video'
       );
     });
-    files.forEach(file => {
-      command.input(file); // TODO: add setStartTime() based on analysis of wav file
+    files.forEach(fileData => {
+      command.input(fileData.file); // TODO: add setStartTime() based on analysis of wav file
     });
-    // -filter_complex amix=inputs=NUM:duration=longest
-    command.complexFilter({
-      filter: 'amix',
-      options: { inputs: files.length, duration: 'longest' },
-    });
+
+    /*
+-filter_complex \
+"[0:a]volume=0.8[a0]; \
+[1:a]volume=0.8[a1]; \
+[a0][a1]amix=inputs=2[a]" \
+
+https://stackoverflow.com/questions/44712868/ffmpeg-set-volume-in-amix
+*/
+    command.complexFilter([
+      files
+        .map(
+          (fileObj, idx) => `[${idx}:a]volume=${fileObj.volume / 100}[a${idx}]`
+        )
+        .join('; '),
+      // -filter_complex amix=inputs=NUM:duration=longest
+      {
+        filter: 'amix',
+        inputs: files.map((fileObj, idx) => `[a${idx}]`),
+        options: {
+          inputs: files.length,
+          duration: 'longest',
+        },
+      },
+    ]);
     let filepath = path.join(tmpDir.name, 'combined.wav');
     command.on('end', function (stdout, stderr) {
       console.log('ffmpeg succeeded !');

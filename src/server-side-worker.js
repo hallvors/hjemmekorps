@@ -37,4 +37,4 @@ function start(id, disconnect) {
 
 // Initialize the clustered worker process
 // See: https://devcenter.heroku.com/articles/node-concurrency for more info
-throng({ count: numberOfWorkers, worker: start });
+throng({ count: numberOfWorkers, worker: start,  lifetime: Infinity });
