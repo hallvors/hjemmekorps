@@ -14,6 +14,7 @@ COPY --chown=node:node ./static/ ./static/
 COPY --chown=node:node ./src/ ./src/
 COPY --chown=node:node ./rollup.config.js ./rollup.config.js
 COPY --chown=node:node ./prep-files.sh ./prep-files.sh
+COPY --chown=node:node ./scripts/ ./scripts/
 # Some files from node_modules will be used as web workers,
 # must be copied to somewhere they will be served directly to
 # browsers
