@@ -1,8 +1,11 @@
 import multer from 'multer';
+import Queue from 'bull';
 import { compose } from 'compose-middleware';
-import { mergeSoundfiles } from '../../../../lib/audio_helpers';
 
 const multerUpload = multer({ dest: '/tmp' });
+const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+// Create / Connect to a named work queue
+const workQueue = new Queue('ffmpeg-work', REDIS_URL);
 
 import sClient from '../../../../lib/sanity_client';
 
@@ -25,7 +28,7 @@ export const post = compose([
       )
       .then(project => {
         res.json(project);
-        return mergeSoundfiles(project._id);
+        return workQueue.add({projectId: project._id});
       });
   },
 ]);

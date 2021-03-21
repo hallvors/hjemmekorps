@@ -24,4 +24,4 @@ RUN ./prep-files.sh
 RUN echo "{}" > ./src/config/overrides.json
 
 RUN npm run build
-CMD ["npm", "start"]
+#CMD ["npm", "start"]

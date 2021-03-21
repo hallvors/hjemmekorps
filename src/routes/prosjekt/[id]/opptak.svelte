@@ -43,6 +43,15 @@
       }, 750);
     };
   }
+
+  function recombine() {
+    fetch(`/api/recording/${recording._id}/recombine-recordings`, {
+      method: 'POST',
+    })
+    .then(() =>{
+      alert('Nytt samla lydspor lages nå.')
+    });
+  }
 </script>
 
 <svelte:head
@@ -88,9 +97,10 @@
       høres fint ut..
     </em>
   </p>
-  <button on:click={startAudio}>start</button><button on:click={stopAudio}
-    >stop</button
-  >
+  <button on:click={startAudio}>start</button>
+  <button on:click={stopAudio}>stopp</button>
+  <button on:click={recombine}>Lag ny samla fil</button>
+
 {:else}
   <p>Her er det vist ikke spilt inn noe enda.</p>
 {/if}
