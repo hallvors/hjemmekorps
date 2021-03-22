@@ -13,6 +13,7 @@
   // variables for metronome countdown before recording
   let count = 0;
   let countdown = false;
+  let first = true;
 
   // name of the part this specific user will play
   let trackName;
@@ -49,7 +50,7 @@
   var volumeInterval;
   let volumePercElm;
   let volumeLoud = false;
-  let first = true;
+  let startTime;
 
   onMount(() => {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -113,6 +114,7 @@
         });
 
         first = true;
+        startTime = audioContext.currentTime;
         //start the recording process
         meta.push({ event: 'start', time: audioContext.currentTime });
         recorder.startRecording();
@@ -141,7 +143,10 @@
     xhr.send(fd);
   }
   function countdownUiUpdate(evt) {
-    meta.push({ event: 'countdown', time: audioContext.currentTime });
+    meta.push({
+      event: 'countdown',
+      time: audioContext.currentTime - startTime,
+    });
     count = evt.detail.countdown;
     if (first && count === 3 && evt.detail.beatInMeasure === 2) {
       count = 2;
@@ -250,7 +255,7 @@
   {trackName}
   {audioContext}
   soundRecorder={analyser}
-  hasPartFile={hasPartFile}
+  {hasPartFile}
   bind:this={theBox}
   on:ended={endOfNote}
   on:countdown={countdownUiUpdate}

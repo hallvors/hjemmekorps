@@ -444,6 +444,9 @@ async function updateOrCreateMember(data, bandId, portraitFile) {
 
 function addProjectRecording(projectId, memberId, instrument, meta, filepath) {
   const cl = getSanityClient();
+  if (meta) {
+    meta.forEach(m => m._key = nanoid());
+  }
   return cl
     .fetch(
       `*[_type == $type &&
