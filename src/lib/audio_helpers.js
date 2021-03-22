@@ -18,17 +18,18 @@ async function mergeSoundfiles(projectId) {
   // get recording.url
   const files = await Promise.all(
     recordings.map(recording => {
-      console.log('will get sound file ' + recording.url);
       if (recording.volume === 0) {
-        return;
+        console.log('ignoring muted file', recording._id);
+        return Promise.resolve();
       }
+      console.log('will get sound file ' + recording.url);
       return got(recording.url, { responseType: 'buffer' }).then(result => {
         const file = path.join(tmpDir.name, recording._id) + '.wav';
         const fHandle = fs.openSync(file, 'w');
         fs.writeFileSync(fHandle, result.body);
         fs.closeSync(fHandle);
         console.log('done writing ', recording.url, file);
-        return { file, volume: recording.volume };
+        return Promise.resolve({ file, volume: recording.volume });
       });
     })
   );
