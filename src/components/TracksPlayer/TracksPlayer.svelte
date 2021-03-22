@@ -60,7 +60,11 @@
     }
   }
   export function stop() {
-    mix.stop();
+    try{
+      mix.stop();
+    } catch(e) {
+      console.error(e); // 'not started' state will throw
+    }
   }
 
   // https://stackoverflow.com/questions/57155167/web-audio-api-playing-synchronized-sounds

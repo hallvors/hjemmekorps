@@ -151,7 +151,8 @@ function getProject(userId, projectId, mustBeFresh) {
       `*[_type == $type && _id == $projectId][0] {
       name, _id, sheetmusic, bpm,
       "sheetmusicFile": sheetmusic.asset->url, owner,
-      "ownerName":owner->name, partslist, generated_soundfile,
+      "ownerName":owner->name, partslist,
+      "generatedSoundfileUrl": generated_soundfile.asset->url,
       "bandAdmins": band->owner,
       _createdAt
     }`,

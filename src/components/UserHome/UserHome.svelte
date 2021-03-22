@@ -9,12 +9,18 @@
   // Beklager manglende samsvar mellom data-modellen for admin og musikant
   const project = $projectList[0];
   const band = $bands[0];
-
-  // still working on this feature, will be enabled later
-  const ENABLE_LISTEN_WHILE_RECORDING = false;
-
   export let user;
   let recordings = [];
+
+  if (project.generatedSoundfileUrl) {
+    recordings.push({recording: {
+      url: project.generatedSoundfileUrl
+    }
+    })
+  }
+  // still working on this feature, will be enabled later
+  const ENABLE_LISTEN_WHILE_RECORDING = Boolean(recordings.length);
+
   if (project.partslist) {
     project.partslist.forEach(part => {
       if (part.members) {
@@ -35,7 +41,7 @@
         url => url !== evt.detail.tagValue
       );
     } else {
-      activeRecordings = [...activeRecordings, evt.detail.tagValue];
+      activeRecordings = [ /*...activeRecordings,*/ evt.detail.tagValue];
     }
     console.log(activeRecordings);
   }
@@ -68,7 +74,7 @@
           {#if ENABLE_LISTEN_WHILE_RECORDING && recordings && recordings.length}
             {#each recordings as rec}
               <TagTrigger
-                tagRendered={rec.member ? rec.member.name : 'opptak'}
+                tagRendered={rec.member ? rec.member.name : 'Alle'}
                 tagName=""
                 tagValue={rec.recording.url}
                 active={activeRecordings.includes(rec.recording.url)}
