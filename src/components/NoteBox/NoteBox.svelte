@@ -474,7 +474,7 @@
     on:beat={onBeat}
   />
 {/if}
-{#if renderingMusic || true}
+{#if renderingMusic}
   <div class="loading">
     <Loading
       message={loadingMessage}
