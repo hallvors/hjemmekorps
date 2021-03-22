@@ -50,7 +50,6 @@
   var volumeInterval;
   let volumePercElm;
   let volumeLoud = false;
-  let startTime;
 
   onMount(() => {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -114,9 +113,7 @@
         });
 
         first = true;
-        startTime = audioContext.currentTime;
         //start the recording process
-        meta.push({ event: 'start', time: audioContext.currentTime });
         recorder.startRecording();
         dispatch('start'); // starts playing other tracks - if any
         theBox.initPlaythrough(); // Tell NoteBox to start metronome
@@ -143,10 +140,6 @@
     xhr.send(fd);
   }
   function countdownUiUpdate(evt) {
-    meta.push({
-      event: 'countdown',
-      time: audioContext.currentTime - startTime,
-    });
     count = evt.detail.countdown;
     if (first && count === 3 && evt.detail.beatInMeasure === 2) {
       count = 2;
@@ -256,6 +249,7 @@
   {audioContext}
   soundRecorder={analyser}
   {hasPartFile}
+  {meta}
   bind:this={theBox}
   on:ended={endOfNote}
   on:countdown={countdownUiUpdate}

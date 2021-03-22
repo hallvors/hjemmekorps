@@ -17,6 +17,7 @@
   export let soundRecorder;
   export let audioContext;
   export let hasPartFile = false;
+  export let meta = [];
 
   let sheetMusicRenderer; // OSMD instance
   let sheetmusicElm;
@@ -40,6 +41,7 @@
   let repeats = [];
   let svg = '';
   let loadingMessage = 'Henter notene...';
+  let startTime;
 
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
@@ -287,6 +289,11 @@
     if (evt.detail.countdown) {
       // RecordUI will count visually down
       dispatch('countdown', Object.assign({}, evt.detail));
+      meta.push({
+        event: 'countdown',
+        measure: measureCount,
+        time: audioContext.currentTime - startTime,
+      });
       if (!upbeat) {
         return; // nothing to do here
       }
@@ -312,6 +319,13 @@
       // if this is a multi-rest measure, we have no new notes
       // to highlight but still want to remove the old one
       clearHighlight();
+      if (measureCount % 10 === 0) {
+        meta.push({
+          event: 'measurestart',
+          measure: measureCount,
+          time: audioContext.currentTime - startTime,
+        });
+      }
     }
 
     highlightBeat(measureCount, evt.detail.beatInMeasure);
@@ -383,6 +397,7 @@
   export function initPlaythrough() {
     // init music data every time (repeats are "used" when cursor goes through data)
     initMusicData();
+    startTime = audioContext.currentTime;
     metronome.play(upbeat);
   }
   export function stopPlaythrough() {
