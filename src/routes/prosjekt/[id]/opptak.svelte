@@ -45,7 +45,7 @@
   }
 
   function recombine() {
-    fetch(`/api/recording/${recording._id}/recombine-recordings`, {
+    fetch(`/api/project/${id}/recombine-recordings`, {
       method: 'POST',
     })
     .then(() =>{

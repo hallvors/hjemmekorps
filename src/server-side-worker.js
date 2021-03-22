@@ -21,8 +21,8 @@ function start(id, disconnect) {
   let workQueue = new Queue('processing-jobs', REDIS_URL);
 
   workQueue.process('sound-file-merge', maxJobsPerWorker, async job => {
-    console.log('background worker merges sound files for ' + job.projectId);
-    await aHelpers.mergeSoundfiles(job.projectId);
+    console.log('background worker merges sound files for ' + job.data.projectId, job);
+    await aHelpers.mergeSoundfiles(job.data.projectId);
     console.log('background worker done');
     return { completed: true };
   });
