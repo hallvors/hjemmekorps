@@ -24,6 +24,7 @@ export const post = compose([
         req.body.projectId,
         req.body.memberId,
         req.body.instrument,
+        JSON.parse(req.body.meta || '[]'),
         req.file.path
       )
       .then(project => {

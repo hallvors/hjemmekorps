@@ -114,7 +114,7 @@
 
         first = true;
         //start the recording process
-        meta.push({ start: audioContext.currentTime });
+        meta.push({ event: 'start', time: audioContext.currentTime });
         recorder.startRecording();
         dispatch('start'); // starts playing other tracks - if any
         theBox.initPlaythrough(); // Tell NoteBox to start metronome
@@ -141,7 +141,7 @@
     xhr.send(fd);
   }
   function countdownUiUpdate(evt) {
-    meta.push({ countdown: audioContext.currentTime });
+    meta.push({ event: 'countdown', time: audioContext.currentTime });
     count = evt.detail.countdown;
     if (first && count === 3 && evt.detail.beatInMeasure === 2) {
       count = 2;

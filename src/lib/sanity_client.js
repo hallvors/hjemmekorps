@@ -442,7 +442,7 @@ async function updateOrCreateMember(data, bandId, portraitFile) {
   return result;
 }
 
-function addProjectRecording(projectId, memberId, instrument, filepath) {
+function addProjectRecording(projectId, memberId, instrument, meta, filepath) {
   const cl = getSanityClient();
   return cl
     .fetch(
@@ -484,6 +484,7 @@ function addProjectRecording(projectId, memberId, instrument, filepath) {
               },
               volume: 100,
               instrument,
+              meta,
             })
             .then(() => getProject(memberId, projectId, true));
         });
