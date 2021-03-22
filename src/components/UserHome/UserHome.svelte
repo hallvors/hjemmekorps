@@ -13,10 +13,11 @@
   let recordings = [];
 
   if (project.generatedSoundfileUrl) {
-    recordings.push({recording: {
-      url: project.generatedSoundfileUrl
-    }
-    })
+    recordings.push({
+      recording: {
+        url: project.generatedSoundfileUrl,
+      },
+    });
   }
   // still working on this feature, will be enabled later
   const ENABLE_LISTEN_WHILE_RECORDING = Boolean(recordings.length);
@@ -41,7 +42,7 @@
         url => url !== evt.detail.tagValue
       );
     } else {
-      activeRecordings = [ /*...activeRecordings,*/ evt.detail.tagValue];
+      activeRecordings = [/*...activeRecordings,*/ evt.detail.tagValue];
     }
     console.log(activeRecordings);
   }
@@ -84,8 +85,13 @@
                 on:deactivate={handleClick}
               />
             {/each}
-            {:else}
-            <p><em>Ingen stemmer spilt inn enda <i class="fas fa-music"></i> - blir din den første?</em></p>
+          {:else}
+            <p>
+              <em
+                >Ingen stemmer spilt inn enda <i class="fas fa-music" /> - blir din
+                den første?</em
+              >
+            </p>
           {/if}
         </div>
         {#if activeRecordings && activeRecordings.length}
@@ -98,7 +104,10 @@
         {/if}
       </ScrollableListToolsRight>
     {:else}
-      <Loading message="Henter noter og opptak..." />
+      <Loading
+        message="Henter noter og opptak..."
+        subMessage="Husk å bruke høretelefoner!"
+      />
     {/if}
   </div>
 </div>

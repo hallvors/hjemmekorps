@@ -474,9 +474,12 @@
     on:beat={onBeat}
   />
 {/if}
-{#if renderingMusic}
+{#if renderingMusic || true}
   <div class="loading">
-    <Loading message={loadingMessage} />
+    <Loading
+      message={loadingMessage}
+      subMessage="Husk å bruke høretelefoner!"
+    />
   </div>
 {/if}
 <div class="note-box" bind:this={sheetmusicElm} id="sheetmusic">

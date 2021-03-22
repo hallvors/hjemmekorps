@@ -4,6 +4,7 @@
   import { instruments } from '../../lib/datastore';
   import { getRandomInt } from '../../lib/utils';
   export let message = 'Vent litt...';
+  export let subMessage = '';
   let rndInstr = [];
   function pickInstruments() {
     for (let i = 0; i < 3; i++) {
@@ -15,23 +16,23 @@
 </script>
 
 <div class="background">
-
   <div class="loading">
+    <p class="mainmsg">{message}</p>
     {#each rndInstr as instrument, idx}
-    <img
-    class="i{idx}"
-      src="/images/instruments/{instrument.value}.png"
-      alt=""
+      <img
+        class="i{idx}"
+        src="/images/instruments/{instrument.value}.png"
+        alt=""
       />
-      {/each}
-      <p>{message}</p>
-    </div>
+    {/each}
+    {#if subMessage}<aside>{subMessage}</aside>{/if}
   </div>
+</div>
 
 <style>
   .background {
     background-color: #999;
-    opacity: .9;
+    opacity: 0.9;
     position: fixed;
     top: 0;
     left: 0;
@@ -49,12 +50,22 @@
     padding-top: 4%;
     border-radius: 100px;
   }
-  p {
+  p, aside {
     color: #444;
     letter-spacing: 8%;
-    font-size: 5vw;
     text-align: center;
+    font-size: 5vw;
   }
+  p {
+    margin-top: 15vh;
+  }
+  aside {
+    font-size: 2.5vw;
+    position: absolute;
+    bottom: 10vh;
+    width: 100%;
+  }
+
   img {
     width: 10%;
     position: absolute;
