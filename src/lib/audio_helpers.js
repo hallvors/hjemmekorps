@@ -16,7 +16,7 @@ async function mergeSoundfiles(projectId) {
     prefix: 'ffmpeg-wav-tmp',
   });
   // get recording.url
-  const files = await Promise.all(
+  let files = await Promise.all(
     recordings.map(recording => {
       if (recording.volume === 0) {
         console.log('ignoring muted file', recording._id);
