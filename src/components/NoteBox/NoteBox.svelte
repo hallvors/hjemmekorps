@@ -314,7 +314,6 @@
       clearHighlight();
     }
 
-    let beatDuration = 1 / timeNumerator;
     highlightBeat(measureCount, evt.detail.beatInMeasure);
     previousMeasure = measureCount;
   }
