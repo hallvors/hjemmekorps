@@ -2,6 +2,10 @@ FROM node:14.16.0-stretch
 
 RUN apt-get update -y && apt-get install -y ffmpeg
 
+# We need redis-cli apparently, and it seems the best way to get it is
+# installing the full redis-server
+RUN apt-get install -y redis-server
+
 RUN mkdir -p /home/node/app && \
     chown -R node:node /home/node/app
 WORKDIR /home/node/app
