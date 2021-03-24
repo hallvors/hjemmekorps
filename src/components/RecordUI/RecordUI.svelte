@@ -213,11 +213,11 @@
 <nav id="rec-toolbar">
   {#if recState === STOPPED}
     <!-- initial state: start recording-button only -->
-    <div class="start-stop-btn" on:click={start}><h1>Ta opp</h1></div>
+    <div class="start-stop-btn" on:click={start}><div>Ta opp</div></div>
   {:else if recState === RECORDING}
     <!-- pause button?, stop button -->
     <div class="start-stop-btn" on:click={stop}>
-      <h1>Stopp opptak</h1>
+      <div>Stopp opptak</div>
       <div id="volume"><span bind:this={volumePercElm} class:volumeLoud /></div>
     </div>
 
@@ -227,8 +227,8 @@
     <!-- Listen button, send button, delete button -->
     <!-- <button on:click={playRecording}>Hør på opptak</button> -->
     <div class="recording-btn-wrapper">
-      <div class="half-btn" on:click={sendRecording}><h1>Send opptak</h1></div>
-      <div class="half-btn" on:click={cancel}><h1>Slett opptak</h1></div>
+      <div class="half-btn" on:click={sendRecording}><div>Send opptak</div></div>
+      <div class="half-btn" on:click={cancel}><div>Slett opptak</div></div>
     </div>
   {:else if recState === SENDING}
     <Loading message="Sender..." />
@@ -272,7 +272,7 @@
     width: 100%;
     position: absolute;
     border: none;
-    bottom: -20px;
+    bottom: 0;
     left: 50%;
     -ms-transform: translateX(-50%);
     transform: translateX(-50%);
@@ -281,7 +281,7 @@
   #volume span {
     background-color: rgb(15, 83, 55);
     width: 100%;
-    border-top: 10px dotted rgb(2, 148, 2);
+    border-top: 6px dotted rgb(2, 148, 2);
     display: inline-block;
   }
   #volume span.volumeLoud {
@@ -292,7 +292,6 @@
   #rec-toolbar {
     position: fixed;
     z-index: 2;
-    height: 10vw;
     width: 100%;
     left: 0;
     top: var(--navbarHeight); /* Navbarheight */
@@ -300,7 +299,6 @@
     border: var(--border);
     border-top: none;
     text-align: center;
-    font-size: 2em;
     font-weight: 300;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -320,7 +318,7 @@
 
   .half-btn {
     width: 50%;
-    height: 13vw;
+    font-size: 8vw;
   }
   .half-btn:hover {
     cursor: pointer;
@@ -337,24 +335,16 @@
   .start-stop-btn {
     width: 100%;
     height: 100%;
-
-    position: absolute;
-    top: 0;
-    left: 0;
   }
   .start-stop-btn:hover {
     background-color: #f5f5f5;
     cursor: pointer;
   }
 
-  .start-stop-btn h1 {
-    width: max-content;
+  .start-stop-btn div, .half-btn div {
     margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    -ms-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
     font-size: 8vw;
+    line-height: 8vw;
+    text-align: center;
   }
 </style>

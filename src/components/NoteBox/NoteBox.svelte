@@ -90,13 +90,16 @@
       markup = await request.text();
     }
     loadingMessage = 'Tilpasser notene til din skjerm...';
+    let zoom = 1;
+    if (window.innerWidth <= 480) {
+      zoom = 0.75;
+    }
     if (markup) {
       sheetMusicRenderer = new opensheetmusicdisplay.OpenSheetMusicDisplay(
         sheetmusicElm,
         {
           autoResize: false, // important! OSMD must not redraw notes with new IDs
           backend: 'svg',
-          //pageBackgroundColor: '#FFFFFF',
           drawTitle: false,
           drawSubtitle: false,
           drawComposer: false,
@@ -107,6 +110,7 @@
         }
       );
       await sheetMusicRenderer.load(markup);
+      sheetMusicRenderer.zoom = zoom; // must be after load() for some reason
       sheetMusicRenderer.render();
       console.log('render done');
       if (
