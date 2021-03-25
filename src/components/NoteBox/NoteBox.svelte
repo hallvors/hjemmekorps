@@ -482,7 +482,7 @@
   <div class="loading">
     <Loading
       message={loadingMessage}
-      subMessage="Husk å bruke høretelefoner!"
+      subMessage={ soundRecorder ? 'Husk å bruke høretelefoner!' : ''}
     />
   </div>
 {/if}
