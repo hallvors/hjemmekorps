@@ -111,6 +111,7 @@
       );
       await sheetMusicRenderer.load(markup);
       sheetMusicRenderer.zoom = zoom; // must be after load() for some reason
+      sheetMusicRenderer.EngravingRules.RenderRehearsalMarks = false; // Workaround because Flute voices get marks intended for the full score
       sheetMusicRenderer.render();
       console.log('render done');
       if (
