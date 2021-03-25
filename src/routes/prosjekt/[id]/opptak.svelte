@@ -102,7 +102,7 @@
   <button on:click={recombine}>Lag ny samla fil</button>
 
 {:else}
-  <p>Her er det vist ikke spilt inn noe enda.</p>
+  <p>Her er det visst ikke spilt inn noe enda.</p>
 {/if}
 
 <p>
