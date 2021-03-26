@@ -14,7 +14,12 @@
   import { projects, members, assignments } from '../../../lib/datastore';
 
   const project = $projects[id];
-
+  let hasRecordings = false;
+  for(let assignment in $assignments[id]) {
+    if($assignments[id][assignment].recording) {
+      hasRecordings = true;
+    }
+  }
   let audioElements = [];
   function startAudio() {
     audioElements.forEach(elm => elm.play());
@@ -76,7 +81,7 @@
   </div>
 {/if}
 
-{#if Object.entries($assignments[id]).length}
+{#if hasRecordings}
   <h3>Innsendte opptak</h3>
   <UsageHint
     message="Her er alle opptak sendt inn så langt. Volumet du setter her brukes neste gang felles lydspor lages. Dersom et opptak ikke skal tas med i generert fil, kan volumet settes til null."
