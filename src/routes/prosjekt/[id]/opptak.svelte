@@ -60,12 +60,12 @@
 </script>
 
 <svelte:head
-  ><title>{$projects[id].name} : Opptak - hjemmekorps.no</title></svelte:head
+  ><title>{project.name} : Opptak - hjemmekorps.no</title></svelte:head
 >
 
 <h2>Opptak</h2>
 
-{#if project.generated_soundfile}
+{#if project.generatedSoundfileUrl}
   <div class="merged-audio">
     <h3>Samlet lydfil</h3>
     <UsageHint
@@ -74,7 +74,7 @@
     <span class="audio">
       <!-- svelte-ignore a11y-media-has-caption -->
       <!-- We can not create captions for user-generated music files :) -->
-      <audio controls src={project.generated_soundfile.url}>
+      <audio controls src={project.generatedSoundfileUrl}>
         Audio does not work
       </audio>
     </span>
