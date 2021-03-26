@@ -13,7 +13,10 @@
   export let assignments = {};
 
   let listOptions = [];
-  let selectedOption = Object.keys(assignments).length ? 1 : 0;
+  let selectedOption =
+    assignments[project._id] && Object.keys(assignments[project._id]).length
+      ? 1
+      : 0;
 
   // filter out members from other bands, list members in alphabetical order
   let membersFiltered = Object.keys(members)
