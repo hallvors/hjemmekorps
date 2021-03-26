@@ -14,14 +14,28 @@
   let project = $projects[id];
 
   let subpages = [
-    { href: `/prosjekt/${id}/musikanter`, title: 'Musikanter' },
-    { href: `/prosjekt/${id}/send`, title: 'Send noter' },
-    { href: `/prosjekt/${id}/stemmer`, title: 'Stemmer' },
-    { href: `/prosjekt/${id}/opptak`, title: 'Opptak' },
+    {
+      href: `/prosjekt/${id}/musikanter`,
+      title: 'Tildel stemmer',
+      orderbadge: 1,
+    },
+    { href: `/prosjekt/${id}/send`, title: 'Send noter', orderbadge: 2 },
+    { href: `/prosjekt/${id}/opptak`, title: 'Hør opptak', orderbadge: 3 },
   ];
 </script>
 
 <svelte:head><title>{project.name} - hjemmekorps.no</title></svelte:head>
 
+<LinkedBoxList items={subpages} />
 
-  <LinkedBoxList items={subpages} />
+<p>
+  Du kan også <a href={`/prosjekt/${id}/stemmer`}
+    >sjekke om notene er lastet opp korrekt</a
+  >.
+</p>
+
+<style>
+  p {
+    text-align: center;
+  }
+</style>
