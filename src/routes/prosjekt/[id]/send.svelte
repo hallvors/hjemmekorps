@@ -28,7 +28,7 @@
 />
 
 <p>
-  <Back {id} />
+  <ForwardBackNav {id} forward={`/prosjekt/${id}/opptak`} />
 </p>
 
 <style>

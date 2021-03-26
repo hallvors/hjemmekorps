@@ -17,7 +17,7 @@
       updateProjectAssignment,
     } from '../../../lib/datastore';
     import ProjectMain from '../../../components/ProjectMain/ProjectMain.svelte';
-    import Back from '../../../components/Back/Back.svelte';
+    import ForwardBackNav from '../../../components/ForwardBackNav/ForwardBackNav.svelte';
   
     function onPartsUpdate(evt) {
       updateProjectAssignment(evt.detail.id, evt.detail.partslist);
@@ -39,7 +39,7 @@
   />
   
   <p>
-    <Back {id} />
+    <ForwardBackNav {id} forward={`/prosjekt/${id}/send`} />
   </p>
   
   
