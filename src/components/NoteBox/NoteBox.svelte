@@ -198,6 +198,10 @@
     // them to measures using meta data.
     for (let i = 0; i < notes.length; i++) {
       let note = notes[i];
+      if(!noteData[note.id]) {
+        console.error('no data for note?');
+        continue;
+      }
       let start = parseFloat(noteData[note.id].timeStart); // in fractions of measure
       let measureIndex = parseInt(noteData[note.id].measure);
       let measure = measureList[measureIndex];
