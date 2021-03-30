@@ -228,7 +228,6 @@ function addProject(
   name,
   mxmlFile,
   partslist,
-  bpm,
   members
 ) {
   const client = getSanityClient();
@@ -294,7 +293,6 @@ function addProject(
           owner: { _type: 'reference', _ref: userId },
           band: { _type: 'reference', _ref: bandId },
           name,
-          bpm: parseInt(bpm),
           sheetmusic: {
             _type: 'file',
             asset: { _type: 'reference', _ref: filedoc._id },

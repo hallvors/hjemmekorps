@@ -16,7 +16,6 @@
   import Loading from '../../components/Loading/Loading.svelte';
 
   export let id;
-  let bpm = 96;
   let loading = false;
 
   let files;
@@ -33,7 +32,6 @@
       if (id) {
         formData.append('projectId', id);
       }
-      formData.append('bpm', bpm);
       formData.append('file', files[0]);
       loading = true;
       const response = await fetch('/api/projects', {
@@ -74,15 +72,6 @@
   {/if}
   <label for="file">Velg Music XML-fil:</label>
   <input required id="file" type="file" bind:files />
-
-  <label
-    >Tempo (om ikke oppgitt i notene): kvartnote = <input
-      type="number"
-      size="4"
-      bind:value={bpm}
-    />BPM</label
-  >
-
   <input type="submit" value="Last opp" />
 </form>
 

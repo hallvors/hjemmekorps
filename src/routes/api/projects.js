@@ -39,7 +39,6 @@ export async function post(req, res, next) {
           projName,
           req.file,
           partslist,
-          req.body.bpm,
           bandMembers
         )
         .then(project => {
