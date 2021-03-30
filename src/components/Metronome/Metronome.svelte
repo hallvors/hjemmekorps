@@ -89,7 +89,7 @@
       recordBeat = countDownBeats.length > 4;
     }
 
-    if (beatNumber % nthBeatSounded === 0) {
+    if (beatNumber % nthBeatSounded === 0 || countDownBeats.length) {
       let source = audioContext.createBufferSource();
       if (beatNumber === 0) {
         // 0th beat in measure == high pitch
