@@ -11,7 +11,7 @@
   const band = $bands[0];
   export let user;
   let recordings = [];
-
+  let message = 'Henter opptak...';
   if (project.generatedSoundfileUrl) {
     recordings.push({
       recording: {
@@ -47,13 +47,7 @@
     console.log(activeRecordings);
   }
   let tracksPlayer;
-  let loading = false;
-  function indicateLoading() {
-    loading = true;
-  }
-  function stopIndicateLoading() {
-    loading = false;
-  }
+
   function startPlay() {
     if (tracksPlayer) {
       tracksPlayer.start();
@@ -66,7 +60,7 @@
   }
 </script>
 
-<div class="main-wrapper" class:loading>
+<div class="main-wrapper">
   <div class="display">
     {#if project && user}
       <ScrollableListToolsRight>
@@ -98,14 +92,12 @@
           <TracksPlayer
             recordings={activeRecordings}
             bind:this={tracksPlayer}
-            on:loadstart={indicateLoading}
-            on:loadend={stopIndicateLoading}
           />
         {/if}
       </ScrollableListToolsRight>
     {:else}
       <Loading
-        message="Henter noter og opptak..."
+        {message}
         subMessage="Husk å bruke høretelefoner!"
       />
     {/if}
@@ -116,8 +108,5 @@
   .main-wrapper {
     padding: 50px 0;
     padding-top: 10vw;
-  }
-  .main-wrapper.loading {
-    cursor: wait;
   }
 </style>

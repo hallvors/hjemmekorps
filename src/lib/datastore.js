@@ -135,3 +135,7 @@ export const assignments = derived(projects, $projects => {
   });
   return assignments;
 });
+
+// recording wav buffers, decoded, keyed on url
+export const soundBuffers = writable({});
+

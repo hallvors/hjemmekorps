@@ -1,36 +1,42 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import Loading from '../Loading/Loading.svelte';
+  import {soundBuffers} from '../../lib/datastore';
+
   const dispatch = createEventDispatcher();
   export let recordings = []; // [url, url]
   let buffers = [];
   let audioContext;
   let mix;
-  let cachemap = {};
   $: preparedRecordings = init(recordings);
+  let loading = false;
 
   async function init(recordings) {
     if (recordings.length === 0 || typeof window === 'undefined') {
       return;
     }
-    dispatch('loadstart');
+    loading = true;
     console.log('start init, fetching ' + recordings.length);
     audioContext =
       audioContext || new (window.AudioContext || window.webkitAudioContext)();
     buffers = await Promise.all(
-      recordings.map(url =>
-        Promise.resolve(
-          cachemap[url] ||
-            fetch(url).then(res =>
-              res
-                .arrayBuffer()
-                .then(buffer => audioContext.decodeAudioData(buffer))
-            )
-        )
-      )
+      recordings.map(url => {
+        if ($soundBuffers[url]) {
+          return Promise.resolve($soundBuffers[url]);
+        }
+        return Promise.resolve(
+          fetch(url).then(res =>
+            res
+              .arrayBuffer()
+              .then(buffer => audioContext.decodeAudioData(buffer))
+          )
+        );
+      })
     );
-    console.log('fetched urls');
     recordings.forEach((url, idx) => {
-      cachemap[url] = buffers[idx];
+      soundBuffers.update(data => {
+        return {...data, [url]: buffers[idx]}
+      });
     });
 
     let songLength = 0;
@@ -49,7 +55,7 @@
     }
     console.log('post-mix, ready!');
     mix.connect(audioContext.destination);
-    dispatch('loadend');
+    loading = false;
     return buffers;
   }
 
@@ -60,9 +66,9 @@
     }
   }
   export function stop() {
-    try{
+    try {
       mix.stop();
-    } catch(e) {
+    } catch (e) {
       console.error(e); // 'not started' state will throw
     }
   }
@@ -94,3 +100,7 @@
     return finalMix;
   }
 </script>
+
+{#if loading}
+  <Loading message="Henter opptak.." subMessage="Husk å bruke høretelefoner!" />
+{/if}
