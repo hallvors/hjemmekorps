@@ -42,7 +42,8 @@
   let svg = '';
   let loadingMessage = 'Henter notene...';
   let startTime;
-
+  let scrolling = false;
+  let targetScrollPosition;
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
   const timeStart = Date.now();
@@ -198,7 +199,7 @@
     // them to measures using meta data.
     for (let i = 0; i < notes.length; i++) {
       let note = notes[i];
-      if(!noteData[note.id]) {
+      if (!noteData[note.id]) {
         console.error('no data for note?');
         continue;
       }
@@ -416,6 +417,9 @@
   }
 
   function scrollIfRequired(elm) {
+    if (scrolling) {
+      return;
+    }
     let rect = elm.getBoundingClientRect();
     let navs = document.getElementsByTagName('nav');
     let navbarHeight = navs[0].offsetHeight;
@@ -426,13 +430,43 @@
       );
     }
     let tooHigh = rect.y < navbarHeight * 1.1;
-    let tooLow = rect.bottom > winHeight - rect.height;
+    let tooLow = rect.bottom > winHeight - rect.height * 2.5;
     if (tooHigh || tooLow) {
-      let scroll =
+      targetScrollPosition =
         rect.y + document.documentElement.scrollTop - navbarHeight * 1.2;
-      document.documentElement.scrollTop = scroll;
+      scrolling = true;
+      console.log('we want to scroll to', targetScrollPosition);
+      let steps =
+        (document.documentElement.scrollTop - targetScrollPosition) / 30;
+      if (steps > 0) { // we're jumping back..
+        document.documentElement.scrollTop = targetScrollPosition;
+        return;
+      }
+      console.log({ steps });
+      function scrollStep() {
+        document.documentElement.scrollTop -= steps;
+        if (diff(document.documentElement.scrollHeight - document.documentElement.scrollTop, window.innerHeight) <= Math.abs(steps)) {
+          // end of document
+          console.log('bottom!')
+          scrolling = false;
+        }
+        if (
+          scrolling &&
+          diff(document.documentElement.scrollTop, targetScrollPosition) >
+            Math.abs(steps * 1.5)
+        ) {
+          setTimeout(scrollStep, 5);
+        } else {
+          scrolling = false;
+        }
+      }
+      scrollStep();
     }
   }
+  function diff(a, b) {
+    return Math.abs(a - b);
+  }
+
   function saveSVGToServer() {
     initMusicData();
     let svgElm = sheetmusicElm.getElementsByTagName('svg')[0];
@@ -488,7 +522,7 @@
   <div class="loading">
     <Loading
       message={loadingMessage}
-      subMessage={ soundRecorder ? 'Husk å bruke høretelefoner!' : ''}
+      subMessage={soundRecorder ? 'Husk å bruke høretelefoner!' : ''}
     />
   </div>
 {/if}
