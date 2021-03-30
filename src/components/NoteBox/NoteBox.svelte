@@ -76,10 +76,11 @@
         }/svg`,
         { credentials: 'same-origin' }
       );
+      svg = await request.text();
     }
     let markup;
-    if (request && request.ok) {
-      svg = await request.text();
+    if (request && request.ok && svg && svg.indexOf('data-') > -1) {
+      // ..can we trust this SVG?
     } else {
       request = await fetch(
         `/api/project/${project._id}/score/${
