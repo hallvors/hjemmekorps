@@ -19,11 +19,13 @@
   <div class="loading">
     <p class="mainmsg">{message}</p>
     {#each rndInstr as instrument, idx}
-      <img
-        class="i{idx}"
-        src="/images/instruments/{instrument.value}.png"
-        alt=""
-      />
+      {#if instrument && instrument.value}
+        <img
+          class="i{idx}"
+          src="/images/instruments/{instrument.value}.png"
+          alt=""
+        />
+      {/if}
     {/each}
     {#if subMessage}<aside>{subMessage}</aside>{/if}
   </div>
@@ -50,7 +52,8 @@
     padding-top: 4%;
     border-radius: 100px;
   }
-  p, aside {
+  p,
+  aside {
     color: #444;
     letter-spacing: 8%;
     text-align: center;
