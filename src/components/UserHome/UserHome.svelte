@@ -92,6 +92,7 @@
           <TracksPlayer
             recordings={activeRecordings}
             bind:this={tracksPlayer}
+            on:error={() => {activeRecordings.length = 0;}}
           />
         {/if}
       </ScrollableListToolsRight>

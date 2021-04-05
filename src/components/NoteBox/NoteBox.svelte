@@ -372,7 +372,7 @@
         beatUnit = measure.metronome.beatUnit;
         dotted = [true, 'true'].includes(measure.metronome.dotted);
         console.log('tempo settings changed! New: ', measure.metronome);
-        document.title = beatUnit + ' ' + dotted;
+        
         beatUnitNumber = tempoUnitAsNumber(beatUnit);
         nthBeatSounded =
           (timeDenominator / beatUnitNumber) * (dotted ? 1.5 : 1);
