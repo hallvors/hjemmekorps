@@ -474,16 +474,22 @@ function clearCollapsedHighlight(){
       targetScrollPosition =
         rect.y + document.documentElement.scrollTop - navbarHeight * 1.2;
       scrolling = true;
-      console.log('we want to scroll to', targetScrollPosition);
       let steps =
         (document.documentElement.scrollTop - targetScrollPosition) / 30;
-      if (steps > 0) { // we're jumping back..
+      if (steps > 0) {
+        // we're jumping back..
         document.documentElement.scrollTop = targetScrollPosition;
         return;
       }
       function scrollStep() {
         document.documentElement.scrollTop -= steps;
-        if (diff(document.documentElement.scrollHeight - document.documentElement.scrollTop, window.innerHeight) <= Math.abs(steps)) {
+        if (
+          diff(
+            document.documentElement.scrollHeight -
+              document.documentElement.scrollTop,
+            window.innerHeight
+          ) <= Math.abs(steps)
+        ) {
           // end of document
           scrolling = false;
         }
