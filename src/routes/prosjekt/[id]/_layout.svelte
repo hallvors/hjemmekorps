@@ -59,15 +59,35 @@
 </script>
 
 {#await projectPromise}
-  <div class="wait"><Loading /></div>
+  <Loading />
 {:then project}
-  <slot />
+<main>
+  <header class="project-info">
+      <h1 class="h1-bigger project-title">{project.name}</h1>
+      <p>Lagt til {project._createdAt} av <em>{project.ownerName}</em></p>
+  </header>
+
+<slot />
+</main>
+
 {:catch error}
   <p style="color: red">{error.message}</p>
 {/await}
 
 <style>
-  .wait {
-    height: 100vh;
+  .project-title {
+    text-align: center;
+    padding-top: 0.8em;
+    margin: 0;
   }
+
+  h1 {
+    text-transform: uppercase;
+  }
+  header {
+    text-align: center;
+    border-bottom: 1px dashed grey;
+    margin-bottom: 0.8em;
+  }
+
 </style>

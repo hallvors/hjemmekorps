@@ -41,6 +41,8 @@
       plainTextLinks.push(links[i].textContent);
       plainTextLinks.push(links[i].href);
       plainTextLinks.push('');
+      // fix missing protocol and hostname in attributes
+      links[i].setAttribute('href', links[i].href);
     }
     event.clipboardData.setData('text/plain', plainTextLinks.join('\n'));
     event.clipboardData.setData('text/html', ulElement.outerHTML);
@@ -94,5 +96,5 @@
   {/if}
 
   <button on:click={triggerSelectAndCopy}>Kopier alle lenker</button>
-  <a href="/prosjekt/{project._id}">Tilbake</a>
+
 </div>

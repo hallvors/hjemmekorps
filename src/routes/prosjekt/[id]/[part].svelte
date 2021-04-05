@@ -12,6 +12,7 @@
   import { projects } from '../../../lib/datastore';
   import NoteBox from '../../../components/NoteBox/NoteBox.svelte';
   import UsageHint from '../../../components/UsageHint/UsageHint.svelte';
+  import Back from '../../../components/Back/Back.svelte';
 </script>
 
 <svelte:head><title>{$projects[id].name} : {part} - hjemmekorps.no</title></svelte:head>
@@ -21,4 +22,6 @@
 
 <NoteBox project={$projects[id]} trackName={part} />
 
-<p><a href="/prosjekt/{id}" on:click={() => history.back()}>Tilbake</a></p>
+<p>
+  <Back href={`/prosjekt/${id}/stemmer`} />
+</p>

@@ -11,6 +11,17 @@
   const band = $bands[0];
   export let user;
   let recordings = [];
+  let message = 'Henter opptak...';
+  if (project.generatedSoundfileUrl) {
+    recordings.push({
+      recording: {
+        url: project.generatedSoundfileUrl,
+      },
+    });
+  }
+  // still working on this feature, will be enabled later
+  const ENABLE_LISTEN_WHILE_RECORDING = Boolean(recordings.length);
+
   if (project.partslist) {
     project.partslist.forEach(part => {
       if (part.members) {
@@ -31,18 +42,12 @@
         url => url !== evt.detail.tagValue
       );
     } else {
-      activeRecordings = [...activeRecordings, evt.detail.tagValue];
+      activeRecordings = [/*...activeRecordings,*/ evt.detail.tagValue];
     }
     console.log(activeRecordings);
   }
   let tracksPlayer;
-  let loading = false;
-  function indicateLoading() {
-    loading = true;
-  }
-  function stopIndicateLoading() {
-    loading = false;
-  }
+
   function startPlay() {
     if (tracksPlayer) {
       tracksPlayer.start();
@@ -55,16 +60,16 @@
   }
 </script>
 
-<div class="main-wrapper" class:loading>
+<div class="main-wrapper">
   <div class="display">
     {#if project && user}
       <ScrollableListToolsRight>
         <RecordUI {project} {user} on:start={startPlay} on:stop={stopPlay} />
         <div slot="aside">
-          {#if recordings && recordings.length}
+          {#if ENABLE_LISTEN_WHILE_RECORDING && recordings && recordings.length}
             {#each recordings as rec}
               <TagTrigger
-                tagRendered={rec.member.name}
+                tagRendered={rec.member ? rec.member.name : 'Alle'}
                 tagName=""
                 tagValue={rec.recording.url}
                 active={activeRecordings.includes(rec.recording.url)}
@@ -74,21 +79,27 @@
                 on:deactivate={handleClick}
               />
             {/each}
-            {:else}
-            <p><em>Ingen stemmer spilt inn enda <i class="fas fa-music"></i> - blir din den første?</em></p>
+          {:else}
+            <p>
+              <em
+                >Ingen stemmer spilt inn enda <i class="fas fa-music" /> - blir din
+                den første?</em
+              >
+            </p>
           {/if}
         </div>
         {#if activeRecordings && activeRecordings.length}
           <TracksPlayer
             recordings={activeRecordings}
             bind:this={tracksPlayer}
-            on:loadstart={indicateLoading}
-            on:loadend={stopIndicateLoading}
           />
         {/if}
       </ScrollableListToolsRight>
     {:else}
-      <Loading message="Henter noter og opptak..." />
+      <Loading
+        {message}
+        subMessage="Husk å bruke høretelefoner!"
+      />
     {/if}
   </div>
 </div>
@@ -97,8 +108,5 @@
   .main-wrapper {
     padding: 50px 0;
     padding-top: 10vw;
-  }
-  .main-wrapper.loading {
-    cursor: wait;
   }
 </style>

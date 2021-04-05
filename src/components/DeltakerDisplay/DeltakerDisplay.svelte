@@ -2,21 +2,6 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  let muted = false;
-
-  function toggleMute(e) {
-    const button = e.currentTarget;
-
-    if (!muted) {
-      button.firstChild.classList.toggle('fa-volume-mute');
-      button.firstChild.classList.toggle('fa-volume-up');
-    } else {
-      button.firstChild.classList.toggle('fa-volume-mute');
-      button.firstChild.classList.toggle('fa-volume-up');
-    }
-    muted = !muted;
-  }
-
   function dispatchClick() {
     dispatch('click', member);
   }
@@ -24,7 +9,6 @@
   export let member;
   export let projectName;
   export let assignmentInfo = {};
-  export let registerAudioElement = () => {};
 
 </script>
 
@@ -54,13 +38,6 @@
           >{assignmentInfo.part}{#if projectName}, {projectName}{/if}</em
         >
       </p>{/if}
-    {#if assignmentInfo && assignmentInfo.recording}
-      <button class="mute-btn" on:click|preventDefault|stopPropagation={toggleMute}
-        ><i class="fas fa-volume-up" /></button
-      >
-      <!-- svelte-ignore a11y-media-has-caption -->
-      <audio src={assignmentInfo.recording.url} use:registerAudioElement {muted} />
-    {/if}
   </div>
 {/if}
 
@@ -111,19 +88,5 @@
     max-width: 20%;
     vertical-align: bottom;
     margin-left: -20px;
-  }
-
-  .mute-btn {
-    border: 1px solid var(--dark);
-    background: var(--dark);
-    color: var(--textColorLight);
-    padding: 5px 10px;
-    border-radius: 100px;
-  }
-
-  .mute-btn:hover {
-    cursor: pointer;
-    background: none;
-    color: var(--blue);
   }
 </style>

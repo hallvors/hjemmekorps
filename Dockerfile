@@ -2,6 +2,10 @@ FROM node:14.16.0-stretch
 
 RUN apt-get update -y && apt-get install -y ffmpeg
 
+# We need redis-cli apparently, and it seems the best way to get it is
+# installing the full redis-server
+RUN apt-get install -y redis-server
+
 RUN mkdir -p /home/node/app && \
     chown -R node:node /home/node/app
 WORKDIR /home/node/app
@@ -14,6 +18,7 @@ COPY --chown=node:node ./static/ ./static/
 COPY --chown=node:node ./src/ ./src/
 COPY --chown=node:node ./rollup.config.js ./rollup.config.js
 COPY --chown=node:node ./prep-files.sh ./prep-files.sh
+COPY --chown=node:node ./scripts/ ./scripts/
 # Some files from node_modules will be used as web workers,
 # must be copied to somewhere they will be served directly to
 # browsers
@@ -23,4 +28,4 @@ RUN ./prep-files.sh
 RUN echo "{}" > ./src/config/overrides.json
 
 RUN npm run build
-CMD ["npm", "start"]
+#CMD ["npm", "start"]

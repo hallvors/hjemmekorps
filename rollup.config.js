@@ -106,7 +106,7 @@ export default {
 		preserveEntrySignatures: 'strict',
 		onwarn,
 	},
-
+/*
 	serviceworker: {
 		input: config.serviceworker.input(),
 		output: config.serviceworker.output(),
@@ -124,4 +124,5 @@ export default {
 		preserveEntrySignatures: false,
 		onwarn,
 	}
+*/
 };

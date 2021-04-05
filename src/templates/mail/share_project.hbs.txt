@@ -8,6 +8,6 @@ Melding fra dirigenten:
 
 Klikk her for å se notene og sende inn opptak:
 
-https://{{domain}}/?t={{token}}
+https://{{hostname}}/?t={{token}}
 
 Du kan ikke svare på denne eposten. Dersom du har spørsmål, ta kontakt med {{friendly_name}}.

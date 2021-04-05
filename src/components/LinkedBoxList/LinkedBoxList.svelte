@@ -9,8 +9,8 @@
       <LinkedBox
         href={item.href}
         title={item.title}
+        orderbadge={item.orderbadge}
         on:click
-        active={Boolean(item.active)}
       />
     </div>
   {/each}

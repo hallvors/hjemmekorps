@@ -7,9 +7,6 @@ const _ = require('underscore');
 const { nanoid } = require('nanoid');
 const NodeCache = require('node-cache');
 
-const { filterInstrumentName } = require('./utils');
-const { bands } = require('./datastore');
-
 const sanityCache = new NodeCache({
   stdTTL: 60 * 60 * 24 * 7,
   useClones: true,
@@ -18,7 +15,8 @@ const sanityCache = new NodeCache({
 const PROJECT = env.config.sanity.project;
 const TOKEN = env.config.sanity.token;
 const DATASET = env.config.sanity.dataset;
-const instruments = env.instruments;
+
+const dateFormat = new Intl.DateTimeFormat('no-NB');
 
 var sanityClient = null;
 function getSanityClient() {
@@ -152,9 +150,11 @@ function getProject(userId, projectId, mustBeFresh) {
     client.fetch(
       `*[_type == $type && _id == $projectId][0] {
       name, _id, sheetmusic, bpm,
-      "sheetmusicFile": sheetmusic.asset->url,
-      owner, partslist, generated_soundfile,
-      "bandAdmins": band->owner
+      "sheetmusicFile": sheetmusic.asset->url, owner,
+      "ownerName":owner->name, partslist,
+      "generatedSoundfileUrl": generated_soundfile.asset->url,
+      "bandAdmins": band->owner,
+      _createdAt
     }`,
       {
         type: 'project',
@@ -169,6 +169,7 @@ function getProject(userId, projectId, mustBeFresh) {
       return null;
     }
     let project = results[0];
+    project._createdAt = dateFormat.format(new Date(project._createdAt));
     let recordings = results[1];
     let userIsBandAdmin =
       (project.owner && project.owner._ref === userId) ||
@@ -227,7 +228,6 @@ function addProject(
   name,
   mxmlFile,
   partslist,
-  bpm,
   members
 ) {
   const client = getSanityClient();
@@ -293,7 +293,6 @@ function addProject(
           owner: { _type: 'reference', _ref: userId },
           band: { _type: 'reference', _ref: bandId },
           name,
-          bpm: parseInt(bpm),
           sheetmusic: {
             _type: 'file',
             asset: { _type: 'reference', _ref: filedoc._id },
@@ -442,8 +441,11 @@ async function updateOrCreateMember(data, bandId, portraitFile) {
   return result;
 }
 
-function addProjectRecording(projectId, memberId, instrument, filepath) {
+function addProjectRecording(projectId, memberId, instrument, meta, filepath) {
   const cl = getSanityClient();
+  if (meta) {
+    meta.forEach(m => m._key = nanoid());
+  }
   return cl
     .fetch(
       `*[_type == $type &&
@@ -484,6 +486,7 @@ function addProjectRecording(projectId, memberId, instrument, filepath) {
               },
               volume: 100,
               instrument,
+              meta,
             })
             .then(() => getProject(memberId, projectId, true));
         });
@@ -530,6 +533,16 @@ function addCombinedRecording(projectId, filepath) {
             });
         });
     });
+}
+
+function setVolume(recordingId, volume) {
+  volume = parseInt(volume);
+  if (isNaN(volume)) {
+    console.error('bad volume value');
+    return;
+  }
+  const cl = getSanityClient();
+  return cl.patch(recordingId).set({ volume }).commit();
 }
 
 // OLD code
@@ -589,6 +602,7 @@ module.exports = {
   addPartFile,
   addProjectRecording,
   addCombinedRecording,
+  setVolume,
 
   removeHelpRecording,
   addImage,

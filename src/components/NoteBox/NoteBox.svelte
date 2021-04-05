@@ -3,6 +3,8 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import Loading from '../Loading/Loading.svelte';
   import Metronome from '../Metronome/Metronome.svelte';
+  import { getMetronomeDefault } from './metronomeDefaults';
+
   import {
     extractNoteMetaData,
     extractMeasureData,
@@ -15,11 +17,13 @@
   export let soundRecorder;
   export let audioContext;
   export let hasPartFile = false;
+  export let meta = [];
 
   let sheetMusicRenderer; // OSMD instance
   let sheetmusicElm;
   let renderingMusic = true;
   // stuff metronome needs
+  // many of these are re-set in the setGlobalMetronomeVars method
   let metronome;
   let beatUnit = 'quarter';
   let dotted = false;
@@ -29,14 +33,17 @@
   let beatUnitNumber = tempoUnitAsNumber(beatUnit);
   let nthBeatSounded = (timeDenominator / beatUnitNumber) * (dotted ? 1.5 : 1);
   let delayBetweenBeats = 60 / bpm / nthBeatSounded;
+  let cachedMetronomeSettings = {};
   // cursor movement stuff
   let upbeat = 0;
   let measureList;
   let noteData;
   let repeats = [];
   let svg = '';
-  let loadingMessage = 'Vent litt...';
-
+  let loadingMessage = 'Henter notene...';
+  let startTime;
+  let scrolling = false;
+  let targetScrollPosition;
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
   const timeStart = Date.now();
@@ -71,10 +78,11 @@
         }/svg`,
         { credentials: 'same-origin' }
       );
+      svg = await request.text();
     }
     let markup;
-    if (request && request.ok) {
-      svg = await request.text();
+    if (request && request.ok && svg && svg.indexOf('data-') > -1) {
+      // ..can we trust this SVG?
     } else {
       request = await fetch(
         `/api/project/${project._id}/score/${
@@ -85,6 +93,10 @@
       markup = await request.text();
     }
     loadingMessage = 'Tilpasser notene til din skjerm...';
+    let zoom = 1;
+    if (window.innerWidth <= 480) {
+      zoom = 0.75;
+    }
     if (markup) {
       sheetMusicRenderer = new opensheetmusicdisplay.OpenSheetMusicDisplay(
         sheetmusicElm,
@@ -101,6 +113,8 @@
         }
       );
       await sheetMusicRenderer.load(markup);
+      sheetMusicRenderer.zoom = zoom; // must be after load() for some reason
+      sheetMusicRenderer.EngravingRules.RenderRehearsalMarks = false; // Workaround because Flute voices get marks intended for the full score
       sheetMusicRenderer.render();
       console.log('render done');
       if (
@@ -186,6 +200,10 @@
     // them to measures using meta data.
     for (let i = 0; i < notes.length; i++) {
       let note = notes[i];
+      if (!noteData[note.id]) {
+        console.error('no data for note?');
+        continue;
+      }
       let start = parseFloat(noteData[note.id].timeStart); // in fractions of measure
       let measureIndex = parseInt(noteData[note.id].measure);
       let measure = measureList[measureIndex];
@@ -283,6 +301,11 @@
     if (evt.detail.countdown) {
       // RecordUI will count visually down
       dispatch('countdown', Object.assign({}, evt.detail));
+      meta.push({
+        event: 'countdown',
+        measure: measureCount,
+        time: audioContext.currentTime - startTime,
+      });
       if (!upbeat) {
         return; // nothing to do here
       }
@@ -308,22 +331,32 @@
       // if this is a multi-rest measure, we have no new notes
       // to highlight but still want to remove the old one
       clearHighlight();
+      if (measureCount % 10 === 0) {
+        meta.push({
+          event: 'measurestart',
+          measure: measureCount,
+          time: audioContext.currentTime - startTime,
+        });
+      }
     }
 
-    let beatDuration = 1 / timeNumerator;
     highlightBeat(measureCount, evt.detail.beatInMeasure);
     previousMeasure = measureCount;
   }
 
   function setGlobalMetronomeVars(measure) {
     // did the time signature change?
+    let tsChanged = false;
+    let oldMeter;
     if (
       measure.timeSignature &&
       (measure.timeSignature.numerator !== timeNumerator ||
         measure.timeSignature.denominator !== timeDenominator)
     ) {
+      oldMeter = `${timeNumerator}/${timeDenominator}`;
       timeNumerator = measure.timeSignature.numerator;
       timeDenominator = measure.timeSignature.denominator;
+      tsChanged = true;
       console.log(`${timeNumerator}/${timeDenominator}`);
     }
     // detect tempo changes
@@ -333,7 +366,7 @@
       if (
         bpm !== measure.metronome.bpm ||
         beatUnit !== measure.metronome.beatUnit ||
-        dotted !== measure.metronome.dotter
+        dotted !== measure.metronome.dotted
       ) {
         bpm = measure.metronome.bpm;
         beatUnit = measure.metronome.beatUnit;
@@ -345,12 +378,38 @@
           (timeDenominator / beatUnitNumber) * (dotted ? 1.5 : 1);
         delayBetweenBeats = 60 / bpm / nthBeatSounded;
       }
+    } else if (tsChanged) {
+      // whoa, the time signature just changed but the
+      // metronome info did not. We may want to go for
+      // default values for the new meter..
+      let maybeValues =
+        cachedMetronomeSettings[`${timeNumerator}/${timeDenominator}`] ||
+        getMetronomeDefault(timeNumerator, timeDenominator);
+      if (
+        beatUnitNumber !== maybeValues.beatUnitNumber ||
+        dotted !== maybeValues.dotted ||
+        nthBeatSounded !== maybeValues.nthBeatSounded
+      ) {
+        // we're really changing here.. right!
+        cachedMetronomeSettings[oldMeter] = {
+          beatUnit,
+          beatUnitNumber,
+          dotted,
+          nthBeatSounded,
+        };
+        beatUnit = numberToTempoUnit(maybeValues.beatUnitNumber);
+        nthBeatSounded = maybeValues.nthBeatSounded;
+        dotted = maybeValues.dotted;
+        beatUnitNumber = maybeValues.beatUnitNumber;
+        delayBetweenBeats = 60 / bpm / nthBeatSounded;
+      }
     }
   }
 
   export function initPlaythrough() {
     // init music data every time (repeats are "used" when cursor goes through data)
     initMusicData();
+    startTime = audioContext.currentTime;
     metronome.play(upbeat);
   }
   export function stopPlaythrough() {
@@ -359,6 +418,9 @@
   }
 
   function scrollIfRequired(elm) {
+    if (scrolling) {
+      return;
+    }
     let rect = elm.getBoundingClientRect();
     let navs = document.getElementsByTagName('nav');
     let navbarHeight = navs[0].offsetHeight;
@@ -369,13 +431,43 @@
       );
     }
     let tooHigh = rect.y < navbarHeight * 1.1;
-    let tooLow = rect.bottom > winHeight - rect.height;
+    let tooLow = rect.bottom > winHeight - rect.height * 2.5;
     if (tooHigh || tooLow) {
-      let scroll =
+      targetScrollPosition =
         rect.y + document.documentElement.scrollTop - navbarHeight * 1.2;
-      document.documentElement.scrollTop = scroll;
+      scrolling = true;
+      console.log('we want to scroll to', targetScrollPosition);
+      let steps =
+        (document.documentElement.scrollTop - targetScrollPosition) / 30;
+      if (steps > 0) { // we're jumping back..
+        document.documentElement.scrollTop = targetScrollPosition;
+        return;
+      }
+      console.log({ steps });
+      function scrollStep() {
+        document.documentElement.scrollTop -= steps;
+        if (diff(document.documentElement.scrollHeight - document.documentElement.scrollTop, window.innerHeight) <= Math.abs(steps)) {
+          // end of document
+          console.log('bottom!')
+          scrolling = false;
+        }
+        if (
+          scrolling &&
+          diff(document.documentElement.scrollTop, targetScrollPosition) >
+            Math.abs(steps * 1.5)
+        ) {
+          setTimeout(scrollStep, 5);
+        } else {
+          scrolling = false;
+        }
+      }
+      scrollStep();
     }
   }
+  function diff(a, b) {
+    return Math.abs(a - b);
+  }
+
   function saveSVGToServer() {
     initMusicData();
     let svgElm = sheetmusicElm.getElementsByTagName('svg')[0];
@@ -402,6 +494,15 @@
       sixteenth: 16, // hopefully never..?
     }[unit];
   }
+  function numberToTempoUnit(number) {
+    return {
+      1: 'whole',
+      2: 'half',
+      4: 'quarter',
+      8: 'eight',
+      16: 'sixteenth', // hopefully never..?
+    }[number];
+  }
   let winHeight;
 </script>
 
@@ -420,7 +521,10 @@
 {/if}
 {#if renderingMusic}
   <div class="loading">
-    <Loading message={loadingMessage} />
+    <Loading
+      message={loadingMessage}
+      subMessage={soundRecorder ? 'Husk å bruke høretelefoner!' : ''}
+    />
   </div>
 {/if}
 <div class="note-box" bind:this={sheetmusicElm} id="sheetmusic">

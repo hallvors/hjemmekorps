@@ -28,10 +28,10 @@ export async function post(req, res, next) {
     }
     
     const token = sign({ email }, env.config.site.tokensecret);
-    const link = `https://${env.domain}/?t=${token}`;
+    const link = `https://${env.hostname}/?t=${token}`;
     let data = {
       link,
-      domain: env.domain,
+      hostname: env.hostname,
       user,
     };
     let templatePlain = Handlebars.compile(templateText);
@@ -39,7 +39,7 @@ export async function post(req, res, next) {
     let result = await send(
       user.email,
       { name: 'Admin' },
-      'Innlogging til ' + env.domain,
+      'Innlogging til ' + env.hostname,
       templatePlain(data),
       templateRich(data)
     );

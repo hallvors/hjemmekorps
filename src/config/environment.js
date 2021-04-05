@@ -27,7 +27,7 @@ function objectMerge(a, b) {
   }
 }
 
-const config = require( './defaults.json');
+const config = require('./defaults.json');
 let appEnvConf = {};
 if (env === 'test') {
   appEnvConf = require('./test.json');
@@ -52,13 +52,20 @@ APP_ENV_VARS.forEach(varName => {
 });
 objectMerge(config, envConf);
 
+let hostname =
+  env === 'development'
+    ? 'localhost'
+    : env === 'production'
+    ? 'hjemmekorps.no'
+    : 'test.hjemmekorps.no';
+
 module.exports = {
   instruments: require('./instruments.json').instruments,
   name: env,
   test: env === 'test',
   development: env === 'development',
   production: env === 'production',
-  domain: env === 'production' ? 'hjemmekorps.no' : 'test.hjemmekorps.no',
+  hostname,
   port,
   config,
 };

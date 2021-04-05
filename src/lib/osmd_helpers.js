@@ -5,7 +5,7 @@ export function extractNoteMetaData(osmdInstance) {
   for (let i = 0; i < osmdInstance.graphic.MeasureList.length; i++) {
     for (let j = 0; j < osmdInstance.graphic.MeasureList[i].length; j++) {
       if (!osmdInstance.graphic.MeasureList[i][j]) {
-          continue;
+        continue;
       }
       time = 0;
       for (
@@ -82,16 +82,20 @@ export function extractMeasureData(osmdInstance) {
     if (measure.lastRepetitionInstructions) {
       repeats = repeats.concat(measure.lastRepetitionInstructions);
     }
-    if (measure.tempoExpressions && measure.tempoExpressions[0]) {
+    if (
+      measure.tempoExpressions &&
+      measure.tempoExpressions[0] &&
+      measure.tempoExpressions[0].instantaneousTempo
+    ) {
       info.metronome = {
         beatUnit: measure.tempoExpressions[0].instantaneousTempo.beatUnit,
         dotted: measure.tempoExpressions[0].instantaneousTempo.dotted,
         bpm: measure.tempoExpressions[0].instantaneousTempo.tempoInBpm,
-      }
+      };
     }
     return info;
   });
-  return {measureList, repeats}
+  return { measureList, repeats };
 }
 
 export function extractUpbeatTime(osmdInstance) {
