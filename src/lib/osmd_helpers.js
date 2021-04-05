@@ -67,6 +67,15 @@ export function extractMeasureData(osmdInstance) {
       start: durationSoFar,
       isReducedToMultiRest: measure.isReducedToMultiRest,
     };
+    let graphicalMeasure = osmdInstance.graphic.getGraphicalMeasureFromSourceMeasureAndIndex(measure, 0);
+    if (graphicalMeasure && graphicalMeasure.stave) {
+      ['x', 'y', 'width', 'height'].forEach(prop => {
+        info[prop] = graphicalMeasure.stave[prop];
+        if (graphicalMeasure.multiRestElement) {
+          info.numberOfMeasures = graphicalMeasure.multiRestElement.number_of_measures;
+        }
+      })
+    }
 
     durationSoFar += info.duration;
     if (measure.RhythmPrinted) {

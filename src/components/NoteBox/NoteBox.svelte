@@ -19,6 +19,8 @@
   export let hasPartFile = false;
   export let meta = [];
 
+  const SVGNS = 'http://www.w3.org/2000/svg';
+
   let sheetMusicRenderer; // OSMD instance
   let sheetmusicElm;
   let renderingMusic = true;
@@ -47,6 +49,10 @@
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
   const timeStart = Date.now();
+  // highlighting collapsed pause measures
+  let nthCollapsedPauseMeasure;
+  let collapsedPauseHiliElm;
+  let renderedCollapsedMeasure;
 
   // To move a cursor correctly, we need to know about _beats, measures and jumps_
   // Beat signals arrive from the metronome and potentially cause cursor movements.
@@ -255,8 +261,11 @@
     measure.beats[beat].push(noteObj);
   }
 
-  function highlightBeat(measureIdx, beatIdx) {
+  function highlightBeat(measureIdx, beatIdx, firstBeatInMeasure) {
     if (measureList[measureIdx] && measureList[measureIdx].beats[beatIdx]) {
+      if (collapsedPauseHiliElm) {
+        clearCollapsedHighlight();
+      }
       for (let i = 0; i < measureList[measureIdx].beats[beatIdx].length; i++) {
         let beatInfo = measureList[measureIdx].beats[beatIdx][i];
 
@@ -268,6 +277,21 @@
           scrollIfRequired(beatInfo.note);
         }
       }
+    } else if (measureList[measureIdx] && measureList[measureIdx].isReducedToMultiRest) {
+      if (!collapsedPauseHiliElm) {
+        collapsedPauseHiliElm = document.createElementNS(SVGNS, 'rect');
+        collapsedPauseHiliElm.setAttribute('class', 'staffOverlay');
+        document.getElementsByTagName('svg')[0].appendChild(collapsedPauseHiliElm)
+        nthCollapsedPauseMeasure = 0;
+        renderedCollapsedMeasure = measureList[measureIdx];
+      }
+      if (firstBeatInMeasure) {
+        nthCollapsedPauseMeasure++;
+      }
+      collapsedPauseHiliElm.setAttribute('x', renderedCollapsedMeasure.x);
+      collapsedPauseHiliElm.setAttribute('y', renderedCollapsedMeasure.y);
+      collapsedPauseHiliElm.setAttribute('height', renderedCollapsedMeasure.height);
+      collapsedPauseHiliElm.setAttribute('width', (renderedCollapsedMeasure.width / renderedCollapsedMeasure.numberOfMeasures) * nthCollapsedPauseMeasure);
     }
   }
 
@@ -279,6 +303,15 @@
       }
     }
   }
+
+function clearCollapsedHighlight(){
+  if (collapsedPauseHiliElm) {
+      collapsedPauseHiliElm.parentNode.removeChild(collapsedPauseHiliElm);
+      collapsedPauseHiliElm = null;
+      nthCollapsedPauseMeasure = null;
+      renderedCollapsedMeasure = null;
+    }
+}
 
   function highlightAfterDelay(delay, note) {
     let msPerMeasure =
@@ -322,7 +355,7 @@
       }
       return;
     }
-
+    let newMeasure = false;
     if (previousMeasure !== measureCount) {
       // we're entering a new measure
       if (measure.jumps.length) {
@@ -341,9 +374,10 @@
           time: audioContext.currentTime - startTime,
         });
       }
+      newMeasure = true;
     }
 
-    highlightBeat(measureCount, evt.detail.beatInMeasure);
+    highlightBeat(measureCount, evt.detail.beatInMeasure, newMeasure);
     previousMeasure = measureCount;
   }
 
@@ -375,7 +409,7 @@
         beatUnit = measure.metronome.beatUnit;
         dotted = [true, 'true'].includes(measure.metronome.dotted);
         console.log('tempo settings changed! New: ', measure.metronome);
-        
+
         beatUnitNumber = tempoUnitAsNumber(beatUnit);
         nthBeatSounded =
           (timeDenominator / beatUnitNumber) * (dotted ? 1.5 : 1);
@@ -418,6 +452,7 @@
   export function stopPlaythrough() {
     metronome.stop();
     clearHighlight();
+    clearCollapsedHighlight();
   }
 
   function scrollIfRequired(elm) {
@@ -542,8 +577,8 @@
       brightness(60%) contrast(101%);
     -webkit-filter: invert(29%) sepia(82%) saturate(4448%) hue-rotate(174deg)
       brightness(60%) contrast(101%);
-    fill: #00a4d6;
-    stroke: #00a4d6;
+    fill: var(--activeNoteColor);
+    stroke: var(--activeNoteColor);
   }
   :global(html) {
     scroll-behavior: smooth;
@@ -551,6 +586,11 @@
   :global(svg) {
     max-width: 100%;
   }
+  :global(.staffOverlay) {
+    fill: var(--activeNoteColor);
+    fill-opacity: 0.15;
+  }
+
   .note-box {
     /*
       Whoever embeds a NoteBox should style margins
