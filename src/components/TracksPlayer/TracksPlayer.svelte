@@ -32,7 +32,13 @@
           )
         );
       })
-    );
+    )
+    .catch(error => {
+      console.log(error);
+      dispatch('error');
+      alert('Klarte ikke å laste inn opptak');
+      loading = false;
+    });
     recordings.forEach((url, idx) => {
       soundBuffers.update(data => {
         return {...data, [url]: buffers[idx]}
