@@ -101,7 +101,10 @@
       if (recordBeat && soundRecorder) {
         source.connect(soundRecorder);
       }
-      source.connect(audioContext.destination);
+      var gainNode = audioContext.createGain();
+      gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+      source.connect(gainNode);
+      gainNode.connect(audioContext.destination);
       source.start(Math.max(time, audioContext.currentTime));
     }
     let beat = {
