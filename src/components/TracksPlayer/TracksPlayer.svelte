@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import Loading from '../Loading/Loading.svelte';
   import {soundBuffers} from '../../lib/datastore';
+  import { AudioContext } from 'standardized-audio-context';
 
   const dispatch = createEventDispatcher();
   export let recordings = []; // [url, url]
@@ -18,7 +19,7 @@
     loading = true;
     console.log('start init, fetching ' + recordings.length);
     audioContext =
-      audioContext || new (window.AudioContext || window.webkitAudioContext)();
+      audioContext || new AudioContext;
     buffers = await Promise.all(
       recordings.map(url => {
         if ($soundBuffers[url]) {
