@@ -136,6 +136,10 @@
   function initMusicData() {
     // This code needs to deal with units. Mainly three types of units:
     // measures, beats and seconds
+
+    // Fall back to default slow inital bpm in case the note does not
+    // have metronome info to start with
+    bpm = 65;
     let svgElm = sheetmusicElm.getElementsByTagName('svg')[0];
     repeats.length = 0;
     if (svgElm.dataset.measureList) {
@@ -145,8 +149,7 @@
       noteData = JSON.parse(svgElm.dataset.noteData);
       upbeat = parseFloat(svgElm.dataset.upbeat);
     } else {
-      // this call also sets repeats
-      let temp = extractMeasureData(sheetMusicRenderer, repeats);
+      let temp = extractMeasureData(sheetMusicRenderer);
       measureList = temp.measureList;
       repeats = temp.repeats;
       noteData = extractNoteMetaData(sheetMusicRenderer);
@@ -443,12 +446,10 @@
         document.documentElement.scrollTop = targetScrollPosition;
         return;
       }
-      console.log({ steps });
       function scrollStep() {
         document.documentElement.scrollTop -= steps;
         if (diff(document.documentElement.scrollHeight - document.documentElement.scrollTop, window.innerHeight) <= Math.abs(steps)) {
           // end of document
-          console.log('bottom!')
           scrolling = false;
         }
         if (
@@ -500,7 +501,7 @@
       2: 'half',
       4: 'quarter',
       8: 'eight',
-      16: 'sixteenth', // hopefully never..?
+      16: 'sixteenth', // will this ever be used..? :)
     }[number];
   }
   let winHeight;
