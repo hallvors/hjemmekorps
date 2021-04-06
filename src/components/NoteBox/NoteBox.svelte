@@ -90,6 +90,7 @@
     if (request && request.ok && svg && svg.indexOf('data-') > -1) {
       // ..can we trust this SVG?
     } else {
+      svg = '';
       request = await fetch(
         `/api/project/${project._id}/score/${
           trackName ? encodeURIComponent(trackName) : ''
