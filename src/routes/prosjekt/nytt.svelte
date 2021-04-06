@@ -14,6 +14,7 @@
     updateProjectList,
   } from '../../lib/datastore';
   import Loading from '../../components/Loading/Loading.svelte';
+  import UsageHint from '../../components/UsageHint/UsageHint.svelte';
 
   export let id;
   let loading = false;
@@ -75,6 +76,10 @@
   <input type="submit" value="Last opp" />
 </form>
 
+<UsageHint
+  message="Tips: last opp hele dirigent-partituret som en Music XML-fil. Du trenger ikke laste opp hver enkelt stemme separat."
+/>
+
 {#if loading}
-<Loading message="Laster opp.." />
+  <Loading message="Laster opp.." />
 {/if}
