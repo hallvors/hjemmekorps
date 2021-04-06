@@ -597,7 +597,6 @@ function clearCollapsedHighlight(){
     -webkit-filter: invert(29%) sepia(82%) saturate(4448%) hue-rotate(174deg)
       brightness(60%) contrast(101%);
     fill: var(--activeNoteColor);
-    stroke: var(--activeNoteColor);
   }
   :global(html) {
     scroll-behavior: smooth;
