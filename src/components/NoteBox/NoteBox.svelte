@@ -379,6 +379,17 @@ function clearCollapsedHighlight(){
 
     highlightBeat(measureCount, evt.detail.beatInMeasure, newMeasure);
     previousMeasure = measureCount;
+    // tempo change is hard because the metronome schedules beats in advance
+    // if we set the tempo when the new measure starts, it may be too later
+    if (evt.detail.beatInMeasure === timeNumerator - 1) {
+      // last beat.. lookahead check to see if metronome instructions change
+      if (measureList[measureCount + 1] || measureList[measureCount].jumps[0]) {
+        let nextMeasure = measureList[measureList[measureCount].jumps[0]] || measureList[measureCount + 1];
+        if (nextMeasure) {
+          setGlobalMetronomeVars(nextMeasure);
+        }
+      }
+    }
   }
 
   function setGlobalMetronomeVars(measure) {

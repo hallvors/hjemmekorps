@@ -35,9 +35,9 @@
   var isPlaying = false; // Are we currently playing?
   var startTime; // The start time of the entire sequence.
   // What note is currently last scheduled?
-  var lookahead = 100.0; // How frequently to call scheduling function
+  var lookahead = 60.0; // How frequently to call scheduling function
   //(in milliseconds)
-  var scheduleAheadTime = 0.3; // How far ahead to schedule audio (sec)
+  var scheduleAheadTime = 0.15; // How far ahead to schedule audio (sec)
   // This is calculated from lookahead, and overlaps
   // with next interval (in case the timer is late)
   let nextBeatCounter;
