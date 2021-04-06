@@ -81,15 +81,18 @@
 
   function scheduleBeat(measure, beatNumber, time) {
     let recordBeat = false;
-    if (countDownBeats.length) {
-      // we're in countdown mode
-      if (beatNumber !== countDownBeats[0]) {
-        return; // no sound on this beat
-      }
-      recordBeat = countDownBeats.length > 4;
+    let hasPulse = beatNumber % nthBeatSounded === 0;
+    // In countdown mode, some beats are silent
+    // even if they would normally be sounded..
+    if (hasPulse && countDownBeats.length && !countDownBeats[0]) {
+      hasPulse = false;
     }
 
-    if (beatNumber % nthBeatSounded === 0 || countDownBeats.length) {
+    if (hasPulse && countDownBeats.length) {
+      recordBeat = countDownBeats.length > 6;
+    }
+
+    if (hasPulse) {
       let source = audioContext.createBufferSource();
       if (beatNumber === 0) {
         // 0th beat in measure == high pitch
@@ -102,48 +105,40 @@
         source.connect(soundRecorder);
       }
       var gainNode = audioContext.createGain();
-      gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
       source.connect(gainNode);
       gainNode.connect(audioContext.destination);
       source.start(Math.max(time, audioContext.currentTime));
     }
+
     let beat = {
       measureCount: measure,
       beatInMeasure: beatNumber,
       timestamp: audioContext.currentTime - startTime,
+      hasPulse,
     };
-    beat.countdown = countDownBeats.length ? beatNumber + 1 : null;
+    beat.countdown = countDownBeats.length ? true : false;
     beat.lastCountdown = countDownBeats.length === 1;
     setTimeout(function () {
       dispatch('beat', beat);
     }, Math.max(0, (time - audioContext.currentTime) * 1000));
 
-    if (countDownBeats.length) {
+    if (beatNumber % nthBeatSounded === 0 && countDownBeats.length) {
       countDownBeats.shift();
     }
   }
 
-  export function play(upbeat) {
+  export function play(upbeat, nthBeatSounded, timeNumerator) {
     isPlaying = true;
-    // A typical 1 - 2 - 1 - 2 - 3 - 4 is 2 measures, first counted at half speed
-    if (timeNumerator === 4) {
-      countDownBeats = [0, 2, 0, 1, 2, 3]; // 1, 2, 1, 2, 3, 4 ..
-    } else if (timeNumerator === 6) {
-      countDownBeats = [0, 3, 0, 1, 2, 3, 4, 5];
-    } else {
-      // TODO: improve this.. but count every beat for two measures
-      // if we're not in 4/4 or 6/8
-      countDownBeats = [];
-      for (let i = 0; i < 2; i++) {
-        for (let j = 0; j < timeNumerator; j++) {
-          countDownBeats.push(j);
-        }
-      }
-    }
-    // if no upbeat, there are two measures of countdown
-    // before music starts. If upbeat, there's one measure
-    // of only countdown and upbeat is a partial 0th measure
-    measureCount = upbeat ? -1 : -2;
+    // we want 8 "sounded" beats of countdown (although 2nd and 4th
+    // should be silent).
+    // That means the first measure we start from will be
+    // (8 * nthBeatSounded) / timeNumerator * -1
+    // If music has upbeat, we add 1 because the music "starts"
+    // in the -1th measure, so it's one less to count down
+    measureCount = ((8 * nthBeatSounded) / timeNumerator) * -1;
+    countDownBeats = [true, false, true, false, true, true, true, true]; // 1, 2, 1, 2, 3, 4 ..
+    measureCount += upbeat ? 1 : 0;
     nextBeatCounter = 0;
     startTime = audioContext.currentTime;
     nextBeatTime = audioContext.currentTime;
@@ -197,5 +192,4 @@
     }
     return buffer;
   }
-
 </script>

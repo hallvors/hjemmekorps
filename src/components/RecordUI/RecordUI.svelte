@@ -14,7 +14,7 @@
   let count = 0;
   let countdown = false;
   let first = true;
-
+  let countdownNumbers;
   // name of the part this specific user will play
   let trackName;
   let hasPartFile = false;
@@ -70,7 +70,7 @@
       node.start(0);
       unlocked = true;
     }
-
+    countdownNumbers = [1,2,1,2,3,4];
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then(function (stream) {
@@ -140,11 +140,7 @@
     xhr.send(fd);
   }
   function countdownUiUpdate(evt) {
-    count = evt.detail.countdown;
-    if (first && count === 3 && evt.detail.beatInMeasure === 2) {
-      count = 2;
-      first = false;
-    }
+    count = countdownNumbers.shift();
     countdown = true;
     if (evt.detail.lastCountdown) {
       setTimeout(() => {

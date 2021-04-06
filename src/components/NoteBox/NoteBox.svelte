@@ -334,15 +334,16 @@ function clearCollapsedHighlight(){
     // Two first measures are countdown - if upbeat,
     // upbeat starts during second measure
     let measureCount = evt.detail.measureCount;
-    if (evt.detail.countdown) {
-      // RecordUI will count visually down
+    // RecordUI will count visually down
+    // It only cares about the beats with audible pulse though..
+    if (evt.detail.countdown && evt.detail.hasPulse) {
       dispatch('countdown', Object.assign({}, evt.detail));
       meta.push({
         event: 'countdown',
         measure: measureCount,
         time: audioContext.currentTime - startTime,
       });
-      if (!upbeat) {
+      if (measureCount < 0) {
         return; // nothing to do here
       }
     }
@@ -458,7 +459,7 @@ function clearCollapsedHighlight(){
     // init music data every time (repeats are "used" when cursor goes through data)
     initMusicData();
     startTime = audioContext.currentTime;
-    metronome.play(upbeat);
+    metronome.play(upbeat, nthBeatSounded, timeNumerator);
   }
   export function stopPlaythrough() {
     metronome.stop();
