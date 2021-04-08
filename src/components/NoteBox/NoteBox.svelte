@@ -93,13 +93,20 @@
       // ..can we trust this SVG?
     } else {
       svg = '';
-      request = await fetch(
-        `/api/project/${project._id}/score/${
-          trackName ? encodeURIComponent(trackName) : ''
-        }`,
-        { credentials: 'same-origin' }
-      );
-      markup = await request.text();
+      if (sessionStorage.getItem(project._id + '/' + trackName)) {
+        markup = await Promise.resolve(
+          sessionStorage.getItem(project._id + '/' + trackName)
+        );
+      } else {
+        request = await fetch(
+          `/api/project/${project._id}/score/${
+            trackName ? encodeURIComponent(trackName) : ''
+          }`,
+          { credentials: 'same-origin' }
+        );
+        markup = await request.text();
+        sessionStorage.setItem(project._id + '/' + trackName, markup);
+      }
     }
     loadingMessage = 'Tilpasser notene til din skjerm...';
     let zoom = 1;
