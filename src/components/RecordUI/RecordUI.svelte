@@ -96,7 +96,7 @@
         volumeInterval = setInterval(volumeCallback, 200);
         recorder = new WebAudioRecorder(analyser, {
           workerDir: '/js/web-audio-recorder/lib-minified/',
-          encoding: 'wav',
+          encoding: 'mp3',
         });
         recorder.onComplete = function (recorder, blob) {
           recordingData = blob;

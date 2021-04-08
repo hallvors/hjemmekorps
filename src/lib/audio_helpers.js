@@ -24,7 +24,7 @@ async function mergeSoundfiles(projectId) {
       }
       console.log('will get sound file ' + recording.url);
       return got(recording.url, { responseType: 'buffer' }).then(result => {
-        const file = path.join(tmpDir.name, recording._id) + '.wav';
+        const file = path.join(tmpDir.name, recording._id) + '.mp3';
         const fHandle = fs.openSync(file, 'w');
         fs.writeFileSync(fHandle, result.body);
         fs.closeSync(fHandle);
@@ -87,7 +87,7 @@ https://stackoverflow.com/questions/44712868/ffmpeg-set-volume-in-amix
         },
       },
     ]);
-    let filepath = path.join(tmpDir.name, 'combined.wav');
+    let filepath = path.join(tmpDir.name, 'combined.mp3');
     command.on('end', function (stdout, stderr) {
       console.log('ffmpeg succeeded !');
       console.log(stdout, stderr);
