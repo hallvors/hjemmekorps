@@ -17,9 +17,11 @@ const dev = NODE_ENV === 'development';
 console.log('---- starting server ----');
 console.log({
   hostname: env.hostname,
+  envname: env.name,
+  dev,
   PORT,
   NODE_ENV,
-  conf: env.config,
+  sanity: env.config.sanity.dataset,
 });
 
 const app = polka();
