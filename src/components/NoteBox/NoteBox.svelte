@@ -45,7 +45,9 @@
   let loadingMessage = 'Henter notene...';
   let startTime;
   let scrolling = false;
+  let navbarHeight;
   let targetScrollPosition;
+  let firstMeasureYPos;
   // Enable feature sending generated SVG files to server
   const OPT_SAVE_GENERATED_SVG = false;
   const timeStart = Date.now();
@@ -138,6 +140,14 @@
     renderingMusic = false;
     let hasElm = Boolean(document.getElementsByTagName('svg')[0]);
     console.log('render time: ' + (Date.now() - timeStart) + 'ms', hasElm);
+    let navs = document.getElementsByTagName('nav');
+    navbarHeight = navs[0].offsetHeight;
+    for (let i = 0; i < navs.length; i++) {
+      navbarHeight = Math.max(
+        navbarHeight,
+        navs[i].getBoundingClientRect().bottom
+      );
+    }
   });
 
   function initMusicData() {
@@ -252,6 +262,7 @@
         });
       }
     }
+
     console.log(measureList);
   }
 
@@ -275,25 +286,52 @@
         } else {
           clearHighlight();
           beatInfo.note.classList.add('activeNote');
-          scrollIfRequired(beatInfo.note);
+          scrollIfRequired(measureIdx);
         }
       }
-    } else if (measureList[measureIdx] && measureList[measureIdx].isReducedToMultiRest) {
+    } else if (
+      measureList[measureIdx] &&
+      measureList[measureIdx].isReducedToMultiRest
+    ) {
       if (!collapsedPauseHiliElm) {
         renderedCollapsedMeasure = measureList[measureIdx];
         nthCollapsedPauseMeasure = 0;
-        collapsedPauseHiliElm = document.createElementNS(SVGNS, 'rect');
-        collapsedPauseHiliElm.setAttribute('class', 'staffOverlay');
-        collapsedPauseHiliElm.setAttribute('x', renderedCollapsedMeasure.x);
-        collapsedPauseHiliElm.setAttribute('y', renderedCollapsedMeasure.y);
-        collapsedPauseHiliElm.setAttribute('height', renderedCollapsedMeasure.height);
-        document.getElementsByTagName('svg')[0].appendChild(collapsedPauseHiliElm)
+        collapsedPauseHiliElm = addMeasureRect(measureIdx, 'staffOverlay');
+        scrollIfRequired(measureIdx);
       }
       if (firstBeatInMeasure) {
         nthCollapsedPauseMeasure++;
       }
-      collapsedPauseHiliElm.setAttribute('width', (renderedCollapsedMeasure.width / renderedCollapsedMeasure.numberOfMeasures) * nthCollapsedPauseMeasure);
+      collapsedPauseHiliElm.setAttribute(
+        'width',
+        (renderedCollapsedMeasure.width /
+          renderedCollapsedMeasure.numberOfMeasures) *
+          nthCollapsedPauseMeasure
+      );
     }
+  }
+
+  function addMeasureRect(num, clsName) {
+    let measureData = measureList[num];
+    if (!measureData) {
+      return console.error('no data for overlay for' + num);
+    }
+    if (!(measureData.x && measureData.y)) {
+      return;
+    }
+    let rect = document.createElementNS(SVGNS, 'rect');
+    if (clsName) {
+      rect.setAttribute('class', clsName);
+    } else {
+      rect.setAttribute('class', 'measureOverlay');
+      rect.setAttribute('id', 'overlay_' + num);
+    }
+    rect.setAttribute('x', measureData.x);
+    rect.setAttribute('y', measureData.y);
+    rect.setAttribute('height', measureData.height);
+    rect.setAttribute('width', measureData.width);
+    document.getElementsByTagName('svg')[0].appendChild(rect);
+    return rect;
   }
 
   function clearHighlight() {
@@ -305,14 +343,14 @@
     }
   }
 
-function clearCollapsedHighlight(){
-  if (collapsedPauseHiliElm) {
+  function clearCollapsedHighlight() {
+    if (collapsedPauseHiliElm) {
       collapsedPauseHiliElm.parentNode.removeChild(collapsedPauseHiliElm);
       collapsedPauseHiliElm = null;
       nthCollapsedPauseMeasure = null;
       renderedCollapsedMeasure = null;
     }
-}
+  }
 
   function highlightAfterDelay(delay, note) {
     let msPerMeasure =
@@ -369,6 +407,17 @@ function clearCollapsedHighlight(){
       // if this is a multi-rest measure, we have no new notes
       // to highlight but still want to remove the old one
       clearHighlight();
+      // Insert an overlay to help with the scroll calculations
+      let oldelm = document.getElementById('overlay_' + previousMeasure);
+      let newelm =
+        document.getElementById('overlay_' + measureCount) ||
+        addMeasureRect(measureCount);
+      if (newelm && oldelm) {
+        oldelm.parentNode.removeChild(oldelm);
+      }
+      if (newelm && !firstMeasureYPos) {
+        firstMeasureYPos = newelm.getBoundingClientRect().y;
+      }
       if (measureCount % 10 === 0) {
         meta.push({
           event: 'measurestart',
@@ -386,7 +435,9 @@ function clearCollapsedHighlight(){
     if (evt.detail.beatInMeasure === timeNumerator - 1) {
       // last beat.. lookahead check to see if metronome instructions change
       if (measureList[measureCount + 1] || measureList[measureCount].jumps[0]) {
-        let nextMeasure = measureList[measureList[measureCount].jumps[0]] || measureList[measureCount + 1];
+        let nextMeasure =
+          measureList[measureList[measureCount].jumps[0]] ||
+          measureList[measureCount + 1];
         if (nextMeasure) {
           setGlobalMetronomeVars(nextMeasure);
         }
@@ -457,7 +508,9 @@ function clearCollapsedHighlight(){
   }
 
   export function initPlaythrough() {
+    document.documentElement.scrollTop = 0;
     // init music data every time (repeats are "used" when cursor goes through data)
+    // TODO: for better performance, only re-init repeats..
     initMusicData();
     startTime = audioContext.currentTime;
     metronome.play(upbeat, nthBeatSounded, timeNumerator);
@@ -468,34 +521,43 @@ function clearCollapsedHighlight(){
     clearCollapsedHighlight();
   }
 
-  function scrollIfRequired(elm) {
+  function scrollIfRequired(measureIndex) {
     if (scrolling) {
       return;
     }
-    let rect = elm.getBoundingClientRect();
-    let navs = document.getElementsByTagName('nav');
-    let navbarHeight = navs[0].offsetHeight;
-    for (let i = 0; i < navs.length; i++) {
-      navbarHeight = Math.max(
-        navbarHeight,
-        navs[i].getBoundingClientRect().bottom
-      );
+    let elm = document.getElementById('overlay_' + measureIndex);
+    if (!elm) {
+      console.error('No element ' + measureIndex);
+      return;
     }
-    let tooHigh = rect.y < navbarHeight * 1.1;
-    let tooLow = rect.bottom > winHeight - rect.height * 2.5;
-    if (tooHigh || tooLow) {
-      targetScrollPosition =
-        rect.y + document.documentElement.scrollTop - navbarHeight * 1.2;
-      scrolling = true;
-      let steps =
-        (document.documentElement.scrollTop - targetScrollPosition) / 30;
-      if (steps > 0) {
+    let rect = elm.getBoundingClientRect();
+
+    let needsScrollUp = rect.y < navbarHeight * 1.1;
+    let needsScrollDown = !needsScrollUp && rect.y > firstMeasureYPos * 1.1;
+    if (needsScrollUp || needsScrollDown) {
+      targetScrollPosition = needsScrollDown
+        ? rect.y -
+          firstMeasureYPos +
+          document.documentElement.scrollTop +
+          rect.height
+        : document.documentElement.scrollTop -
+          navbarHeight -
+          Math.abs(rect.y) -
+          rect.height;
+
+      if (needsScrollUp) {
         // we're jumping back..
+        document.body.style.scrollBehavior = 'smooth';
         document.documentElement.scrollTop = targetScrollPosition;
+        scrolling = false;
+        document.body.style.scrollBehavior = '';
         return;
       }
+      scrolling = true;
+      let steps =
+        (targetScrollPosition - document.documentElement.scrollTop) / 10;
       function scrollStep() {
-        document.documentElement.scrollTop -= steps;
+        document.documentElement.scrollTop += steps;
         if (
           diff(
             document.documentElement.scrollHeight -
@@ -509,9 +571,9 @@ function clearCollapsedHighlight(){
         if (
           scrolling &&
           diff(document.documentElement.scrollTop, targetScrollPosition) >
-            Math.abs(steps * 1.5)
+            Math.abs(steps * 1.2)
         ) {
-          setTimeout(scrollStep, 5);
+          setTimeout(scrollStep, 10);
         } else {
           scrolling = false;
         }
@@ -596,19 +658,21 @@ function clearCollapsedHighlight(){
       brightness(60%) contrast(101%);
     -webkit-filter: invert(29%) sepia(82%) saturate(4448%) hue-rotate(174deg)
       brightness(60%) contrast(101%);
-    fill: var(--activeNoteColor);
+    fill: #00a4d6;
+    stroke: #00a4d6;
   }
-  :global(html) {
-    scroll-behavior: smooth;
-  }
+
   :global(svg) {
     max-width: 100%;
   }
   :global(.staffOverlay) {
-    fill: var(--activeNoteColor);
+    fill: #00a4d6;
     fill-opacity: 0.15;
   }
-
+  :global(.measureOverlay) {
+    fill: none;
+    stroke: none;
+  }
   .note-box {
     /*
       Whoever embeds a NoteBox should style margins
