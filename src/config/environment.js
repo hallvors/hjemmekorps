@@ -1,5 +1,7 @@
-const env = process.env.NODE_ENV || 'development';
-const port = process.env.PORT || 3000;
+console.log(process.env.NODE_ENV);
+const { PORT, NODE_ENV } = process.env;
+const env = NODE_ENV || 'development';
+const port = PORT || 3000;
 const APP_ENV_VARS = [
   'sanity__token',
   'site__tokensecret',
