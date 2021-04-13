@@ -97,19 +97,21 @@
         recorder = new WebAudioRecorder(analyser, {
           workerDir: '/js/web-audio-recorder/lib-minified/',
           encoding: 'mp3',
+          numChannels: 2,
         });
         recorder.onComplete = function (recorder, blob) {
           recordingData = blob;
 
           var url = URL.createObjectURL(recordingData);
           audioElm.src = url;
+          audioElm.load();
           audioElm.controls = true;
         };
 
         recorder.setOptions({
           timeLimit: 360,
-          encodeAfterRecord: false,
-          //mp3: { bitRate: 160 },
+          encodeAfterRecord: true,
+          mp3: { bitRate: 160 },
         });
 
         first = true;
@@ -233,6 +235,7 @@
   <!-- svelte-ignore a11y-media-has-caption -->
   <audio
     id="audio-elm"
+    type="audio/mp3"
     class={recordingData === 0 ? 'hide' : ''}
     bind:this={audioElm}
     on:ended={pausePlayRecording}
