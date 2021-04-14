@@ -428,12 +428,14 @@
       if (newelm && !firstMeasureYPos) {
         firstMeasureYPos = newelm.getBoundingClientRect().y;
       }
-      if (measureCount % 10 === 0) {
+      if (measureCount % 2 === 0) {
         meta.push({
           event: 'measurestart',
           measure: measureCount,
+          predictedTime: measure.startsAtMs,
           time: audioContext.currentTime - startTime,
         });
+        console.log(meta[meta.length-1])
       }
       newMeasure = true;
     }

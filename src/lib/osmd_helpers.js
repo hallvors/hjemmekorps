@@ -59,50 +59,74 @@ export function extractNoteMetaData(osmdInstance) {
 
 export function extractMeasureData(osmdInstance) {
   let durationSoFar = 0;
+  let durationSoFarMs = 0;
+  let metronome;
   let repeats = [];
+  let msPerMeasure = 0;
   let measureList = osmdInstance.sheet.sourceMeasures.map(measure => {
-    // Choose some properties of this measure and prepare client-side code
-    let info = {
-      duration: measure.duration.realValue, // in measures (?)
-      jumps: [],
-      beats: [],
-      start: durationSoFar,
-      isReducedToMultiRest: measure.isReducedToMultiRest,
-    };
-    let graphicalMeasure = osmdInstance.graphic.getGraphicalMeasureFromSourceMeasureAndIndex(measure, 0);
-    if (graphicalMeasure && graphicalMeasure.stave) {
-      ['x', 'y', 'width', 'height'].forEach(prop => {
-        info[prop] = graphicalMeasure.stave[prop];
-        if (graphicalMeasure.multiRestElement) {
-          info.numberOfMeasures = graphicalMeasure.multiRestElement.number_of_measures;
-        }
-      })
-    }
-
-    durationSoFar += info.duration;
+    let timeSignature;
     if (measure.RhythmPrinted) {
       // nice shortcut to "does the signature change here?"
-      info.timeSignature = {
+      timeSignature = {
         numerator: measure.activeTimeSignature.numerator,
         denominator: measure.activeTimeSignature.denominator,
       };
     }
-    if (measure.firstRepetitionInstructions) {
-      repeats = repeats.concat(measure.firstRepetitionInstructions);
-    }
-    if (measure.lastRepetitionInstructions) {
-      repeats = repeats.concat(measure.lastRepetitionInstructions);
-    }
+
     if (
       measure.tempoExpressions &&
       measure.tempoExpressions[0] &&
       measure.tempoExpressions[0].instantaneousTempo
     ) {
-      info.metronome = {
+      metronome = {
         beatUnit: measure.tempoExpressions[0].instantaneousTempo.beatUnit,
         dotted: measure.tempoExpressions[0].instantaneousTempo.dotted,
         bpm: measure.tempoExpressions[0].instantaneousTempo.tempoInBpm,
       };
+    }
+    if (timeSignature && measure.tempoExpressions) {
+      msPerMeasure =
+        (60 /
+          (metronome ? metronome.bpm : STANDARD_BPM) /
+          (timeSignature.denominator /
+            tempoUnitAsNumber(metronome ? metronome.beatUnit : 'quarter'))) *
+        (metronome && metronome.dotted ? 1.5 : 1) *
+        timeSignature.numerator *
+        1000;
+    }
+
+    // Choose some properties of this measure and prepare client-side code
+    let info = {
+      duration: measure.duration.realValue, // in measures (?)
+      startsAtMs: durationSoFarMs,
+      metronome,
+      timeSignature,
+      jumps: [],
+      beats: [],
+      start: durationSoFar,
+      isReducedToMultiRest: measure.isReducedToMultiRest,
+    };
+    let graphicalMeasure = osmdInstance.graphic.getGraphicalMeasureFromSourceMeasureAndIndex(
+      measure,
+      0
+    );
+    if (graphicalMeasure && graphicalMeasure.stave) {
+      ['x', 'y', 'width', 'height'].forEach(prop => {
+        info[prop] = graphicalMeasure.stave[prop];
+        if (graphicalMeasure.multiRestElement) {
+          info.numberOfMeasures =
+            graphicalMeasure.multiRestElement.number_of_measures;
+        }
+      });
+    }
+
+    durationSoFar += info.duration;
+    durationSoFarMs += msPerMeasure;
+    if (measure.firstRepetitionInstructions) {
+      repeats = repeats.concat(measure.firstRepetitionInstructions);
+    }
+    if (measure.lastRepetitionInstructions) {
+      repeats = repeats.concat(measure.lastRepetitionInstructions);
     }
     return info;
   });
