@@ -1,3 +1,5 @@
+export const STANDARD_BPM = 80;
+
 export function extractNoteMetaData(osmdInstance) {
   // add meta data to SVG notes
   let time = 0;
@@ -116,4 +118,24 @@ export function extractUpbeatTime(osmdInstance) {
     return osmdInstance.sheet.sourceMeasures[0].duration.realValue;
   }
   return null;
+}
+
+export function tempoUnitAsNumber(unit) {
+  return {
+    whole: 1,
+    half: 2,
+    quarter: 4,
+    eight: 8,
+    sixteenth: 16, // hopefully never..?
+  }[unit];
+}
+
+export function numberToTempoUnit(number) {
+  return {
+    1: 'whole',
+    2: 'half',
+    4: 'quarter',
+    8: 'eight',
+    16: 'sixteenth', // will this ever be used..? :)
+  }[number];
 }

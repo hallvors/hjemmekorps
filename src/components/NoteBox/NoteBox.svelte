@@ -9,6 +9,9 @@
     extractNoteMetaData,
     extractMeasureData,
     extractUpbeatTime,
+    tempoUnitAsNumber,
+    numberToTempoUnit,
+    STANDARD_BPM
   } from '../../lib/osmd_helpers';
   const dispatch = createEventDispatcher();
 
@@ -29,7 +32,7 @@
   let metronome;
   let beatUnit = 'quarter';
   let dotted = false;
-  let bpm = 65;
+  let bpm = STANDARD_BPM;
   let timeNumerator = 4;
   let timeDenominator = 4;
   let beatUnitNumber = tempoUnitAsNumber(beatUnit);
@@ -163,7 +166,7 @@
 
     // Fall back to default slow inital bpm in case the note does not
     // have metronome info to start with
-    bpm = 65;
+    bpm = STANDARD_BPM;
     let svgElm = sheetmusicElm.getElementsByTagName('svg')[0];
     repeats.length = 0;
     if (svgElm.dataset.measureList) {
@@ -609,24 +612,6 @@
     );
   }
 
-  function tempoUnitAsNumber(unit) {
-    return {
-      whole: 1,
-      half: 2,
-      quarter: 4,
-      eight: 8,
-      sixteenth: 16, // hopefully never..?
-    }[unit];
-  }
-  function numberToTempoUnit(number) {
-    return {
-      1: 'whole',
-      2: 'half',
-      4: 'quarter',
-      8: 'eight',
-      16: 'sixteenth', // will this ever be used..? :)
-    }[number];
-  }
   let winHeight;
 </script>
 
