@@ -30,24 +30,7 @@ export default {
       name: 'meta',
       type: 'array',
       of: [
-        {
-          type: "object", fields: [
-            {
-              title: "Hendelse",
-              name: "event",
-              type: "string"
-            },
-            {
-              title: "Takt",
-              name: "measure",
-              type: "number"
-            },
-            {
-              title: "Tid",
-              name: "time",
-              type: "number"
-            }
-        ]}
+        {type: 'timingmeta'}
       ]
     },
     {

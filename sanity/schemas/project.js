@@ -40,6 +40,16 @@ export default {
       title: "Generert lydfil",
       name: "generated_soundfile",
       type: "file",
+      fields: [
+        {
+          title: 'Tidsdata',
+          name: 'meta',
+          type: 'array',
+          of: [
+            {type: 'timingmeta'}
+          ]
+        },
+      ]
     },
 
   ],

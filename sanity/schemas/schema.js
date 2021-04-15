@@ -11,6 +11,7 @@ import member from './member.js';
 import band from './band.js';
 import recording from './recording.js';
 import projectassignment from './projectassignment.js';
+import timingmeta from './object-timingmeta.js';
 
 // Then we give our schema to the builder and provide the result to Sanity
 export default createSchema({
@@ -25,5 +26,6 @@ export default createSchema({
     member,
     recording,
     projectassignment,
+    timingmeta,
   ]),
 });
