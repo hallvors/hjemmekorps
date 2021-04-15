@@ -152,7 +152,12 @@
 
   function cancel() {
     if (recorder) {
-      recorder.cancelRecording();
+      try {
+        recorder.cancelRecording();
+      } catch (e) {
+        console.log(e);
+      }
+
       theBox.stopPlaythrough();
       recordingData = null;
       audioElm.controls = false;
