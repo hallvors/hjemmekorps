@@ -35,7 +35,7 @@
   const RECORDING = 1;
   const PAUSED = 2;
   const RECORDED_AUDIO = 3;
-  const PLAYING = 4;
+  const ENCODING = 4;
   const SENDING = 5;
   var recState = STOPPED;
   // actual audio data we've recorded - obviously only available in RECORDED_AUDIO state
@@ -99,6 +99,7 @@
           encoding: 'wav',
         });
         recorder.onComplete = function (recorder, blob) {
+          recState = RECORDED_AUDIO;
           recordingData = blob;
 
           var url = URL.createObjectURL(recordingData);
@@ -160,8 +161,8 @@
 
       theBox.stopPlaythrough();
       recordingData = null;
-      audioElm.controls = false;
       audioElm.pause();
+      audioElm.controls = false;
       meta = [];
       clearInterval(volumeInterval);
       count = 0;
@@ -173,10 +174,11 @@
     if (recorder) {
       theStream.getAudioTracks()[0].stop();
       theBox.stopPlaythrough();
+      recState = ENCODING;
+
       recorder.finishRecording();
       dispatch('stop');
 
-      recState = RECORDED_AUDIO;
       clearInterval(volumeInterval);
     }
   }
@@ -228,9 +230,13 @@
     <!-- Listen button, send button, delete button -->
     <!-- <button on:click={playRecording}>Hør på opptak</button> -->
     <div class="recording-btn-wrapper">
-      <div class="half-btn" on:click={sendRecording}><div>Send opptak</div></div>
+      <div class="half-btn" on:click={sendRecording}>
+        <div>Send opptak</div>
+      </div>
       <div class="half-btn" on:click={cancel}><div>Slett opptak</div></div>
     </div>
+  {:else if recState === ENCODING}
+    <Loading message="Gjør klart opptaket..." />
   {:else if recState === SENDING}
     <Loading message="Sender..." />
   {/if}
