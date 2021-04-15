@@ -45,7 +45,7 @@ async function mergeSoundfiles(projectId) {
   files = files.filter(file => Boolean(file));
   console.log('sound files ' + files.length);
   if (files.length === 1) {
-    return sClient.addCombinedRecording(projectId, files[0].file);
+    return sClient.addCombinedRecording(projectId, files[0].file, shortestTime);
   }
 
   return new Promise((resolve, reject) => {

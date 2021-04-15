@@ -438,7 +438,8 @@
           predictedTime: measure.startsAtMs,
           time: audioContext.currentTime - startTime,
         });
-        console.log(meta[meta.length-1])
+        console.log(meta[meta.length - 1]);
+        dispatch('measuretime', { time: audioContext.currentTime - startTime });
       }
       newMeasure = true;
     }

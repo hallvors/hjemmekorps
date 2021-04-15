@@ -249,6 +249,7 @@
   bind:this={theBox}
   on:ended={endOfNote}
   on:countdown={countdownUiUpdate}
+  on:measuretime
 />
 
 <style>

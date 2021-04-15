@@ -153,6 +153,7 @@ function getProject(userId, projectId, mustBeFresh) {
       "sheetmusicFile": sheetmusic.asset->url, owner,
       "ownerName":owner->name, partslist,
       "generatedSoundfileUrl": generated_soundfile.asset->url,
+      "soundMeta": generated_soundfile.meta,
       "bandAdmins": band->owner,
       _createdAt
     }`,
@@ -505,7 +506,7 @@ function getRecordings(projectId) {
   );
 }
 
-function addCombinedRecording(projectId, filepath) {
+function addCombinedRecording(projectId, filepath, timeToFirstMeasure) {
   const cl = getSanityClient();
   return cl
     .fetch('*[_type == "project" && _id == $id]', { id: projectId })
@@ -523,6 +524,13 @@ function addCombinedRecording(projectId, filepath) {
               generated_soundfile: {
                 _type: 'file',
                 asset: { _type: 'reference', _ref: doc._id },
+                meta: [
+                  {
+                    event: 'measurestart',
+                    measure: 0,
+                    time: timeToFirstMeasure,
+                  },
+                ],
               },
             })
             .commit()

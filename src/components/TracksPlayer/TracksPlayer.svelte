@@ -5,12 +5,14 @@
   import { AudioContext } from 'standardized-audio-context';
 
   const dispatch = createEventDispatcher();
-  export let recordings = []; // [url, url]
+  export let recordings = []; // [{member, recording.url}, ..]
+  export let activeRecordings = []; // [url, url]
   let buffers = [];
   let audioContext;
   let mix;
-  $: preparedRecordings = init(recordings);
+  $: preparedRecordings = init(activeRecordings);
   let loading = false;
+  let activeRecordingStartTime = 0;
 
   async function init(recordings) {
     if (recordings.length === 0 || typeof window === 'undefined') {
@@ -68,6 +70,15 @@
 
   export function start() {
     //will playback the entire mix
+    let rec = recordings.find(item => item.recording.url === activeRecordings[0])
+    console.log(rec)
+    if (rec && rec.meta) {
+      let evt = rec.meta.find(item => item.event === 'measurestart');
+      if (evt) {
+        activeRecordingStartTime = evt.time;
+      }
+    }
+    console.log({activeRecordingStartTime});
     if (mix) {
       mix.start();
     }
@@ -77,6 +88,13 @@
       mix.stop();
     } catch (e) {
       console.error(e); // 'not started' state will throw
+    }
+  }
+
+  export function jump(time) {
+    console.log('will jump to ' + time)
+    if (preparedRecordings.length) {
+      mix.start(0, time - activeRecordingStartTime);
     }
   }
 

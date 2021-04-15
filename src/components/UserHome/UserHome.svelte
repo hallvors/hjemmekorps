@@ -16,6 +16,7 @@
     recordings.push({
       recording: {
         url: project.generatedSoundfileUrl,
+        meta: project.soundMeta,
       },
     });
   }
@@ -64,7 +65,15 @@
   <div class="display">
     {#if project && user}
       <ScrollableListToolsRight>
-        <RecordUI {project} {user} on:start={startPlay} on:stop={stopPlay} />
+        <RecordUI
+          {project}
+          {user}
+          on:start={startPlay}
+          on:stop={stopPlay}
+          on:measuretime={evt => {
+            if (tracksPlayer) tracksPlayer.jump(evt.detail.time);
+          }}
+        />
         <div slot="aside">
           {#if ENABLE_LISTEN_WHILE_RECORDING && recordings && recordings.length}
             {#each recordings as rec}
