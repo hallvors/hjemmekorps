@@ -16,6 +16,7 @@ async function mergeSoundfiles(projectId) {
     prefix: 'ffmpeg-wav-tmp',
   });
   // get recording.url
+  let shortestTime = Number.POSITIVE_INFINITY;
   let files = await Promise.all(
     recordings.map(recording => {
       if (recording.volume === 0) {
@@ -29,7 +30,15 @@ async function mergeSoundfiles(projectId) {
         fs.writeFileSync(fHandle, result.body);
         fs.closeSync(fHandle);
         console.log('done writing ', recording.url, file);
-        return Promise.resolve({ file, volume: recording.volume });
+        let startTimestamp;
+        if (recording.meta) {
+          let first = recording.meta.find(item => item.event === 'measurestart');
+          if (first) {
+            startTimestamp = first.time;
+            shortestTime = Math.min(shortestTime, first.time);
+          }
+        }
+        return Promise.resolve({ file, volume: recording.volume, startTimestamp });
       });
     })
   );
@@ -60,7 +69,10 @@ async function mergeSoundfiles(projectId) {
       );
     });
     files.forEach(fileData => {
-      command.input(fileData.file); // TODO: add setStartTime() based on analysis of wav file
+      command.input(fileData.file);
+      if (fileData.startTimestamp) {
+        command.setStartTime(fileData.startTimestamp - shortestTime);
+      }
     });
 
     /*

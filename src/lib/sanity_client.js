@@ -497,7 +497,7 @@ function getRecordings(projectId) {
   return getSanityClient().fetch(
     `*[
         _type == $type && references($projectId)
-      ] {_id, _createdAt, member, "url": file.asset->url, volume}`,
+      ] {_id, _createdAt, member, "url": file.asset->url, volume, meta}`,
     {
       type: 'recording',
       projectId: projectId,
