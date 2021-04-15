@@ -70,7 +70,7 @@
       node.start(0);
       unlocked = true;
     }
-    countdownNumbers = [1,2,1,2,3,4];
+    countdownNumbers = [1, 2, 1, 2, 3, 4];
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then(function (stream) {
@@ -337,7 +337,8 @@
     cursor: pointer;
   }
 
-  .start-stop-btn div, .half-btn div {
+  .start-stop-btn div,
+  .half-btn div {
     margin: 0;
     font-size: 8vw;
     line-height: 8vw;

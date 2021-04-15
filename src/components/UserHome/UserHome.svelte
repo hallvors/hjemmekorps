@@ -90,17 +90,17 @@
         </div>
         {#if activeRecordings && activeRecordings.length}
           <TracksPlayer
-            recordings={activeRecordings}
+            {recordings}
+            {activeRecordings}
             bind:this={tracksPlayer}
-            on:error={() => {activeRecordings.length = 0;}}
+            on:error={() => {
+              activeRecordings.length = 0;
+            }}
           />
         {/if}
       </ScrollableListToolsRight>
     {:else}
-      <Loading
-        {message}
-        subMessage="Husk å bruke høretelefoner!"
-      />
+      <Loading {message} subMessage="Husk å bruke høretelefoner!" />
     {/if}
   </div>
 </div>

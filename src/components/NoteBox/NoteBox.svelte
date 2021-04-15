@@ -11,7 +11,7 @@
     extractUpbeatTime,
     tempoUnitAsNumber,
     numberToTempoUnit,
-    STANDARD_BPM
+    STANDARD_BPM,
   } from '../../lib/osmd_helpers';
   const dispatch = createEventDispatcher();
 
@@ -392,6 +392,9 @@
         measure: measureCount,
         time: audioContext.currentTime - startTime,
       });
+      //Update startTime while count-down,
+      // because we want it to be the time when music starts
+      startTime = audioContext.currentTime;
       if (measureCount < 0) {
         return; // nothing to do here
       }
