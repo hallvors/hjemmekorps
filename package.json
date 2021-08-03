@@ -13,7 +13,8 @@
     "start:worker": "node src/server-side-worker.js",
     "test": "NODE_ENV=test jest ",
     "test:watch": "npm run test -- --watch",
-    "prep": "npm install && bash ./prep-files.sh"
+    "prep": "npm install && bash ./prep-files.sh",
+    "postinstall": "env-install"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "cookie-parser": "^1.4.5",
     "cross-blob": "^2.0.0",
     "cross-fetch": "^3.0.6",
+    "env-install": "1.0.0",
     "fast-xml-parser": "^3.18.0",
     "fluent-ffmpeg": "^2.1.2",
     "form-data": "^4.0.0",
@@ -57,6 +59,9 @@
     "wavefile": "^11.0.0",
     "web-audio-recorder-js": "^0.0.2",
     "xmldom": "^0.5.0"
+  },
+  "envDependencies": {
+    "osmd-extended": "git+https://${GITHUB_PAT}:x-oauth-basic@github.com/opensheetmusicdisplay/osmd-extended.git#master",
   },
   "devDependencies": {
     "@babel/core": "^7.13.8",
