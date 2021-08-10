@@ -2,6 +2,10 @@ build:
   docker:
     web: Dockerfile
 
+release:
+  command:
+    - npm run db:migrate
+
 run:
   web:
     image: web

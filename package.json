@@ -14,7 +14,7 @@
     "test": "NODE_ENV=test jest ",
     "test:watch": "npm run test -- --watch",
     "prep": "npm install && bash ./prep-files.sh",
-    "postinstall": "env-install"
+    "db:migrate": "node migrate.js up"
   },
   "repository": {
     "type": "git",
@@ -29,15 +29,15 @@
   "dependencies": {
     "@rollup/plugin-json": "^4.1.0",
     "@sanity/client": "^2.2.6",
+    "@slonik/migrator": "^0.8.4",
     "body-parser": "^1.19.0",
     "bull": "^3.21.1",
-    "canvas": "^2.7.0",
+    "canvas": "^2.8.0",
     "compose-middleware": "^5.0.1",
     "compression": "^1.7.1",
     "cookie-parser": "^1.4.5",
     "cross-blob": "^2.0.0",
     "cross-fetch": "^3.0.6",
-    "env-install": "1.0.0",
     "fast-xml-parser": "^3.18.0",
     "fluent-ffmpeg": "^2.1.2",
     "form-data": "^4.0.0",
@@ -52,10 +52,11 @@
     "opensheetmusicdisplay": "^0.9.5",
     "polka": "^0.5.2",
     "sirv": "^1.0.11",
+    "slonik": "^24.0.0",
     "standardized-audio-context": "^25.1.13",
     "throng": "^5.0.0",
     "tmp": "^0.2.1",
-    "underscore": "^1.12.0",
+    "underscore": "^1.13.1",
     "wavefile": "^11.0.0",
     "web-audio-recorder-js": "^0.0.2",
     "xmldom": "^0.5.0"

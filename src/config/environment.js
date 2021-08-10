@@ -8,6 +8,8 @@ const APP_ENV_VARS = [
   'sanity__dataset',
   'mailgun__apikey',
 ];
+const {createPool} = require('slonik')
+const slonik = createPool(process.env.DATABASE_URL);
 
 // Order of priorities for config:
 // 1. defaults ..can be overwritten by
@@ -70,4 +72,5 @@ module.exports = {
   hostname,
   port,
   config,
+  slonik,
 };
