@@ -8,8 +8,10 @@ const APP_ENV_VARS = [
   'sanity__dataset',
   'mailgun__apikey',
 ];
-const {createPool} = require('slonik')
+const { createPool } = require('slonik');
 const slonik = createPool(process.env.DATABASE_URL);
+
+const { logServerSideError, logClientSideError } = require('../lib/logging_helpers');
 
 // Order of priorities for config:
 // 1. defaults ..can be overwritten by
@@ -73,4 +75,6 @@ module.exports = {
   port,
   config,
   slonik,
+  logServerSideError: logServerSideError.bind(null, slonik),
+  logClientSideError: logClientSideError.bind(null, slonik),
 };

@@ -26,8 +26,15 @@ console.log({
 
 const app = polka();
 app
-  .use((req, res, next) => {req.locals = {env}; next();})
-  .use(json({limit: '25MB'}), urlencoded({ extended: false, limit: '25MB' }), cookieParser())
+  .use((req, res, next) => {
+    req.locals = { env };
+    next();
+  })
+  .use(
+    json({ limit: '25MB' }),
+    urlencoded({ extended: false, limit: '25MB' }),
+    cookieParser()
+  )
   .use(utils.jsonSender, utils.parseUrl, utils.setCookie) // Some stuff Express does by default.
   .use(utils.ensureHttps) // redirect to https if http
   .use(
@@ -64,7 +71,10 @@ app
     })
   )
   .listen(PORT, err => {
-    if (err) console.log('error', err);
+    if (err) {
+      console.log('error', err);
+      env.logServerSideError(err.message || err, err.stack || '');
+    }
   });
 
 module.exports = app;
