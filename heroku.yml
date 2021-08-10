@@ -3,6 +3,7 @@ build:
     web: Dockerfile
 
 release:
+  image: web
   command:
     - npm run db:migrate
 
