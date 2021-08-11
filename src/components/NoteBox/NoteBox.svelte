@@ -4,7 +4,7 @@
   import Loading from '../Loading/Loading.svelte';
   import Metronome from '../Metronome/Metronome.svelte';
   import { getMetronomeDefault } from './metronomeDefaults';
-
+  import { logPerfStats } from '../utils/logging';
   import {
     extractNoteMetaData,
     extractMeasureData,
@@ -82,6 +82,7 @@
     //const module = await import('opensheetmusicdisplay');
     loadingMessage = 'Henter notene...';
     let request;
+    let perfmeasure = Date.now();
     if (hasPartFile) {
       request = await fetch(
         `/api/project/${project._id}/score/${
@@ -111,12 +112,18 @@
         sessionStorage.setItem(project._id + '/' + trackName, markup);
       }
     }
+    logPerfStats({
+      measurement: 'fetch-music-partfile',
+      project: project._id,
+      ms: Date.now() - perfmeasure,
+    });
     loadingMessage = 'Tilpasser notene til din skjerm...';
     let zoom = 1;
     if (window.innerWidth <= 480) {
       zoom = 0.75;
     }
     if (markup) {
+      perfmeasure = Date.now();
       sheetMusicRenderer = new opensheetmusicdisplay.OpenSheetMusicDisplay(
         sheetmusicElm,
         {
@@ -136,6 +143,12 @@
       sheetMusicRenderer.EngravingRules.RenderRehearsalMarks = false; // Workaround because Flute voices get marks intended for the full score
       sheetMusicRenderer.render();
       console.log('render done');
+      logPerfStats({
+        measurement: 'render-music-osmd',
+        project: project._id,
+        ms: Date.now() - perfmeasure,
+      });
+
       if (
         OPT_SAVE_GENERATED_SVG &&
         window.innerWidth >= 768 &&

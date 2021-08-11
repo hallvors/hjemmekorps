@@ -6,5 +6,8 @@ const migrator = new SlonikMigrator({
   migrationTableName: 'migration',
   slonik,
 });
-
+console.log(
+  'Running migrations for ' +
+    process.env.DATABASE_URL.replace(/\/.*@/, '/*******:*******@')
+);
 migrator.runAsCLI();

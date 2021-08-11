@@ -11,7 +11,7 @@ const APP_ENV_VARS = [
 const { createPool } = require('slonik');
 const slonik = createPool(process.env.DATABASE_URL);
 
-const { logServerSideError, logClientSideError } = require('../lib/logging_helpers');
+const { logServerSideError, logClientSideError, logPerformanceData } = require('../lib/logging_helpers');
 
 // Order of priorities for config:
 // 1. defaults ..can be overwritten by
@@ -77,4 +77,5 @@ module.exports = {
   slonik,
   logServerSideError: logServerSideError.bind(null, slonik),
   logClientSideError: logClientSideError.bind(null, slonik),
+  logPerformanceData: logPerformanceData.bind(null, slonik),
 };

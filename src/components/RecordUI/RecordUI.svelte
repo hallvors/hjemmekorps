@@ -5,9 +5,11 @@
   import LibLoader from '../utils/LibLoader.svelte';
   import NoteBox from '../NoteBox/NoteBox.svelte';
   import Loading from '../Loading/Loading.svelte';
+  import { logPerfStats } from '../utils/logging';
 
   export let project;
   export let user;
+
   var recorder, input, theStream;
   let unlocked = false;
   // variables for metronome countdown before recording
@@ -50,6 +52,8 @@
   var volumeInterval;
   let volumePercElm;
   let volumeLoud = false;
+
+  let perfmeasure;
 
   onMount(() => {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -105,6 +109,12 @@
           var url = URL.createObjectURL(recordingData);
           audioElm.src = url;
           audioElm.controls = true;
+          logPerfStats({
+            measurement: 'process-recording',
+            project: project._id,
+            userid: user._id,
+            ms: Date.now() - perfmeasure,
+          });
         };
 
         recorder.setOptions({
@@ -123,6 +133,7 @@
 
   function sendRecording() {
     recState = SENDING;
+    let perfmeasure = Date.now();
     var xhr = new XMLHttpRequest();
     xhr.open('post', '/api/project/' + project._id + '/recordings', true);
     xhr.onload = function () {
@@ -130,6 +141,12 @@
       recState = STOPPED;
       recordingData = null;
       audioElm.controls = false;
+      logPerfStats({
+        measurement: 'submit-recording',
+        project: project._id,
+        userid: user._id,
+        ms: Date.now() - perfmeasure,
+      });
     };
     var fd = new FormData();
     fd.append('file', recordingData, 'opptak.wav');
@@ -175,7 +192,7 @@
       theStream.getAudioTracks()[0].stop();
       theBox.stopPlaythrough();
       recState = ENCODING;
-
+      perfmeasure = Date.now();
       recorder.finishRecording();
       dispatch('stop');
 

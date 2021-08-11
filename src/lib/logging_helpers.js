@@ -14,7 +14,7 @@ async function logServerSideError(slonik, message, stack) {
   });
 }
 
-async function logClientSideError(slonik, req) {
+async function logClientSideError(slonik, data) {
   await slonik.connect(client => {
     return client.query(sql`
             INSERT INTO errors_client (
@@ -26,12 +26,33 @@ async function logClientSideError(slonik, req) {
                 url
             )
             VALUES (
-                ${req.body.message},
-                ${req.body.stack},
-                ${req.body.ua},
-                ${req.body.project},
-                ${req.body.userid},
-                ${req.body.url}
+                ${data.message},
+                ${data.stack},
+                ${data.ua},
+                ${data.project},
+                ${data.userid},
+                ${data.url}
+            )
+        `);
+  });
+}
+
+async function logPerformanceData(slonik, data) {
+  await slonik.connect(client => {
+    return client.query(sql`
+            INSERT INTO perf_stats (
+                measurement,
+                ua,
+                project,
+                userid,
+                ms
+            )
+            VALUES (
+                ${data.measurement},
+                ${data.ua},
+                ${data.project},
+                ${data.userid},
+                ${data.ms}
             )
         `);
   });
@@ -40,4 +61,5 @@ async function logClientSideError(slonik, req) {
 module.exports = {
   logClientSideError,
   logServerSideError,
+  logPerformanceData,
 };
