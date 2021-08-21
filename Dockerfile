@@ -5,6 +5,8 @@ RUN apt-get update -y && apt-get install -y ffmpeg
 # We need redis-cli apparently, and it seems the best way to get it is
 # installing the full redis-server
 RUN apt-get install -y redis-server
+# Curl to support streaming release phase output
+Run apt-get install -y curl
 
 RUN mkdir -p /home/node/app && \
     chown -R node:node /home/node/app
@@ -19,6 +21,7 @@ COPY --chown=node:node ./src/ ./src/
 COPY --chown=node:node ./rollup.config.js ./rollup.config.js
 COPY --chown=node:node ./prep-files.sh ./prep-files.sh
 COPY --chown=node:node ./scripts/ ./scripts/
+# migrate.js runs in release phase
 COPY --chown=node:node ./migrate.js ./migrate.js
 # Some files from node_modules will be used as web workers,
 # must be copied to somewhere they will be served directly to
