@@ -21,7 +21,8 @@ COPY --chown=node:node ./src/ ./src/
 COPY --chown=node:node ./rollup.config.js ./rollup.config.js
 COPY --chown=node:node ./prep-files.sh ./prep-files.sh
 COPY --chown=node:node ./scripts/ ./scripts/
-# migrate.js runs in release phase
+# migrate.js runs in release phase. Prepare migrations and script.
+COPY --chown=node:node ./migrations/ ./migrations/
 COPY --chown=node:node ./migrate.js ./migrate.js
 # Some files from node_modules will be used as web workers,
 # must be copied to somewhere they will be served directly to
