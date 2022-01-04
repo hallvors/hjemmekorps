@@ -271,7 +271,6 @@
   {project}
   {trackName}
   {audioContext}
-  soundRecorder={analyser}
   {hasPartFile}
   {meta}
   bind:this={theBox}
