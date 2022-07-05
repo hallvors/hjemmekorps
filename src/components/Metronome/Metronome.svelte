@@ -41,7 +41,7 @@
   // with next interval (in case the timer is late)
   let nextBeatCounter;
   var nextBeatTime = 0.0; // when the next 16th note is due (we may play a beat or not).
-  var measureCount = 0;
+  var measureIndex = 0;
   var timerWorker = null; // The Web Worker used to fire timer messages
 
   function setup() {
@@ -64,7 +64,7 @@
     // while there are notes that will need to play before the next interval,
     // schedule them and advance the pointer.
     while (nextBeatTime < audioContext.currentTime + scheduleAheadTime) {
-      scheduleBeat(measureCount, nextBeatCounter, nextBeatTime);
+      scheduleBeat(measureIndex, nextBeatCounter, nextBeatTime);
 
       // Add beat length to last beat time
       nextBeatTime += delayBetweenBeats;
@@ -73,12 +73,12 @@
       nextBeatCounter++;
       if (nextBeatCounter >= timeNumerator) {
         nextBeatCounter = 0; // new measure..
-        measureCount++;
+        measureIndex++;
       }
     }
   }
 
-  function scheduleBeat(measure, beatNumber, time) {
+  function scheduleBeat(measureIndex, beatNumber, time) {
     let recordBeat = false;
     let hasPulse = beatNumber % nthBeatSounded === 0;
     // In countdown mode, some beats are silent
@@ -109,7 +109,7 @@
     }
 
     let beat = {
-      measureCount: measure,
+      measureIndex,
       beatInMeasure: beatNumber,
       timestamp: audioContext.currentTime - startTime,
       hasPulse,
@@ -133,9 +133,9 @@
     // (8 * nthBeatSounded) / timeNumerator * -1
     // If music has upbeat, we add 1 because the music "starts"
     // in the -1th measure, so it's one less to count down
-    measureCount = ((8 * nthBeatSounded) / timeNumerator) * -1;
+    measureIndex = ((8 * nthBeatSounded) / timeNumerator) * -1;
     countDownBeats = [true, false, true, false, true, true, true, true]; // 1, 2, 1, 2, 3, 4 ..
-    measureCount += upbeat ? 1 : 0;
+    measureIndex += upbeat ? 1 : 0;
     nextBeatCounter = 0;
     startTime = audioContext.currentTime;
     nextBeatTime = audioContext.currentTime;
@@ -161,9 +161,9 @@
 
   // Repetition means jumping to specific measures,
   // either forward or back. The code keeping track of the
-  // score needs to control measureCount for this.
+  // score needs to control measureIndex for this.
   export function jumpToMeasure(newMeasure) {
-    measureCount = newMeasure;
+    measureIndex = newMeasure;
   }
 
   function makeBuffer(audioContext, hertz) {
