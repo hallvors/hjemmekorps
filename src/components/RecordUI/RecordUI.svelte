@@ -2,9 +2,9 @@
   import { onMount, createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  import LibLoader from '../utils/LibLoader.svelte';
-  import NoteBox from '../NoteBox/NoteBox.svelte';
+  import NotePlayer from '../NotePlayer/NotePlayer.svelte';
   import Loading from '../Loading/Loading.svelte';
+  import ChunkedRecorder from '../ChunkedRecorder/ChunkedRecorder.svelte';
   import { logPerfStats } from '../utils/logging';
 
   export let project;
@@ -12,10 +12,13 @@
 
   var recorder, input, theStream;
   let unlocked = false;
+  // count of measures played / recorded until now
+  // unlike measure index this just increases while
+  // index will decrease on repeats
+  let measureCount = 0;
   // variables for metronome countdown before recording
   let count = 0;
   let countdown = false;
-  let first = true;
   let countdownNumbers;
   // name of the part this specific user will play
   let trackName;
@@ -40,10 +43,6 @@
   const ENCODING = 4;
   const SENDING = 5;
   var recState = STOPPED;
-  // actual audio data we've recorded - obviously only available in RECORDED_AUDIO state
-  var recordingData;
-  // audio element for playback
-  let audioElm;
   let analyser;
 
   var meta = [];
@@ -75,6 +74,7 @@
       unlocked = true;
     }
     countdownNumbers = [1, 2, 1, 2, 3, 4];
+    measureCount = 0;
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then(function (stream) {
@@ -98,65 +98,13 @@
           volumeLoud = averageVolume > 92 ? true : false;
         };
         volumeInterval = setInterval(volumeCallback, 200);
-        recorder = new WebAudioRecorder(analyser, {
-          workerDir: '/js/web-audio-recorder/lib-minified/',
-          encoding: 'wav',
-        });
-        recorder.onComplete = function (recorder, blob) {
-          recState = RECORDED_AUDIO;
-          recordingData = blob;
 
-          var url = URL.createObjectURL(recordingData);
-          audioElm.src = url;
-          audioElm.controls = true;
-          logPerfStats({
-            measurement: 'process-recording',
-            project: project._id,
-            userid: user._id,
-            ms: Date.now() - perfmeasure,
-          });
-        };
-
-        recorder.setOptions({
-          timeLimit: 360,
-          encodeAfterRecord: false,
-          //mp3: { bitRate: 160 },
-        });
-
-        first = true;
-        //start the recording process
-        recorder.startRecording();
         dispatch('start'); // starts playing other tracks - if any
-        theBox.initPlaythrough(); // Tell NoteBox to start metronome
+        recorder.startRecording(stream, analyser);
+        theBox.initPlaythrough(); // Tell NotePlayer to start metronome
       });
   }
 
-  function sendRecording() {
-    recState = SENDING;
-    let perfmeasure = Date.now();
-    var xhr = new XMLHttpRequest();
-    xhr.open('post', '/api/project/' + project._id + '/recordings', true);
-    xhr.onload = function () {
-      alert('Ferdig! Opptaket er sendt. Tusen takk :)');
-      recState = STOPPED;
-      recordingData = null;
-      audioElm.controls = false;
-      logPerfStats({
-        measurement: 'submit-recording',
-        project: project._id,
-        userid: user._id,
-        ms: Date.now() - perfmeasure,
-      });
-    };
-    var fd = new FormData();
-    fd.append('file', recordingData, 'opptak.wav');
-    fd.append('memberId', user._id);
-    fd.append('instrument', user.instrument);
-    fd.append('projectId', project._id);
-    fd.append('meta', JSON.stringify(meta));
-    meta = [];
-    xhr.send(fd);
-  }
   function countdownUiUpdate(evt) {
     count = countdownNumbers.shift();
     countdown = true;
@@ -169,35 +117,24 @@
   }
 
   function cancel() {
-    if (recorder) {
-      try {
-        recorder.cancelRecording();
-      } catch (e) {
-        console.log(e);
-      }
-
-      theBox.stopPlaythrough();
-      recordingData = null;
-      audioElm.pause();
-      audioElm.controls = false;
-      meta = [];
-      clearInterval(volumeInterval);
-      count = 0;
-      recState = STOPPED;
-    }
+    theBox.stopPlaythrough();
+    recorder.resetRecording();
+    meta = [];
+    measureCount = 0;
+    clearInterval(volumeInterval);
+    count = 0;
+    recState = STOPPED;
   }
 
   function stop() {
-    if (recorder) {
-      theStream.getAudioTracks()[0].stop();
-      theBox.stopPlaythrough();
-      recState = ENCODING;
-      perfmeasure = Date.now();
-      recorder.finishRecording();
-      dispatch('stop');
+    theStream.getAudioTracks()[0].stop();
+    theBox.stopPlaythrough();
+    recorder.stopRecording();
+    recState = RECORDED_AUDIO;
+    perfmeasure = Date.now();
+    dispatch('stop');
 
-      clearInterval(volumeInterval);
-    }
+    clearInterval(volumeInterval);
   }
 
   function endOfNote() {
@@ -206,25 +143,21 @@
   }
 
   function toggle(e) {
-    if (recorder && recorder.isRecording()) {
-      stop();
+    if (recorder && recorder.state === 'recording') {
+      recorder.pause();
     } else {
-      start();
+      recorder.resume();
     }
   }
 
-  function pausePlayRecording() {
-    audioElm.pause();
-    recState = RECORDED_AUDIO;
+  function playRecording() {
+    recorder.play();
   }
-
+function sendRecording(){
+  recorder.sendRecording(project);
+}
   var theBox;
 </script>
-
-<LibLoader
-  src="/js/web-audio-recorder/lib-minified/WebAudioRecorder.min.js"
-  libraryDetectionObject="WebAudioRecorder"
-/>
 
 {#if countdown}
   <div id="countdown">{count}</div>
@@ -245,7 +178,7 @@
     resume button, stop button -->
   {:else if recState === RECORDED_AUDIO}
     <!-- Listen button, send button, delete button -->
-    <!-- <button on:click={playRecording}>Hør på opptak</button> -->
+    <button on:click={playRecording}>Hør på opptak</button>
     <div class="recording-btn-wrapper">
       <div class="half-btn" on:click={sendRecording}>
         <div>Send opptak</div>
@@ -257,17 +190,9 @@
   {:else if recState === SENDING}
     <Loading message="Sender..." />
   {/if}
-
-  <!-- svelte-ignore a11y-media-has-caption -->
-  <audio
-    id="audio-elm"
-    class={recordingData === 0 ? 'hide' : ''}
-    bind:this={audioElm}
-    on:ended={pausePlayRecording}
-  />
 </nav>
 
-<NoteBox
+<NotePlayer
   {project}
   {trackName}
   {audioContext}
@@ -276,7 +201,13 @@
   bind:this={theBox}
   on:ended={endOfNote}
   on:countdown={countdownUiUpdate}
+  on:newmeasure={() => measureCount++}
   on:measuretime
+/>
+
+<ChunkedRecorder
+  bind:this={recorder}
+  {measureCount}
 />
 
 <style>
