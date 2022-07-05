@@ -17,6 +17,7 @@
   let startTime;
   const timeStart = Date.now();
   let playbackManager;
+  let timingSource;
   onMount(async function () {
     loadingMessage = 'Henter notene...';
     let request;
@@ -58,7 +59,7 @@
           drawingParameters: 'compact',
           cursorsOptions: [
             {
-              type: 1,
+              type: 0,
               color: '#000099',
               alpha: 0.4,
               follow: true,
@@ -82,6 +83,19 @@
         project: project._id,
         ms: Date.now() - perfmeasure,
       });
+      timingSource = new opensheetmusicdisplay.LinearTimingSource();
+      playbackManager = new opensheetmusicdisplay.PlaybackManager(
+        timingSource,
+        undefined,
+        new opensheetmusicdisplay.BasicAudioPlayer(),
+        undefined
+      );
+      playbackManager.DoPlayback = true;
+      playbackManager.DoPreCount = true;
+      playbackManager.PreCountMeasures = 1; // note that DoPreCount has to be true for a precount to happen
+      timingSource.Settings = sheetMusicRenderer.sheet.playbackSettings;
+      playbackManager.initialize(sheetMusicRenderer.sheet.musicPartManager);
+      playbackManager.addListener(sheetMusicRenderer.cursor);
 
       top.osmd = sheetMusicRenderer; // Debug. TODO: remove
     }
@@ -93,22 +107,8 @@
   export function initPlaythrough() {
     document.documentElement.scrollTop = 0;
     startTime = audioContext.currentTime;
-    var timingSource = new opensheetmusicdisplay.LinearTimingSource();
-    playbackManager = new opensheetmusicdisplay.PlaybackManager(
-      timingSource,
-      undefined,
-      new opensheetmusicdisplay.BasicAudioPlayer(),
-      undefined
-    );
-    playbackManager.DoPlayback = true;
-    playbackManager.DoPreCount = false;
-    playbackManager.PreCountMeasures = 1; // note that DoPreCount has to be true for a precount to happen
+    playbackManager.setPlaybackStart();
     timingSource.reset();
-    timingSource.pause();
-    timingSource.Settings = sheetMusicRenderer.sheet.playbackSettings;
-    playbackManager.initialize(sheetMusicRenderer.sheet.musicPartManager);
-    playbackManager.addListener(sheetMusicRenderer.cursor);
-    playbackManager.reset();
     playbackManager.play();
   }
   export function stopPlaythrough() {
