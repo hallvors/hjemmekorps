@@ -15,6 +15,7 @@ export function logPerfStats(data) {
         project: data.project,
         userid: data.userid || '',
         ms: data.ms,
+        wasCached: data.wasCached,
       }),
       headers: {
         Accept: 'application/json',
