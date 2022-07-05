@@ -8,7 +8,7 @@
 	<!-- Logo -->
 	{#if logo}
         <span class="logo">
-            <img src={logo} alt="Korpslogo">
+            <img src={logo} alt="Korpslogo" style="height: {navbarHeight}px">
         </span>
 	{/if}
     <h1>Hei {user.name}!</h1>
@@ -31,7 +31,7 @@
         flex-basis: 20%;
 	}
 	.logo img {
-		max-height: var(--navbarHeight);
+        transition: height 0.5s;
 	}
 
 </style>
