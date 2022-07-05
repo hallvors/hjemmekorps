@@ -72,8 +72,8 @@
   //          timeSignature: {numerator, denominator}, tempoInBPM },
   //  ]
   // onBeat: if event.detail.countdown do nothing (well, perhaps upbeat..)
-  // if measureCount >= measures.length, tune finished
-  // if jump, set measureCount (again!)
+  // if measureIndex >= measures.length, tune finished
+  // if jump, set measureIndex (again!)
   // if new measure and time signature different, change it
   // trigger & schedule note movements according to beat queue entry
 
@@ -123,6 +123,7 @@
     }
     if (markup) {
       perfmeasure = Date.now();
+      // opensheetmusicdisplay is global variable, from SCRIPT element in template
       sheetMusicRenderer = new opensheetmusicdisplay.OpenSheetMusicDisplay(
         sheetmusicElm,
         {
@@ -386,34 +387,34 @@
     }, delay * msPerMeasure);
   }
 
-  // if measureCount >= measures.length, tune finished
-  // if jump, set measureCount (again!)
+  // if measureIndex >= measures.length, tune finished
+  // if jump, set measureIndex (again!)
   // if new measure and time signature different, change it
   // trigger & schedule note movements according to beat queue entry
   let previousMeasure;
   function onBeat(evt) {
     // Two first measures are countdown - if upbeat,
     // upbeat starts during second measure
-    let measureCount = evt.detail.measureCount;
+    let measureIndex = evt.detail.measureIndex;
     // RecordUI will count visually down
     // It only cares about the beats with audible pulse though..
     if (evt.detail.countdown && evt.detail.hasPulse) {
       dispatch('countdown', Object.assign({}, evt.detail));
       meta.push({
         event: 'countdown',
-        measure: measureCount,
+        measure: measureIndex,
         time: audioContext.currentTime - startTime,
       });
       //Update startTime while count-down,
       // because we want it to be the time when music starts
       startTime = audioContext.currentTime;
-      if (measureCount < 0) {
+      if (measureIndex < 0) {
         return; // nothing to do here
       }
     }
-    let measure = measureList[measureCount];
+    let measure = measureList[measureIndex];
     if (!measure) {
-      if (measureCount >= measureList.length) {
+      if (measureIndex >= measureList.length) {
         dispatch('ended');
         metronome.stop();
         clearHighlight();
@@ -421,12 +422,14 @@
       return;
     }
     let newMeasure = false;
-    if (previousMeasure !== measureCount) {
+    if (previousMeasure !== measureIndex) {
       // we're entering a new measure
+      dispatch('newmeasure');
       if (measure.jumps.length) {
-        measureCount = measure.jumps.shift();
-        measure = measureList[measureCount];
-        metronome.jumpToMeasure(measureCount);
+        previousMeasure = measureIndex;
+        measureIndex = measure.jumps.shift();
+        measure = measureList[measureIndex];
+        metronome.jumpToMeasure(measureIndex);
       }
       setGlobalMetronomeVars(measure);
       // if this is a multi-rest measure, we have no new notes
@@ -435,18 +438,18 @@
       // Insert an overlay to help with the scroll calculations
       let oldelm = document.getElementById('overlay_' + previousMeasure);
       let newelm =
-        document.getElementById('overlay_' + measureCount) ||
-        addMeasureRect(measureCount);
+        document.getElementById('overlay_' + measureIndex) ||
+        addMeasureRect(measureIndex);
       if (newelm && oldelm) {
         oldelm.parentNode.removeChild(oldelm);
       }
       if (newelm && !firstMeasureYPos) {
         firstMeasureYPos = newelm.getBoundingClientRect().y;
       }
-      if (measureCount % 2 === 0) {
+      if (measureIndex % 2 === 0) {
         meta.push({
           event: 'measurestart',
-          measure: measureCount,
+          measure: measureIndex,
           predictedTime: measure.startsAtMs,
           time: audioContext.currentTime - startTime,
         });
@@ -456,16 +459,16 @@
       newMeasure = true;
     }
 
-    highlightBeat(measureCount, evt.detail.beatInMeasure, newMeasure);
-    previousMeasure = measureCount;
+    highlightBeat(measureIndex, evt.detail.beatInMeasure, newMeasure);
+    previousMeasure = measureIndex;
     // tempo change is hard because the metronome schedules beats in advance
     // if we set the tempo when the new measure starts, it may be too later
     if (evt.detail.beatInMeasure === timeNumerator - 1) {
       // last beat.. lookahead check to see if metronome instructions change
-      if (measureList[measureCount + 1] || measureList[measureCount].jumps[0]) {
+      if (measureList[measureIndex + 1] || measureList[measureIndex].jumps[0]) {
         let nextMeasure =
-          measureList[measureList[measureCount].jumps[0]] ||
-          measureList[measureCount + 1];
+          measureList[measureList[measureIndex].jumps[0]] ||
+          measureList[measureIndex + 1];
         if (nextMeasure) {
           setGlobalMetronomeVars(nextMeasure);
         }
@@ -583,7 +586,7 @@
       }
       scrolling = true;
       let steps =
-        (targetScrollPosition - document.documentElement.scrollTop) / 10;
+        (targetScrollPosition - document.documentElement.scrollTop) / 20;
       function scrollStep() {
         document.documentElement.scrollTop += steps;
         if (
@@ -601,7 +604,7 @@
           diff(document.documentElement.scrollTop, targetScrollPosition) >
             Math.abs(steps * 1.2)
         ) {
-          setTimeout(scrollStep, 10);
+          setTimeout(scrollStep, 5);
         } else {
           scrolling = false;
         }
