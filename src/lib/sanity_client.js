@@ -415,6 +415,7 @@ async function updateOrCreateMember(data, bandId, portraitFile) {
       data,
       '_id',
       'name',
+      'surname',
       'phone',
       'email',
       'instrument',
@@ -439,6 +440,12 @@ async function updateOrCreateMember(data, bandId, portraitFile) {
   if (oldData && oldData.portrait && portraitFile) {
     await client.delete(oldData.portrait.asset._ref);
   }
+  return result;
+}
+
+async function deactivateMember(id) {
+  const client = getSanityClient();
+  const result = await client.patch(id).set({ visible: false }).commit();
   return result;
 }
 
@@ -603,7 +610,7 @@ module.exports = {
   getProjectScoreData,
   updateProject,
   updateOrCreateMember,
-
+  deactivateMember,
   getProject,
   addProject,
   getPartFile,

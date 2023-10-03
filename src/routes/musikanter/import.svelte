@@ -1,5 +1,10 @@
 <script>
-  import { bands, updateBands, selectedBand } from '../../lib/datastore';
+  import {
+    bands,
+    instruments,
+    updateBands,
+    selectedBand,
+  } from '../../lib/datastore';
   import MemberImport from '../../components/MemberImport/MemberImport.svelte';
   function onUpdate(evt) {
     updateBands(
@@ -10,4 +15,8 @@
   }
 </script>
 
-<MemberImport band={$bands[$selectedBand]} on:dataupdate={onUpdate} />
+<MemberImport
+  band={$bands[$selectedBand]}
+  {instruments}
+  on:dataupdate={onUpdate}
+/>

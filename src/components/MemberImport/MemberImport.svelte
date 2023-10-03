@@ -1,53 +1,120 @@
 <script>
- import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
-import UsageHint from '../UsageHint/UsageHint.svelte';
+  import UsageHint from '../UsageHint/UsageHint.svelte';
 
-export let band;
+  export let band;
+  export let instruments;
   let importData = '';
   let parsedImportData;
+  let existingToRemove = [];
   let importSuccess = false;
 
   function parseData() {
     if (importData) {
       let tmp = importData.split(/\r?\n/g);
-      if (tmp.length) {
+      if (tmp.length > 1) {
+        const isStyreportalenData = tmp[0].trim() === 'Medlemmer';
         parsedImportData = tmp
-          .map(row => {
-            let rowData = row.split(/[\t;]/g);
+          .map((row, idx) => {
+            // Styreportalen list: two first rows headers
+            if (isStyreportalenData && idx < 2) {
+              return;
+            }
+            let rowData = row.trim().split(/[\t;]/g);
             let data;
-            if (rowData.length) {
-              data = { name: rowData[0], phone: [], email: [] };
+            if (rowData.length > 1) {
+              data = {
+                name: rowData[0],
+                surname: isStyreportalenData ? rowData[1] : '',
+                phone: [],
+                email: [],
+                subgroup: '',
+              };
               for (let i = 1; i < rowData.length; i++) {
                 if (/^[0-9 +]{8,}$/.test(rowData[i])) {
                   data.phone.push(rowData[i]);
                 } else if (/@/.test(rowData[i])) {
                   data.email.push(rowData[i]);
+                } else if (band.groups.includes(rowData[i])) {
+                  data.subgroup = rowData[i];
+                } else if (getInstrumentValueByTitle(rowData[i] || '')) {
+                  data.instrument = getInstrumentValueByTitle(rowData[i] || '');
                 }
               }
             }
             return data;
           })
-          .filter(row => row);
+          .filter(Boolean);
+        parsedImportData.forEach(entry => {
+          const name = isStyreportalenData
+            ? [entry.name, entry.surname].join(' ')
+            : entry.name;
+          entry.fullname = name;
+          const existing = band.members.find(
+            member =>
+              member.name === name ||
+              (member.name === entry.name && member.surname === entry.surname)
+          );
+          if (existing) {
+            // the last entry here works around the old data model
+            // being different and having .name for both first
+            // and surname
+            Object.assign(entry, existing, entry);
+          }
+        });
+
+        if (band && band.members) {
+          existingToRemove = band.members.filter(existing => {
+            return !parsedImportData.find(
+              entry =>
+                entry.fullname === existing.name ||
+                (entry.name === existing.name &&
+                  entry.surname === existing.surname)
+            );
+          });
+        }
       }
     }
   }
   function getByName(name) {
     return document.querySelector('input[value="' + name + '"]');
   }
+
+  function getInstrumentValueByTitle(title) {
+    const instrument = instruments.find(
+      item =>
+        item.title === title ||
+        title.toLowerCase().includes(item.titel.toLowerCase())
+    );
+    if (instrument) {
+      return instrument.value;
+    }
+  }
+
   function submitParsedData() {
-    let submitData = parsedImportData.filter(item => {
-      if (getByName(item.name).checked) {
+    const submitData = parsedImportData.filter(item => {
+      if (getByName(item.fullname).checked) {
         item.phone = item.phone.filter(num => getByName(num).checked);
         item.email = item.email.filter(mail => getByName(mail).checked);
         return true;
       }
       return false;
     });
+    const deactivate = [].map
+      .call(document.getElementsByName('remove'), item =>
+        item.checked ? item.value : null
+      )
+      .filter(Boolean);
+
     fetch('/api/members', {
       method: 'POST',
       credentials: 'same-origin',
-      body: JSON.stringify({ members: submitData, bandId: band._id }),
+      body: JSON.stringify({
+        members: submitData,
+        bandId: band._id,
+        deactivate,
+      }),
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
@@ -63,15 +130,22 @@ export let band;
     });
   }
 </script>
+
 <svelte:head><title>Importer musikanter - hjemmekorps.no</title></svelte:head>
 
 {#if importSuccess}
-  <p>Import fullført. <a href="/musikanter?reload={Math.random()}">Til musikantliste</a></p>
+  <p>
+    Import fullført. <a href="/musikanter?reload={Math.random()}"
+      >Til musikantliste</a
+    >
+  </p>
 {:else}
   <UsageHint
     message="For å importere data, kopier en tabell fra et regneark og lim inn her.
     Musikantens navn må stå i første kolonne. Tips: bare kopier alle data med Ctrl-A
-    og Ctrl-C, importen velger ut det som ser ut som nyttig informasjon." textAlign="left" />
+    og Ctrl-C, importen velger ut det som ser ut som nyttig informasjon."
+    textAlign="left"
+  />
   <textarea
     bind:value={importData}
     on:input={parseData}
@@ -89,14 +163,18 @@ export let band;
       {#each parsedImportData as data}
         <tr>
           <td>
+            <span class="flagme">
+              {#if data._id}Oppdateres!{:else}Ny!{/if}
+            </span>
             <label
               ><input
                 type="checkbox"
-                value={data.name}
+                value={data.fullname}
                 checked
-              />{data.name}</label
+              />{data.fullname}</label
             >
           </td>
+          <td>{data.subgroup}</td>
           <td>
             {#each data.phone as num}
               <label><input type="checkbox" value={num} checked />{num}</label>
@@ -111,7 +189,31 @@ export let band;
         </tr>
       {/each}
     </table>
-    <button on:click={submitParsedData}>Importer valgte</button>
+    {#if existingToRemove && existingToRemove.length}
+      <p>
+        Det ligger inne medlemmer som ikke er på den nye lista som blir
+        importer. Kryss av dersom de skal fjernes / deaktiveres.
+      </p>
+      <table>
+        <tr><th>Navn</th><th>Gruppe</th></tr>
+        {#each existingToRemove as existing}
+          <tr>
+            <td
+              ><label
+                >Fjern <b>{[existing.name, existing.surname].join(' ')}</b>
+                <input
+                  type="checkbox"
+                  name="remove"
+                  value={existing._id}
+                /></label
+              ></td
+            >
+            <td>{existing.subgroup || ''}</td>
+          </tr>
+        {/each}
+      </table>
+    {/if}
+    <button on:click={submitParsedData}>Importer og oppdater medlemmene</button>
   {/if}
 {/if}
 
@@ -129,5 +231,10 @@ export let band;
     vertical-align: top;
     border: 1px solid #bbb;
     padding: 12px;
+  }
+  .flagme {
+    background: yellow;
+    transform: rotate(30deg);
+    float: right;
   }
 </style>
