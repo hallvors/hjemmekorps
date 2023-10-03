@@ -1,15 +1,11 @@
-setup:
-  config:
-    - DATABASE_URL
-
 build:
   docker:
     web: Dockerfile
 
-release:
-  image: web
-  command:
-    - npm run db:migrate
+#release:
+#  image: web
+#  command:
+#    - npm run db:migrate
 
 run:
   web:

@@ -1,3 +1,4 @@
+console.log('initialising environment.js');
 console.log(process.env.NODE_ENV);
 const { PORT, NODE_ENV } = process.env;
 const env = NODE_ENV || 'development';
