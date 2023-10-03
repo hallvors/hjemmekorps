@@ -9,8 +9,10 @@ yarn-error.log*
 lerna-debug.log*
 
 # This folder is populated by prep-scripts.js and contents will be third-party stuff we don't want/need in our repo
-static/js/opensheetmusicdisplay
 static/js/web-audio-recorder
+
+# Utility scripts for local development, not to be checked in
+update-osmd-local.sh
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

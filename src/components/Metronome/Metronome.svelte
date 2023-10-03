@@ -26,7 +26,6 @@
   export let timeNumerator = 4;
   export let nthBeatSounded;
   export let delayBetweenBeats;
-  export let soundRecorder;
   export let audioContext;
   let fBuffer;
   let aBuffer;
@@ -101,9 +100,7 @@
         // non-0th beat = medium pitch
         source.buffer = fBuffer;
       }
-      if (recordBeat && soundRecorder) {
-        source.connect(soundRecorder);
-      }
+
       var gainNode = audioContext.createGain();
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
       source.connect(gainNode);

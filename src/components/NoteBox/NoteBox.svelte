@@ -17,7 +17,6 @@
 
   export let project;
   export let trackName = null;
-  export let soundRecorder;
   export let audioContext;
   export let hasPartFile = false;
   export let meta = [];
@@ -643,7 +642,6 @@
     {nthBeatSounded}
     {delayBetweenBeats}
     {audioContext}
-    {soundRecorder}
     on:beat={onBeat}
   />
 {/if}
@@ -651,7 +649,7 @@
   <div class="loading">
     <Loading
       message={loadingMessage}
-      subMessage={soundRecorder ? 'Husk å bruke høretelefoner!' : ''}
+      subMessage='Husk å bruke høretelefoner!'
     />
   </div>
 {/if}
