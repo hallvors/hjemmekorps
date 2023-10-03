@@ -46,11 +46,13 @@ function ensureHttps(req, res, next) {
   let url = req.location.origin + req.url;
   if (req.headers["x-forwarded-proto"] !== "https") {
     if (!req.locals.env.development) {
-      url = url.replace(/^http:/, 'https:');
-      res.statusCode = 302;
-      res.setHeader('Location', url);
-      res.end();
-      return;
+      if (url.indexOf('.well-known/acme-challenge') === -1) {
+        url = url.replace(/^http:/, 'https:');
+        res.statusCode = 302;
+        res.setHeader('Location', url);
+        res.end();
+        return;
+      }
     }
   }
   next();
