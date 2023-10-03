@@ -22,7 +22,7 @@ function parseUrl(req, res, next) {
 
 function setCookie(req, res, next) {
   res.setCookie = function (name, value, options) {
-    const cookieOpts = [];
+    const cookieOpts = ['SameSite=Strict'];
     if(options && options.expires) {
       cookieOpts.push('Expires=' + options.expires.toGMTString());
     }
