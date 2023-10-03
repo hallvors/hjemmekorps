@@ -1,4 +1,4 @@
-FROM node:14.16.0-stretch
+FROM node:14-bullseye
 
 RUN apt-get update -y && apt-get install -y ffmpeg
 
