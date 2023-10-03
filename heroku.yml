@@ -1,3 +1,7 @@
+setup:
+  config:
+    - DATABASE_URL
+
 build:
   docker:
     web: Dockerfile
