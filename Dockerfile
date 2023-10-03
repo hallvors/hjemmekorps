@@ -6,7 +6,7 @@ RUN apt-get update -y && apt-get install -y ffmpeg
 # installing the full redis-server
 RUN apt-get install -y redis-server
 # Curl to support streaming release phase output
-Run apt-get install -y curl
+RUN apt-get install -y curl
 
 RUN mkdir -p /home/node/app && \
     chown -R node:node /home/node/app

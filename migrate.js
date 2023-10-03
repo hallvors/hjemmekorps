@@ -8,6 +8,6 @@ const migrator = new SlonikMigrator({
 });
 console.log(
   'Running migrations for ' +
-    process.env.DATABASE_URL.replace(/\/.*@/, '/*******:*******@')
+    (process.env.DATABASE_URL || '').replace(/\/.*@/, '/*******:*******@')
 );
 migrator.runAsCLI();
