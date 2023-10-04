@@ -64,7 +64,7 @@ let hostname =
     ? 'localhost'
     : env === 'production'
     ? 'hjemmekorps.no'
-    : 'test.hjemmekorps.no';
+    : 'hjemmekorps-staging.herokuapp.com';
 
 module.exports = {
   instruments: require('./instruments.json').instruments,
