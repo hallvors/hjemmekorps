@@ -180,7 +180,7 @@
                 type="checkbox"
                 value={data.fullname}
                 checked
-              />{data.fullname}</label
+              /> {data.fullname}</label
             >
           </td>
           <td>{data.subgroup}</td>
@@ -193,12 +193,12 @@
           >
           <td>
             {#each data.phone as num}
-              <label><input type="checkbox" value={num} checked />{num}</label>
+              <label><input type="checkbox" value={num} checked /> {num}</label>
             {/each}
           </td>
           <td>
             {#each data.email as mail}
-              <label><input type="checkbox" value={mail} checked />{mail}</label
+              <label><input type="checkbox" value={mail} checked /> {mail}</label
               >
             {/each}
           </td>
