@@ -17,6 +17,6 @@
 
 <MemberImport
   band={$bands[$selectedBand]}
-  {instruments}
+  instruments={$instruments}
   on:dataupdate={onUpdate}
 />

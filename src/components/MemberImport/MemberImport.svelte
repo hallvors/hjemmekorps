@@ -59,7 +59,8 @@
           if (existing) {
             // the last entry here works around the old data model
             // being different and having .name for both first
-            // and surname
+            // and surname. We do not want to overwrite a new
+            // .name with the existing .name value
             Object.assign(entry, existing, entry);
           }
         });
@@ -80,12 +81,20 @@
   function getByName(name) {
     return document.querySelector('input[value="' + name + '"]');
   }
-
   function getInstrumentValueByTitle(title) {
+    if (!title) {
+      return null;
+    }
+    // Split to handle input like "Kornett/trompet"
+    let titlesFromImport = title.toLowerCase().split(/\//g);
     const instrument = instruments.find(
       item =>
-        item.title === title ||
-        title.toLowerCase().includes(item.titel.toLowerCase())
+        titlesFromImport.includes(item.title.toLowerCase()) ||
+        titlesFromImport.includes(item.value) || // Styreportalen spells Baryton in English..
+        // we allow "Saksofon" to match i.e. "Sopransaxofon" here:
+        titlesFromImport.find(importTitle =>
+          item.title.includes(importTitle.replace('saksofon', 'saxofon'))
+        )
     );
     if (instrument) {
       return instrument.value;
@@ -164,7 +173,7 @@
         <tr>
           <td>
             <span class="flagme">
-              {#if data._id}Oppdateres!{:else}Ny!{/if}
+              {#if data._id}Oppdater!{:else}Ny!{/if}
             </span>
             <label
               ><input
@@ -175,6 +184,13 @@
             >
           </td>
           <td>{data.subgroup}</td>
+          <td
+            >{#if data.instrument}<img
+                width="40"
+                src={`/images/instruments/${data.instrument}.png`}
+                alt={data.instrument}
+              />{/if}</td
+          >
           <td>
             {#each data.phone as num}
               <label><input type="checkbox" value={num} checked />{num}</label>
@@ -234,7 +250,7 @@
   }
   .flagme {
     background: yellow;
-    transform: rotate(30deg);
+    transform: rotate(20deg);
     float: right;
   }
 </style>
