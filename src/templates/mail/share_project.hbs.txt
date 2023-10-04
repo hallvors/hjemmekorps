@@ -10,4 +10,6 @@ Klikk her for å se notene og sende inn opptak:
 
 https://{{hostname}}/?t={{token}}
 
+*Viktig om personvern:* dere må gi tilgang til mikrofon for å gjøre opptaket. Husk at samtaler o.l. i rommet også kan bli med på opptaket. For å ivareta familiens personvern bør musikanten få gjøre opptaket i ro og fred.
+
 Du kan ikke svare på denne eposten. Dersom du har spørsmål, ta kontakt med {{friendly_name}}.
