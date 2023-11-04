@@ -45,6 +45,10 @@ function setCookie(req, res, next) {
 function ensureHttps(req, res, next) {
   let url = req.location.origin + req.url;
   if (req.headers["x-forwarded-proto"] !== "https") {
+    // do not redirect localhost to https
+    if (req.location.origin.match(/(127\.0\.0\.1|localhost)/)) {
+      return next();
+    }
     if (!req.locals.env.development) {
       if (url.indexOf('.well-known/acme-challenge') === -1) {
         url = url.replace(/^http:/, 'https:');
