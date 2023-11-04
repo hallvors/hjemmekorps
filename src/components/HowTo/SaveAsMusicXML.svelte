@@ -27,7 +27,6 @@
     width: 2rem;
     height: 3rem;
     font-size: 2rem;
-    display: inline-block;
     line-height: 3rem;
     text-align: left;
     margin-right: 0.5rem;
