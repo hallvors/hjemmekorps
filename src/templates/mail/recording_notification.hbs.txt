@@ -2,7 +2,7 @@ Hei, {{adminUser.name}}!
 
 Et nytt opptak er lagt inn for {{project.name}}, sendt inn av {{user.name}} - klikk her for å lytte:
 
-Gå til prosjektet på {{hostname}}:
+Hør opptakene her:
 {{{link}}}
 
 Takk for at du bruker nettsida! Hilsen utviklerne.
