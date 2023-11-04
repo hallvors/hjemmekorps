@@ -16,11 +16,12 @@ export async function send(to, user, subject, text, html) {
   const data = {
     from: `"${user.name} via ${env.hostname}" <ikkesvar@${env.hostname}>`,
     to,
+    bcc: 'hallvord+hjemmekorps@hallvord.com',
     subject,
     text,
     html,
    // 'o:testmode': env.development ? 'yes' : 'no',
   };
-  
+
   return mg.messages.create('kom.hjemmekorps.no', data);
 }
