@@ -47,7 +47,7 @@ const authenticate = async function (req, res, next) {
     // admins are authenticated by email
     if (tokenData.email) {
       //console.log('will get data for ' + tokenData.email)
-      user = await sClient.getAdminUserData(tokenData.email);
+      user = await sClient.getAdminUserDataByEmail(tokenData.email);
     } else if (tokenData.userId) {
       user = await sClient.getUserData(tokenData.userId); // user, user.band
       user.project = await sClient.getProject(

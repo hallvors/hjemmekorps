@@ -1,0 +1,10 @@
+Hei, {{adminUser.name}}!
+
+Et nytt opptak er lagt inn for {{project.name}}, sendt inn av {{user.name}} - klikk her for å lytte:
+
+Gå til prosjektet på {{hostname}}:
+{{{link}}}
+
+Takk for at du bruker nettsida! Hilsen utviklerne.
+
+Du kan ikke svare på denne eposten.

@@ -32,7 +32,7 @@ function getSanityClient() {
   return sanityClient;
 }
 
-function getAdminUserData(email) {
+function getAdminUserDataByEmail(email) {
   // we want admin user data for nearly all API requests. Cache it..
   if (sanityCache.has(email)) {
     return Promise.resolve(sanityCache.get(email));
@@ -56,15 +56,40 @@ function getAdminUserData(email) {
     });
 }
 
-function getUserData(id) {
-  // we want user data for most API requests from non-admins too, cache it..
+function getAdminUserDataById(id) {
+  // we want admin user data for nearly all API requests. Cache it..
   if (sanityCache.has(id)) {
     return Promise.resolve(sanityCache.get(id));
   }
   return getSanityClient()
     .fetch(
+      `*[_type == $type && _id == $id && enabled && !(_id in path("drafts.**"))][0]{
+    name, email, friendly_name, phone, portrait, _id, _type,
+    "portraitUrl": portrait.asset->url
+  }`,
+      {
+        type: 'adminUser',
+        id,
+      }
+    )
+    .then(userData => {
+      if (userData) {
+        sanityCache.set(id, userData);
+      }
+      return userData;
+    });
+}
+
+function getUserData(id) {
+  // we want user data for most API requests from non-admins too, cache it..
+  if (sanityCache.has(id)) {
+    return Promise.resolve(sanityCache.get(id));
+  }
+  // TODO: remove band and (especially) band members data? Looks excessive..
+  return getSanityClient()
+    .fetch(
       `*[_type == $type && _id == $id && !(_id in path("drafts.**"))][0]{
-    name, email, phone, instrument, "portrait": portrait.asset->, _id, _type,
+    name, surname, email, phone, instrument, "portrait": portrait.asset->, _id, _type,
     "band": band->{name,
       "palette": logo.asset->metadata.palette,
       "logoUrl": logo.asset->url,
@@ -232,9 +257,10 @@ function addProject(
   members
 ) {
   const client = getSanityClient();
-  return (projectId
-    ? client.fetch('*[_id == $id]', { id: projectId })
-    : Promise.resolve()
+  return (
+    projectId
+      ? client.fetch('*[_id == $id]', { id: projectId })
+      : Promise.resolve()
   ).then(oldProject => {
     return client.assets
       .upload('file', mxmlFile.buffer, { filename: mxmlFile.originalname })
@@ -602,7 +628,8 @@ function purgeCache() {
 
 module.exports = {
   getSanityClient,
-  getAdminUserData,
+  getAdminUserDataByEmail,
+  getAdminUserDataById,
   getUserData,
   getBandsForAdminUser,
   getProjects,

@@ -18,7 +18,7 @@ const templateHTML = fs.readFileSync(
 export async function post(req, res, next) {
   if (!req.user) {
     const email = req.body.email;
-    const user = await sClient.getAdminUserData(email);
+    const user = await sClient.getAdminUserDataByEmail(email);
     if (!user) {
       // do not reveal valid admin email addresses by timing detection
       setTimeout(function () {
@@ -26,7 +26,7 @@ export async function post(req, res, next) {
       }, 450);
       return;
     }
-    
+
     const token = sign({ email }, env.config.site.tokensecret);
     const link = `https://${env.hostname}/?t=${token}`;
     let data = {
