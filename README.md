@@ -22,6 +22,9 @@ For å kjøre et lokalt test/utviklings-miljø må du gjøre følgende:
 	"sanity": {
 		"dataset": "test",
 		"token": "token-you-get-from-manage.sanity.io"
+	},
+	"mailgun": {
+		"apikey": ""
 	}
 }
 ```
@@ -30,8 +33,12 @@ For å kjøre et lokalt test/utviklings-miljø må du gjøre følgende:
 
 ## Database
 
-Prosjektet bruker Sanity.io til det meste av data som lagres, men noe går også til en Postgres server. For å kjøre lokalt må denne settes opp og miljøvariabelen `DATABASE_URL` settes korrekt. Kjør `node migrate.js` for å lage tabeller og struktur.
+Prosjektet bruker Sanity.io til det meste av data som lagres, men noe går også til en Postgres server. For å kjøre lokalt må denne settes opp og miljøvariabelen `DATABASE_URL` settes korrekt, for eksempel med `export DATABASE_URL=postgresql://localhost/hjemmekorps`. Kjør `node migrate.js` for å lage tabeller og struktur.
+
+## Redis
+
+Prosjektet bruker også Redis. Sørg for at Redis er installert og kjører.
 
 ## Test admin-tilgang
 
-For å bruke admin-sidene må du lage en innloggings-lenke med å kjøre `node scripts/make-login-link.js EPOST` der EPOST er epostadressa til en admin-bruker som er opprettet under "Innhold > Admin" i Sanity. Du får opp to lenker, kopier den med `localhost:5000` og kjør `npm start dev` og gå til lenka.
+For å bruke admin-sidene må du lage en innloggings-lenke med å kjøre `node scripts/make-login-link.js EPOST` der EPOST er epostadressa til en admin-bruker som er opprettet under "Innhold > Admin" i Sanity. Du får opp to lenker, kopier den med `localhost:3000` og kjør `npm start dev` og gå til lenka.
