@@ -15,6 +15,7 @@
   } from '../../lib/datastore';
   import Loading from '../../components/Loading/Loading.svelte';
   import UsageHint from '../../components/UsageHint/UsageHint.svelte';
+  import SaveAsMusicXML from '../../components/HowTo/SaveAsMusicXML.svelte';
 
   export let id;
   let loading = false;
@@ -56,7 +57,8 @@
 
 <h1>Nytt prosjekt</h1>
 
-<p>Last opp fil i <em>Music XML</em>-format for å opprette et nytt prosjekt.</p>
+<p>Last opp fil i <em>Music XML</em>-format for å opprette et nytt prosjekt.
+Se under for hvordan du kan lagre MusicXML-filer med Musescore.</p>
 {statusCode}
 <form on:submit|preventDefault={handleSubmit}>
   {#if bands.length > 1}
@@ -79,6 +81,8 @@
 <UsageHint
   message="Tips: last opp hele dirigent-partituret som en Music XML-fil. Du trenger ikke laste opp hver enkelt stemme separat."
 />
+
+<SaveAsMusicXML />
 
 {#if loading}
   <Loading message="Laster opp.." />
