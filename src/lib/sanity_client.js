@@ -49,6 +49,30 @@ function getAdminUserDataByEmail(email) {
       }
     )
     .then(userData => {
+      if (userData && userData.name) {
+        sanityCache.set(email, userData);
+      }
+      return userData;
+    });
+}
+
+function getUserByEmail(email) {
+  // we want admin user data for nearly all API requests. Cache it..
+  if (sanityCache.has(email)) {
+    console.log('cache hit!')
+    return Promise.resolve(sanityCache.get(email));
+  }
+  return getSanityClient()
+    .fetch(
+      `*[_type == $type && $email in email && visible && !(_id in path("drafts.**"))][0]{
+    name, surname, _id, email
+  }`,
+      {
+        type: 'member',
+        email,
+      }
+    )
+    .then(userData => {
       if (userData) {
         sanityCache.set(email, userData);
       }
@@ -245,6 +269,38 @@ function getProject(userId, projectId, mustBeFresh) {
       return project;
     }
   });
+}
+
+async function getProjectsForUser(userId) {
+  let id = `project-${userId}-allprojects`;
+  if (sanityCache.has(id) && !mustBeFresh) {
+    return Promise.resolve(sanityCache.get(id));
+  }
+  const client = getSanityClient();
+  const projects = await client.fetch(
+    `*[_type == $type && references($userId) && !(_id in path("drafts.**"))] {
+      name, _id,
+      "ownerName":owner->name,
+      _createdAt,
+      "recordings": *[_type == 'recording' && references(^._id) && references($userId)]{_id, instrument}
+    } | order(_createdAt desc) [0...20]`,
+    {
+      type: 'project',
+      userId,
+    }
+  );
+  console.log(projects)
+  if (!projects?.length) {
+    return [];
+  }
+  projects.forEach(
+    project =>
+      (project.token = jwt.sign(
+        { userId, projectId: project._id },
+        env.config.site.tokensecret
+      ))
+  );
+  return projects;
 }
 
 function addProject(
@@ -629,6 +685,7 @@ function purgeCache() {
 module.exports = {
   getSanityClient,
   getAdminUserDataByEmail,
+  getUserByEmail,
   getAdminUserDataById,
   getUserData,
   getBandsForAdminUser,
@@ -639,6 +696,7 @@ module.exports = {
   updateOrCreateMember,
   deactivateMember,
   getProject,
+  getProjectsForUser,
   addProject,
   getPartFile,
   addPartFile,

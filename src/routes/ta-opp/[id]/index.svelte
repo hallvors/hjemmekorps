@@ -1,0 +1,138 @@
+<script context="module">
+  export async function preload(page) {
+    let id = page.params.id;
+    return { id };
+  }
+</script>
+<script>
+  export let id;
+  import { onMount } from 'svelte';
+
+  import ScrollableListToolsRight from '../../../structure/ScrollableListAndTools/ScrollableListToolsRight.svelte';
+  import RecordUI from '../../../components/RecordUI/RecordUI.svelte';
+  import TagTrigger from '../../../components/TagTrigger/TagTrigger.svelte';
+  import Loading from '../../../components/Loading/Loading.svelte';
+  import LinkedBoxList from '../../../components/LinkedBoxList/LinkedBoxList.svelte';
+  import { user, bands } from '../../../lib/datastore';
+  import TracksPlayer from '../../../components/TracksPlayer/TracksPlayer.svelte';
+  let recordings = [];
+  let project;
+  let message = 'Henter noter og opptak...';
+  let activeRecordings = [];
+  let ENABLE_LISTEN_WHILE_RECORDING;
+  const band = $bands[0];
+
+  onMount(async function () {
+      project = await (
+        await fetch(
+          `/api/project/${id}`,
+          { credentials: 'same-origin' }
+        )
+      ).json();
+      console.log(project)
+    if (project?.generatedSoundfileUrl) {
+      recordings.push({
+        recording: {
+          url: project.generatedSoundfileUrl,
+          meta: project.soundMeta,
+        },
+      });
+    }
+    // still working on this feature, will be enabled later
+    ENABLE_LISTEN_WHILE_RECORDING = Boolean(recordings.length);
+
+    if (project && project.partslist) {
+      project.partslist.forEach(part => {
+        if (part.members) {
+          part.members.forEach(memRef => {
+            if (memRef.recording) {
+              let member = band.members.find(m => m._id === memRef._ref);
+              recordings.push({ recording: memRef.recording, member });
+            }
+          });
+        }
+      });
+    }
+  });
+  function handleClick(evt) {
+    console.log(evt);
+    if (activeRecordings.includes(evt.detail.tagValue)) {
+      activeRecordings = activeRecordings.filter(
+        url => url !== evt.detail.tagValue
+      );
+    } else {
+      activeRecordings = [/*...activeRecordings,*/ evt.detail.tagValue];
+    }
+    console.log(activeRecordings);
+  }
+  let tracksPlayer;
+
+  function startPlay() {
+    if (tracksPlayer) {
+      tracksPlayer.start();
+    }
+  }
+  function stopPlay() {
+    if (tracksPlayer) {
+      tracksPlayer.stop();
+    }
+  }
+</script>
+<div class="main-wrapper">
+  <div class="display">
+
+{#if project}
+  <ScrollableListToolsRight>
+    <RecordUI
+    {project}
+    user={$user}
+    on:start={startPlay}
+    on:stop={stopPlay}
+    on:measuretime={evt => {
+        if (tracksPlayer) tracksPlayer.jump(evt.detail.time);
+    }}
+    />
+    <div slot="aside">
+    {#if ENABLE_LISTEN_WHILE_RECORDING && recordings && recordings.length}
+        {#each recordings as rec}
+        <TagTrigger
+            tagRendered={rec.member ? rec.member.name : 'Alle'}
+            tagName=""
+            tagValue={rec.recording.url}
+            active={activeRecordings.includes(rec.recording.url)}
+            className="fa-volume-mute"
+            classNameActive="fa-volume-up"
+            on:activate={handleClick}
+            on:deactivate={handleClick}
+        />
+        {/each}
+    {:else}
+        <p>
+        <em
+            >Ingen stemmer spilt inn enda <i class="fas fa-music" /> - blir din
+            den første?</em
+        >
+        </p>
+    {/if}
+    </div>
+    {#if activeRecordings && activeRecordings.length}
+    <TracksPlayer
+        {recordings}
+        {activeRecordings}
+        bind:this={tracksPlayer}
+        on:error={() => {
+        activeRecordings.length = 0;
+        }}
+    />
+    {/if}
+</ScrollableListToolsRight>
+{:else}
+  <Loading {message} />
+{/if}
+</div></div>
+<style>
+  .main-wrapper {
+    padding: 50px 0;
+    padding-top: 10vw;
+  }
+</style>

@@ -8,7 +8,9 @@
 	<!-- Logo -->
 	{#if logo}
         <span class="logo">
-            <img src={logo} alt="Korpslogo">
+		    <a href="/" class="logo" on:click={() => top.location.href = '/'}>
+                <img src={logo} alt="Korpslogo">
+            </a>
         </span>
 	{/if}
     <h1>Hei {user.name}!</h1>

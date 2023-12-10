@@ -13,7 +13,7 @@ function isOkWithoutSession(url) {
   }
   if (
     url === '/' ||
-	url.indexOf('/?rnd') === 0 ||
+    url.indexOf('/?rnd') === 0 ||
     url === '/api/communications/loginlink' ||
     url === '/api/logout'
   ) {
@@ -43,23 +43,22 @@ const authenticate = async function (req, res, next) {
   let token = req.query.t || req.cookies.token;
   try {
     let tokenData = jwt.verify(token, env.config.site.tokensecret);
-    let user;
+    let user, projects;
     // admins are authenticated by email
     if (tokenData.email) {
       //console.log('will get data for ' + tokenData.email)
       user = await sClient.getAdminUserDataByEmail(tokenData.email);
     } else if (tokenData.userId) {
-      user = await sClient.getUserData(tokenData.userId); // user, user.band
-      user.project = await sClient.getProject(
-        tokenData.userId,
-        tokenData.projectId
-      );
+      [user, projects] = await Promise.all([
+        sClient.getUserData(tokenData.userId), // user, user.band
+        sClient.getProjectsForUser(tokenData.userId),
+      ]);
+      user.projects = projects;
     }
     //console.log({user});
     if (!user) {
       if (isOkWithoutSession(req.url)) {
         // avoid redirect loops /feil/* if token is wrong
-        // TODO: what if we are on / with a ?t= URL?
         return next();
       }
       console.error('go to /feil/nyreg');
@@ -68,6 +67,12 @@ const authenticate = async function (req, res, next) {
       res.end();
       return;
     }
+    // if user, session token should contain ID but not project ID
+    token =
+      user._type === 'member' && tokenData.projectId
+        ? jwt.sign({ userId: user._id }, env.config.site.tokensecret)
+        : token;
+
     user.token = token;
     req.user = user;
     // if token does not exist or is not the value we use for auth now,
@@ -78,6 +83,11 @@ const authenticate = async function (req, res, next) {
       req.url.indexOf('/api/logout') === -1
     ) {
       res.setCookie('token', token);
+    }
+    // If original secret link is for a specific project, redirect
+    // token in cookie should grant access when user arrives there
+    if (tokenData.projectId && req.url.indexOf('/ta-opp/') === -1) {
+      return res.redirect(`/ta-opp/${tokenData.projectId}`);
     }
     return next();
   } catch (e) {

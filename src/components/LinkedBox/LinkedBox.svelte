@@ -52,6 +52,7 @@
     padding-bottom: 0.5vw;
     transform: rotate(-45deg);
     font-size: 1.5vw;
+    transform-origin: 65% 65%;
     margin-top: -1.5vw;
   }
 </style>

@@ -56,7 +56,7 @@ app
           projectList = await getProjects(req.user._id);
         } else if (req.user) {
           // this a regular, non-admin user
-          projectList = [req.user.project];
+          projectList = req.user.projects;
           bands = [req.user.band];
         }
         return {

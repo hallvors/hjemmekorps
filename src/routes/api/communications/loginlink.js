@@ -16,24 +16,38 @@ const templateHTML = fs.readFileSync(
 );
 
 export async function post(req, res, next) {
+  let user, link, token;
   if (!req.user) {
     const email = req.body.email;
-    const user = await sClient.getAdminUserDataByEmail(email);
-    if (!user) {
-      // do not reveal valid admin email addresses by timing detection
-      setTimeout(function () {
-        req.json({ status: 'ok' });
-      }, 450);
-      return;
+    console.log('get admin by email ' + email)
+    user = await sClient.getAdminUserDataByEmail(email);
+    console.log('admin user', user)
+    if (user && user.name) {
+      token = sign({ email }, env.config.site.tokensecret);
+    } else {
+      console.log('get user by email ' + email)
+      user = await sClient.getUserByEmail(email);
+      console.log('user user', user)
+      if (user && user.name) {
+        console.log('found user', user)
+        // login link requested by a band member, not admin
+        token = sign({ userId: user._id }, env.config.site.tokensecret);
+      } else {
+        // do not reveal valid email addresses by timing detection
+        setTimeout(function () {
+          res.json({ status: 'ok' });
+        }, 450);
+        return;
+      }
     }
 
-    const token = sign({ email }, env.config.site.tokensecret);
-    const link = `https://${env.hostname}/?t=${token}`;
+    link = `https://${env.hostname}/?t=${token}`;
     let data = {
       link,
       hostname: env.hostname,
       user,
     };
+    console.log('compiling text with ', data)
     let templatePlain = Handlebars.compile(templateText);
     let templateRich = Handlebars.compile(templateHTML);
     let result = await send(

@@ -3,28 +3,29 @@
   import RecordUI from '../RecordUI/RecordUI.svelte';
   import TagTrigger from '../TagTrigger/TagTrigger.svelte';
   import Loading from '../Loading/Loading.svelte';
-  import { projectList, bands } from '../../lib/datastore';
+  import LinkedBoxList from '../LinkedBoxList/LinkedBoxList.svelte';
+  import { projectList, project, bands } from '../../lib/datastore';
   import TracksPlayer from '../TracksPlayer/TracksPlayer.svelte';
   // Dette får man fra backend
   // Beklager manglende samsvar mellom data-modellen for admin og musikant
-  const project = $projectList[0];
   const band = $bands[0];
   export let user;
   let recordings = [];
   let message = 'Henter opptak...';
-  if (project.generatedSoundfileUrl) {
+  console.log({project: $project, projectList: $projectList})
+  if ($project?.generatedSoundfileUrl) {
     recordings.push({
       recording: {
-        url: project.generatedSoundfileUrl,
-        meta: project.soundMeta,
+        url: $project.generatedSoundfileUrl,
+        meta: $project.soundMeta,
       },
     });
   }
   // still working on this feature, will be enabled later
   const ENABLE_LISTEN_WHILE_RECORDING = Boolean(recordings.length);
 
-  if (project.partslist) {
-    project.partslist.forEach(part => {
+  if ($project?.partslist) {
+    $project.partslist.forEach(part => {
       if (part.members) {
         part.members.forEach(memRef => {
           if (memRef.recording) {
@@ -63,60 +64,21 @@
 
 <div class="main-wrapper">
   <div class="display">
-    {#if project && user}
-      <ScrollableListToolsRight>
-        <RecordUI
-          {project}
-          {user}
-          on:start={startPlay}
-          on:stop={stopPlay}
-          on:measuretime={evt => {
-            if (tracksPlayer) tracksPlayer.jump(evt.detail.time);
-          }}
+    {#if user}
+      {#if $projectList && $projectList.length}
+      <h1>Dine låter</h1>
+        <LinkedBoxList items={$projectList.map(proj => ({
+          title: proj.name,
+          href: `/ta-opp/${proj._id}`,
+          orderbadge: proj.recordings.length ? 'Gjort!':'',
+        }))}
         />
-        <div slot="aside">
-          {#if ENABLE_LISTEN_WHILE_RECORDING && recordings && recordings.length}
-            {#each recordings as rec}
-              <TagTrigger
-                tagRendered={rec.member ? rec.member.name : 'Alle'}
-                tagName=""
-                tagValue={rec.recording.url}
-                active={activeRecordings.includes(rec.recording.url)}
-                className="fa-volume-mute"
-                classNameActive="fa-volume-up"
-                on:activate={handleClick}
-                on:deactivate={handleClick}
-              />
-            {/each}
-          {:else}
-            <p>
-              <em
-                >Ingen stemmer spilt inn enda <i class="fas fa-music" /> - blir din
-                den første?</em
-              >
-            </p>
-          {/if}
-        </div>
-        {#if activeRecordings && activeRecordings.length}
-          <TracksPlayer
-            {recordings}
-            {activeRecordings}
-            bind:this={tracksPlayer}
-            on:error={() => {
-              activeRecordings.length = 0;
-            }}
-          />
-        {/if}
-      </ScrollableListToolsRight>
+      {:else}
+        <p>Det ser ut som dirigenten ikke har gitt deg noen låter å øve på enda.</p>
+      {/if}
     {:else}
       <Loading {message} subMessage="Husk å bruke høretelefoner!" />
     {/if}
   </div>
 </div>
 
-<style>
-  .main-wrapper {
-    padding: 50px 0;
-    padding-top: 10vw;
-  }
-</style>

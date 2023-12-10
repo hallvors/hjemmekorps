@@ -3,7 +3,7 @@
 </script>
 <h1>Velkommen!</h1>
 <p>
-  
+
 </p>
 <p>
   Hjemmekorps.no skal inspirere korpsmusikanter til hjemmeøving ved å gjøre leksene
@@ -25,7 +25,7 @@
 </p>
 
 <p>
-  Er du en dirigent som allerede bruker Hjemmekorps.no? Skriv inn epost-adresse for å få
+  Er du en dirigent eller musikant som allerede bruker Hjemmekorps.no? Skriv inn epost-adresse for å få
   tilsendt innloggingslenke:
 </p>
 
