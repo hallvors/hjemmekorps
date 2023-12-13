@@ -1,5 +1,6 @@
 src/config/overrides.json
 __sapper__
+.DS_Store
 # Logs
 logs
 *.log
