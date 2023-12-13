@@ -4,6 +4,7 @@
     return { id };
   }
 </script>
+
 <script>
   export let id;
   import { onMount } from 'svelte';
@@ -12,7 +13,6 @@
   import RecordUI from '../../../components/RecordUI/RecordUI.svelte';
   import TagTrigger from '../../../components/TagTrigger/TagTrigger.svelte';
   import Loading from '../../../components/Loading/Loading.svelte';
-  import LinkedBoxList from '../../../components/LinkedBoxList/LinkedBoxList.svelte';
   import { user, bands } from '../../../lib/datastore';
   import TracksPlayer from '../../../components/TracksPlayer/TracksPlayer.svelte';
   let recordings = [];
@@ -23,13 +23,10 @@
   const band = $bands[0];
 
   onMount(async function () {
-      project = await (
-        await fetch(
-          `/api/project/${id}`,
-          { credentials: 'same-origin' }
-        )
-      ).json();
-      console.log(project)
+    project = await (
+      await fetch(`/api/project/${id}`, { credentials: 'same-origin' })
+    ).json();
+    console.log(project);
     if (project?.generatedSoundfileUrl) {
       recordings.push({
         recording: {
@@ -78,58 +75,60 @@
     }
   }
 </script>
+
 <div class="main-wrapper">
   <div class="display">
-
-{#if project}
-  <ScrollableListToolsRight>
-    <RecordUI
-    {project}
-    user={$user}
-    on:start={startPlay}
-    on:stop={stopPlay}
-    on:measuretime={evt => {
-        if (tracksPlayer) tracksPlayer.jump(evt.detail.time);
-    }}
-    />
-    <div slot="aside">
-    {#if ENABLE_LISTEN_WHILE_RECORDING && recordings && recordings.length}
-        {#each recordings as rec}
-        <TagTrigger
-            tagRendered={rec.member ? rec.member.name : 'Alle'}
-            tagName=""
-            tagValue={rec.recording.url}
-            active={activeRecordings.includes(rec.recording.url)}
-            className="fa-volume-mute"
-            classNameActive="fa-volume-up"
-            on:activate={handleClick}
-            on:deactivate={handleClick}
+    {#if project}
+      <ScrollableListToolsRight>
+        <RecordUI
+          {project}
+          user={$user}
+          on:start={startPlay}
+          on:stop={stopPlay}
+          on:measuretime={evt => {
+            if (tracksPlayer) tracksPlayer.jump(evt.detail.time);
+          }}
         />
-        {/each}
+        <div slot="aside">
+          {#if ENABLE_LISTEN_WHILE_RECORDING && recordings && recordings.length}
+            {#each recordings as rec}
+              <TagTrigger
+                tagRendered={rec.member ? rec.member.name : 'Alle'}
+                tagName=""
+                tagValue={rec.recording.url}
+                active={activeRecordings.includes(rec.recording.url)}
+                className="fa-volume-mute"
+                classNameActive="fa-volume-up"
+                on:activate={handleClick}
+                on:deactivate={handleClick}
+              />
+            {/each}
+          {:else}
+            <p>
+              <em
+                >Ingen stemmer spilt inn enda <i class="fas fa-music" /> - blir din
+                den første?</em
+              >
+            </p>
+          {/if}
+        </div>
+        {#if activeRecordings && activeRecordings.length}
+          <TracksPlayer
+            {recordings}
+            {activeRecordings}
+            bind:this={tracksPlayer}
+            on:error={() => {
+              activeRecordings.length = 0;
+            }}
+          />
+        {/if}
+      </ScrollableListToolsRight>
     {:else}
-        <p>
-        <em
-            >Ingen stemmer spilt inn enda <i class="fas fa-music" /> - blir din
-            den første?</em
-        >
-        </p>
+      <Loading {message} />
     {/if}
-    </div>
-    {#if activeRecordings && activeRecordings.length}
-    <TracksPlayer
-        {recordings}
-        {activeRecordings}
-        bind:this={tracksPlayer}
-        on:error={() => {
-        activeRecordings.length = 0;
-        }}
-    />
-    {/if}
-</ScrollableListToolsRight>
-{:else}
-  <Loading {message} />
-{/if}
-</div></div>
+  </div>
+</div>
+
 <style>
   .main-wrapper {
     padding: 50px 0;

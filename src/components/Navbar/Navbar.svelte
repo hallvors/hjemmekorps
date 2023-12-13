@@ -28,7 +28,7 @@
   {#if $user && $user._type === 'adminUser'}
     <AdminNavbar {logo} {foregroundColor} {navbarHeight} user={$user} />
   {:else if $user && $user._type === 'member'}
-    <MemberNavbar user={$user} {logo} {navbarHeight} />
+    <MemberNavbar user={$user} {logo} {navbarHeight} {foregroundColor} />
   {:else}
     <a href="/" class="logo">
       <svg

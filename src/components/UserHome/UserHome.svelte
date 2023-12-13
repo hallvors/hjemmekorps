@@ -1,65 +1,12 @@
 <script>
-  import ScrollableListToolsRight from '../../structure/ScrollableListAndTools/ScrollableListToolsRight.svelte';
-  import RecordUI from '../RecordUI/RecordUI.svelte';
-  import TagTrigger from '../TagTrigger/TagTrigger.svelte';
   import Loading from '../Loading/Loading.svelte';
   import LinkedBoxList from '../LinkedBoxList/LinkedBoxList.svelte';
-  import { projectList, project, bands } from '../../lib/datastore';
-  import TracksPlayer from '../TracksPlayer/TracksPlayer.svelte';
+  import { projectList, bands } from '../../lib/datastore';
   // Dette får man fra backend
   // Beklager manglende samsvar mellom data-modellen for admin og musikant
   const band = $bands[0];
   export let user;
-  let recordings = [];
-  let message = 'Henter opptak...';
-  console.log({project: $project, projectList: $projectList})
-  if ($project?.generatedSoundfileUrl) {
-    recordings.push({
-      recording: {
-        url: $project.generatedSoundfileUrl,
-        meta: $project.soundMeta,
-      },
-    });
-  }
-  // still working on this feature, will be enabled later
-  const ENABLE_LISTEN_WHILE_RECORDING = Boolean(recordings.length);
-
-  if ($project?.partslist) {
-    $project.partslist.forEach(part => {
-      if (part.members) {
-        part.members.forEach(memRef => {
-          if (memRef.recording) {
-            let member = band.members.find(m => m._id === memRef._ref);
-            recordings.push({ recording: memRef.recording, member });
-          }
-        });
-      }
-    });
-  }
-  let activeRecordings = [];
-  function handleClick(evt) {
-    console.log(evt);
-    if (activeRecordings.includes(evt.detail.tagValue)) {
-      activeRecordings = activeRecordings.filter(
-        url => url !== evt.detail.tagValue
-      );
-    } else {
-      activeRecordings = [/*...activeRecordings,*/ evt.detail.tagValue];
-    }
-    console.log(activeRecordings);
-  }
-  let tracksPlayer;
-
-  function startPlay() {
-    if (tracksPlayer) {
-      tracksPlayer.start();
-    }
-  }
-  function stopPlay() {
-    if (tracksPlayer) {
-      tracksPlayer.stop();
-    }
-  }
+  let message = 'Henter låter...';
 </script>
 
 <div class="main-wrapper">

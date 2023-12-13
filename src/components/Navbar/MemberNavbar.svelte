@@ -2,13 +2,14 @@
     export let logo;
     export let user;
     export let navbarHeight;
+	export let foregroundColor = "white";
 </script>
 
-<div style="height: {navbarHeight}px">
+<div style="height: {navbarHeight}px; color: {foregroundColor}">
 	<!-- Logo -->
 	{#if logo}
         <span class="logo">
-		    <a href="/" class="logo" on:click={() => top.location.href = '/'}>
+		    <a href="/" class="logo" on:click={() => location.href = '/'}>
                 <img src={logo} alt="Korpslogo">
             </a>
         </span>

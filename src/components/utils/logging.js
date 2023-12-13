@@ -3,7 +3,8 @@ export function logPerfStats(data) {
   // whatever is going on in the app (could also
   // be done in a worker..some day)
   setTimeout(function () {
-    if (!(data.measurement && data.ms && data.project)) {
+    if (!('mearurement' in data && 'ms' in data && 'project' in data)) {
+      console.error(data)
       throw new Error('incomplete data for perf stats');
     }
     fetch('/api/perflogging', {

@@ -114,7 +114,7 @@ function getUserData(id) {
     .fetch(
       `*[_type == $type && _id == $id && !(_id in path("drafts.**"))][0]{
     name, surname, email, phone, instrument, "portrait": portrait.asset->, _id, _type,
-    "band": band->{name,
+    "band": band->{name, _id,
       "palette": logo.asset->metadata.palette,
       "logoUrl": logo.asset->url,
       "members": *[_type == 'member' && references(^._id)]{
