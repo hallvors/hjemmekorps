@@ -1,18 +1,84 @@
 {
   "instruments": [
-    { "title": "Fløyte", "value": "flute" },
-    { "title": "Klarinett", "value": "clarinet" },
-    { "title": "Bassklarinett", "value": "bass_clarinet" },
-    { "title": "Sopransaxofon", "value": "soprano-saxophone" },
-    { "title": "Altsaxofon", "value": "alto-saxophone" },
-    { "title": "Tenorsaxofon", "value": "tenor-saxophone" },
-    { "title": "Barytonsaxofon", "value": "baritone-saxophone" },
-    { "title": "Kornett", "value": "cornet" },
-    { "title": "Trompet", "value": "trumpet" },
-    { "title": "Waldhorn", "value": "french-horn" },
-    { "title": "Trombone", "value": "trombone" },
-    { "title": "Baryton", "value": "baritone" },
-    { "title": "Tuba", "value": "bass" },
+    {
+      "title": "Fløyte",
+      "value": "flute",
+      "clef": "treble",
+      "key": "C",
+      "transpose": 1
+    },
+    {
+      "title": "Klarinett",
+      "value": "clarinet",
+      "clef": "treble",
+      "key": "Bb",
+      "transpose": 1.123882503192848
+    },
+    {
+      "title": "Bassklarinett",
+      "value": "bass_clarinet",
+      "clef": "treble",
+      "key": "Bb",
+      "transpose": 2.244935402492164
+    },
+    {
+      "title": "Sopransaxofon",
+      "value": "soprano-saxophone",
+      "clef": "treble",
+      "key": "Bb",
+      "transpose": 1.123882503192848
+    },
+    {
+      "title": "Altsaxofon",
+      "value": "alto-saxophone",
+      "clef": "treble",
+      "key": "Eb",
+      "transpose": 1.68179646440516
+    },
+    {
+      "title": "Tenorsaxofon",
+      "value": "tenor-saxophone",
+      "clef": "treble",
+      "key": "Bb",
+      "transpose": 2.247765006385696
+    },
+    {
+      "title": "Barytonsaxofon",
+      "value": "baritone-saxophone",
+      "clef": "treble",
+      "key": "Eb",
+      "transpose": 3.363657212751319
+    },
+    {
+      "title": "Kornett",
+      "value": "cornet",
+      "clef": "treble",
+      "key": "Bb",
+      "transpose": 1.123882503192848
+    },
+    {
+      "title": "Trompet",
+      "value": "trumpet",
+      "clef": "treble",
+      "key": "Bb",
+      "transpose": 1.123882503192848
+    },
+    {
+      "title": "Waldhorn",
+      "value": "french-horn",
+      "clef": "bass",
+      "key": "F",
+      "transpose": 1.498367791077258
+    },
+    {
+      "title": "Trombone",
+      "value": "trombone",
+      "clef": "bass",
+      "key": "Bb",
+      "transpose": 1.123882503192848
+    },
+    { "title": "Baryton", "value": "baritone", "clef": "bass", "key": "Bb" },
+    { "title": "Tuba", "value": "bass", "clef": "bass", "key": "Bb" },
     { "title": "Melodisk slagverk", "value": "pitched_percussion" },
     { "title": "Perkusjon", "value": "percussion" },
     { "title": "Trommesett", "value": "drum" },

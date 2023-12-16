@@ -18,8 +18,8 @@
   <p class="subinfo">
     <small
       ><b>Du har øvd </b>
-      {furtherStats.userStreak} <b>{furtherStats.userStreak > 1 ? 'dager' : 'dag'} i strekk. Hele korpset har øvd </b>
-      {furtherStats.bandStreak} <b>{furtherStats.bandStreak > 1 ? 'dager' : 'dag'} i strekk.</b></small
+      {furtherStats.userStreak} <b>{furtherStats.userStreak === 1 ? 'dag' : 'dager'} i strekk. Hele korpset har øvd </b>
+      {furtherStats.bandStreak} <b>{furtherStats.bandStreak === 1 ? 'dag' : 'dager'} i strekk.</b></small
     >
     <br />
     <small

@@ -85,12 +85,12 @@ export async function get(req, res, next) {
         results[2].value.rows.length -
         results[2].value.rows
           .map(row => row.streak_status)
-          .lastIndexOf('start'),
+          .lastIndexOf('start') - 1,
       bandStreak:
         results[3].value.rows.length -
         results[2].value.rows
           .map(row => row.streak_status)
-          .lastIndexOf('start'),
+          .lastIndexOf('start') - 1,
       userPointsTotal: results[4].value.rows[0]?.points || 0,
       bandPointsTotal: results[5].value.rows[0]?.points || 0,
     });

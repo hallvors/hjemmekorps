@@ -12,6 +12,14 @@
 <div class="main-wrapper">
   <div class="display">
     {#if user}
+      <h1>Prøv deg!</h1>
+      <LinkedBoxList items={[{
+        title: "Notesprint",
+        href: `/lek/notesprint`,
+        orderbadge: 'Spill!',
+      }]}
+      />
+
       {#if $projectList && $projectList.length}
       <h1>Dine låter</h1>
         <LinkedBoxList items={$projectList.map(proj => ({

@@ -16,8 +16,89 @@
   import Button from '../Button/Button.svelte';
   import { getRandomInt } from '../../lib/utils';
   import { autoCorrelate } from '../../lib/pitch';
+  import { instruments } from '../../lib/datastore';
+
+  // Not sure if we'll use this
+  const noteFrequencies = {
+    C2: 65.41,
+    'C#2': 69.3,
+    D2: 73.42,
+    'D#2': 77.78,
+    E2: 82.41,
+    F2: 87.31,
+    'F#2': 92.5,
+    G2: 98.0,
+    'G#2': 103.83,
+    A2: 110.0,
+    'A#2': 116.54,
+    B2: 123.47,
+
+    C3: 130.81,
+    'C#3': 138.59,
+    D3: 146.83,
+    'D#3': 155.56,
+    E3: 164.81,
+    F3: 174.61,
+    'F#3': 185.0,
+    G3: 196.0,
+    'G#3': 207.65,
+    A3: 220.0,
+    'A#3': 233.08,
+    B3: 246.94,
+
+    C4: 261.63,
+    'C#4': 277.18,
+    D4: 293.66,
+    'D#4': 311.13,
+    E4: 329.63,
+    F4: 349.23,
+    'F#4': 369.99,
+    G4: 392.0,
+    'G#4': 415.3,
+    A4: 440.0,
+    'A#4': 466.16,
+    B4: 493.88,
+
+    C5: 523.25,
+    'C#5': 554.37,
+    D5: 587.33,
+    'D#5': 622.25,
+    E5: 659.26,
+    F5: 698.46,
+    'F#5': 739.99,
+    G5: 783.99,
+    'G#5': 830.61,
+    A5: 880.0,
+    'A#5': 932.33,
+    B5: 987.77,
+
+    C6: 1046.5,
+    'C#6': 1108.73,
+    D6: 1174.66,
+    'D#6': 1244.51,
+    E6: 1318.51,
+    F6: 1396.91,
+    'F#6': 1479.98,
+    G6: 1567.98,
+    'G#6': 1661.22,
+    A6: 1760.0,
+    'A#6': 1864.66,
+    B6: 1975.53,
+  };
+  const octaveSplits = [0, 0];
+  const noteAndOctaveNames = Object.keys(noteFrequencies);
+  noteAndOctaveNames.forEach((key, idx) => {
+    if (idx > 1 && idx % 12 === 0) {
+      octaveSplits.push(
+        (noteFrequencies[key] + noteFrequencies[noteAndOctaveNames[idx - 1]]) /
+          2
+      );
+    }
+  });
+  function selectConcertPitchOctave(hz) {
+    return octaveSplits.findIndex(num => num > hz);
+  }
   let sheetmusicElm;
-  const BASS_INSTRUMENTS = ['trombone', 'baritone', 'bass'];
   const availableNotes = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
   const selectedNotes = [];
   const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
@@ -34,15 +115,14 @@
   // we persist points to server no later than 15 sec after last correct note
   // (we also save every immediately after every 10th correct note)
   const SAVE_DELAY_MS = 15000;
+  let userInstrument;
 
-  function drawConfigNotes(noteNames, octaves) {
+  function drawConfigNotes(noteNames, octaves, instrument) {
     if (context) {
       context.clear();
     }
     stave = new Stave(110 /* x */, 60 /* y */, width /* width */);
-    stave.addClef(
-      BASS_INSTRUMENTS.includes(user.instrument) ? 'bass' : 'treble'
-    );
+    stave.addClef(instrument.clef ? instrument.clef : 'treble');
     stave.setContext(context).draw();
     const voice = new Voice({
       num_beats: availableNotes.length * octaves.length,
@@ -80,13 +160,17 @@
   }
 
   onMount(async function () {
+    userInstrument = $instruments.find(
+      instr => instr.value === user.instrument
+    );
+    console.log({ userInstrument });
     width = sheetmusicElm.offsetWidth * 0.9;
-    const { Renderer, Stave } = Vex.Flow;
+    const { Renderer } = Vex.Flow;
     renderer = new Renderer(sheetmusicElm, Renderer.Backends.SVG);
-    renderer.resize(width, 200);
+    renderer.resize(width, 250);
     context = renderer.getContext();
-    octaves = BASS_INSTRUMENTS.includes(user.instrument) ? [3, 4] : [4, 5];
-    drawConfigNotes(availableNotes, octaves);
+    octaves = userInstrument.clef === 'bass' ? [3, 4] : [4, 5];
+    drawConfigNotes(availableNotes, octaves, userInstrument);
     document.addEventListener(
       'click',
       evt => {
@@ -100,7 +184,7 @@
         if (elm && elm.dataset && elm.dataset.notevalue) {
           selectedNotes.push(elm.dataset.notevalue);
         }
-        drawConfigNotes(availableNotes, octaves);
+        drawConfigNotes(availableNotes, octaves, userInstrument);
       },
       true
     );
@@ -188,18 +272,7 @@
 
     // Handle rounding
     var valueToDisplay = autoCorrelateValue;
-    //      var roundingValue = document.querySelector('input[name="rounding"]:checked').value
-    //      if (roundingValue == 'none') {
-    // Do nothing
-    //      } else if (roundingValue == 'hz') {
     valueToDisplay = Math.round(valueToDisplay);
-    //      } else {
-    // Get the closest note
-    // Thanks to PitchDetect:
-    //        valueToDisplay = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
-    //      }
-
-    //      var smoothingValue = document.querySelector('input[name="smoothing"]:checked').value
     console.log(autoCorrelateValue);
     if (autoCorrelateValue === -1) {
       //        document.getElementById('note').innerText = 'Too quiet...';
@@ -207,18 +280,19 @@
       drawTask();
       return;
     }
+
+    // transposing instrument? Change value to the Hz value
+    // corresponding to the note we actually want to see on
+    // the screen..
+    if (userInstrument.transpose) {
+      autoCorrelateValue *= userInstrument.transpose;
+    }
+
     nowPlayingNote =
       noteStrings[noteFromPitch(autoCorrelateValue) % 12].toLowerCase();
-    // we also need octave info
-    // TODO: this will ALL be different for bass clef, right?
 
-    if (autoCorrelateValue > 130 && autoCorrelateValue < 261) {
-      nowPlayingOctave = 3;
-    } else if (autoCorrelateValue >= 261 && autoCorrelateValue < 523) {
-      nowPlayingOctave = 4;
-    } else if (autoCorrelateValue > 523 && autoCorrelateValue < 1046) {
-      nowPlayingOctave = 5;
-    }
+    // we also need octave info
+    nowPlayingOctave = selectConcertPitchOctave(autoCorrelateValue);
     console.log({
       nowPlayingNote,
       nowPlayingOctave,
@@ -293,8 +367,14 @@
   };
 
   function nextTask() {
-    const num = getRandomInt(0, selectedNotes.length - 1);
+    let num = getRandomInt(0, selectedNotes.length - 1);
     hits.length = 0;
+    // Try to avoid the same note twice in a row
+    if (selectedNotes.length > 1) {
+      while (selectedNotes[num] === currentTaskNote) {
+        num = getRandomInt(0, selectedNotes.length - 1);
+      }
+    }
     currentTaskNote = selectedNotes[num];
     console.log(currentTaskNote);
   }
@@ -306,9 +386,7 @@
     console.log({ isCorrect, npNoteValue });
     context.clear();
     stave = new Stave(110 /* x */, 60 /* y */, width /* width */);
-    stave.addClef(
-      BASS_INSTRUMENTS.includes(user.instrument) ? 'bass' : 'treble'
-    );
+    stave.addClef(userInstrument.clef || 'treble');
     stave.setContext(context).draw();
     const voice = new Voice({
       num_beats: 1,
@@ -352,7 +430,7 @@
     mode = MODES.CONFIGURE;
     source.disconnect(analyser);
     cancelAnimationFrame(drawNoteVisual);
-    drawConfigNotes(availableNotes, octaves);
+    drawConfigNotes(availableNotes, octaves, userInstrument);
     savePoints(points);
   }
 </script>
