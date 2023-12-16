@@ -520,6 +520,7 @@
 {#if serverData}
   <PointsRenderer
     {points}
+    subGroupName={user.subgroup}
     furtherStats={serverData}
     extraPointsSinceLoad={points - serverData.userPointsToday}
   />

@@ -1,0 +1,1 @@
+ALTER TABLE note_sprint_game ADD COLUMN subgroup TEXT NOT NULL;

@@ -120,7 +120,8 @@ function getUserData(id) {
       "members": *[_type == 'member' && references(^._id)]{
         _id, name, instrument, "portrait": portrait.asset->
       }
-    }
+    },
+    subgroup
   }`,
       {
         type: 'member',

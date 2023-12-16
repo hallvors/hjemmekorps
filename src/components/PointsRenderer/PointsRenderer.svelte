@@ -3,7 +3,12 @@
 
   export let points;
   export let furtherStats;
+  export let subGroupName;
   export let extraPointsSinceLoad = 0;
+  // hack for grammar.. if name ends in 'korps' add -et
+  if (/korps$/.test(subGroupName)) {
+    subGroupName += 'et';
+  }
 </script>
 
 <div class="frame">
@@ -18,14 +23,28 @@
   <p class="subinfo">
     <small
       ><b>Du har øvd </b>
-      {furtherStats.userStreak} <b>{furtherStats.userStreak === 1 ? 'dag' : 'dager'} i strekk. Hele korpset har øvd </b>
-      {furtherStats.bandStreak} <b>{furtherStats.bandStreak === 1 ? 'dag' : 'dager'} i strekk.</b></small
+      {furtherStats.userStreak}
+      <b
+        >{furtherStats.userStreak === 1 ? 'dag' : 'dager'} i strekk. {subGroupName.toLowerCase()}
+        {furtherStats.groupStreak}
+        <b
+          >{furtherStats.groupStreak === 1 ? 'dag' : 'dager'} og hele korpset har
+          øvd
+        </b>
+        {furtherStats.bandStreak}
+        <b>{furtherStats.bandStreak === 1 ? 'dag' : 'dager'} i strekk.</b></b
+      ></small
     >
     <br />
     <small
       ><b>Til sammen har du spilt </b>
-      {furtherStats.userPointsTotal + extraPointsSinceLoad} <b> noter og korpset </b>
-      {furtherStats.bandPointsTotal + extraPointsSinceLoad} noter</small
+      {furtherStats.userPointsTotal + extraPointsSinceLoad}
+      <b>
+        noter, {subGroupName.toLowerCase()}
+      </b>{furtherStats.groupPointsTotal + extraPointsSinceLoad}<b>,
+        og hele korpset
+      </b>
+      {furtherStats.bandPointsTotal + extraPointsSinceLoad} <b>noter</b></small
     >
   </p>
 </div>

@@ -21,7 +21,11 @@ export async function get(req, res, next) {
         ),
         // band TODAY
         client.query(
-          sql`SELECT SUM(points) as points FROM note_sprint_game WHERE user_id = ${req.user.band._id} AND date = CURRENT_DATE`
+          sql`SELECT SUM(points) as points FROM note_sprint_game WHERE band_id = ${req.user.band._id} AND date = CURRENT_DATE`
+        ),
+        // band subgroup TODAY
+        client.query(
+          sql`SELECT SUM(points) as points FROM note_sprint_game WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup} AND date = CURRENT_DATE`
         ),
         // raw data for user STREAK
         client.query(sql`WITH date_with_prev AS (
@@ -67,6 +71,28 @@ export async function get(req, res, next) {
       FROM
         date_with_prev;
       `),
+        // raw data for band subgroup STREAK
+        client.query(sql`WITH date_with_prev AS (
+        SELECT
+          date,
+          LAG(date) OVER (ORDER BY date) AS prev_date
+        FROM
+          note_sprint_game
+        WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup}
+      )
+      SELECT
+        date,
+        prev_date,
+        date - prev_date AS diff,
+        CASE
+          WHEN date - prev_date = 1 THEN 'streak'
+          WHEN date - prev_date > 1 THEN 'start'
+          WHEN prev_date IS NULL THEN 'start'
+          ELSE 'end'
+        END AS streak_status
+      FROM
+        date_with_prev;
+      `),
         // user TOTALS
         client.query(
           sql`SELECT SUM(points) AS points FROM note_sprint_game WHERE user_id = ${req.user._id}`
@@ -75,24 +101,37 @@ export async function get(req, res, next) {
         client.query(
           sql`SELECT SUM(points) AS points FROM note_sprint_game WHERE band_id = ${req.user.band._id}`
         ),
+        // band subgroup TOTALS
+        client.query(
+          sql`SELECT SUM(points) AS points FROM note_sprint_game WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup}`
+        ),
       ]);
     });
-    console.log(results.map((obj, idx) =>[idx, obj.value.rows]));
+
+    console.log(results.map((obj, idx) => [idx, obj.value.rows]));
+
     res.json({
       userPointsToday: results[0].value.rows[0]?.points || 0,
       bandPointsToday: results[1].value.rows[0]?.points || 0,
+      groupPointsToday: results[2].value.rows[0]?.points || 0,
       userStreak:
-        results[2].value.rows.length -
-        results[2].value.rows
-          .map(row => row.streak_status)
-          .lastIndexOf('start') - 1,
-      bandStreak:
         results[3].value.rows.length -
-        results[2].value.rows
+        results[3].value.rows
           .map(row => row.streak_status)
-          .lastIndexOf('start') - 1,
-      userPointsTotal: results[4].value.rows[0]?.points || 0,
-      bandPointsTotal: results[5].value.rows[0]?.points || 0,
+          .lastIndexOf('start'),
+      bandStreak:
+        results[4].value.rows.length -
+        results[4].value.rows
+          .map(row => row.streak_status)
+          .lastIndexOf('start'),
+      groupStreak:
+        results[5].value.rows.length -
+        results[5].value.rows
+          .map(row => row.streak_status)
+          .lastIndexOf('start'),
+      userPointsTotal: results[6].value.rows[0]?.points || 0,
+      bandPointsTotal: results[7].value.rows[0]?.points || 0,
+      groupPointsTotal: results[8].value.rows[0]?.points || 0,
     });
   } catch (err) {
     console.error(err);
@@ -108,11 +147,13 @@ export async function post(req, res, next) {
             INSERT INTO note_sprint_game (
                 user_id,
                 band_id,
+                subgroup,
                 points
             )
             VALUES (
                 ${req.user._id},
                 ${req.user.band._id},
+                ${req.user.subgroup},
                 ${req.body.points}
             )
             ON CONFLICT ON CONSTRAINT note_sprint_game_user_id_band_id_date_key DO UPDATE
