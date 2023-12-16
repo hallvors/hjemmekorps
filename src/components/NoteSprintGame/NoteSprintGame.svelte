@@ -8,13 +8,12 @@
   import { onMount } from 'svelte';
   export let band;
   export let user;
-  console.log({ band, user });
   import { Vex, Stave, StaveNote, Voice, Formatter, Accidental } from 'vexflow';
   import UsageHint from '../UsageHint/UsageHint.svelte';
   import Star from '../Star/Star.svelte';
   import PointsRenderer from '../PointsRenderer/PointsRenderer.svelte';
   import Button from '../Button/Button.svelte';
-  import { getRandomInt } from '../../lib/utils';
+  import { getRandomInt, rectsOverlap } from '../../lib/utils';
   import { autoCorrelate } from '../../lib/pitch';
   import { instruments } from '../../lib/datastore';
 
@@ -116,6 +115,7 @@
   // (we also save every immediately after every 10th correct note)
   const SAVE_DELAY_MS = 15000;
   let userInstrument;
+  let cndLassoPositions = {};
 
   function drawConfigNotes(noteNames, octaves, instrument) {
     if (context) {
@@ -172,19 +172,83 @@
     octaves = userInstrument.clef === 'bass' ? [3, 4] : [4, 5];
     drawConfigNotes(availableNotes, octaves, userInstrument);
     document.addEventListener(
-      'click',
+      'mousedown',
       evt => {
         if (mode !== MODES.CONFIGURE) {
           return;
         }
         let elm = evt.target;
+        let insideSvg = elm.tagName === 'svg'; // to enable Dnd only over SVG
         while (elm && elm.dataset && !elm.dataset.notevalue) {
           elm = elm.parentElement;
+          if (elm && elm.tagName === 'svg') {
+            insideSvg = true;
+          }
         }
         if (elm && elm.dataset && elm.dataset.notevalue) {
+          // we clicked a note!
           selectedNotes.push(elm.dataset.notevalue);
+          drawConfigNotes(availableNotes, octaves, userInstrument);
+        } else if (insideSvg) {
+          // init click-and-drag
+          cndLassoPositions = {
+            x: evt.clientX,
+            y: evt.clientY,
+            width: 0,
+            height: 0,
+          };
         }
-        drawConfigNotes(availableNotes, octaves, userInstrument);
+      },
+      true
+    );
+
+    document.addEventListener(
+      'mouseup',
+      evt => {
+        if (cndLassoPositions.x !== undefined) {
+          cndLassoPositions = {};
+        }
+      },
+      true
+    );
+    document.addEventListener(
+      'mousemove',
+      evt => {
+        if (cndLassoPositions.x !== undefined) {
+          // We don't support right-to-left selections, sorry
+          if (
+            evt.clientX < cndLassoPositions.x ||
+            evt.clientY < cndLassoPositions.y
+          ) {
+            cndLassoPositions = {};
+            return;
+          }
+          cndLassoPositions.width = evt.clientX - cndLassoPositions.x;
+          cndLassoPositions.height = evt.clientY - cndLassoPositions.y;
+          const elms = document.querySelectorAll('[data-notevalue]');
+          let changed;
+          for (let i = 0; i < elms.length; i++) {
+            const coords = elms[i].getBoundingClientRect();
+            const overlap = rectsOverlap(cndLassoPositions, coords);
+            if (overlap) {
+  console.log({cndLassoPositions, coords, note: elms[i].dataset.notevalue})
+
+              selectedNotes.push(elms[i].dataset.notevalue);
+              changed = true;
+            } else if (selectedNotes.includes(elms[i].dataset.notevalue)) {
+              selectedNotes.splice(
+                selectedNotes.indexOf(elms[i].dataset.notevalue),
+                1
+              );
+              changed = true;
+            }
+          }
+          if (changed) {
+            drawConfigNotes(availableNotes, octaves, userInstrument);
+          }
+          evt.preventDefault();
+          return false;
+        }
       },
       true
     );
@@ -461,6 +525,16 @@
   />
 {/if}
 
+{#if cndLassoPositions.x !== undefined}<div
+    class="dndLasso"
+    style="
+      left: {cndLassoPositions.x}px;
+      top: {cndLassoPositions.y}px;
+      width: {cndLassoPositions.width}px;
+      height: {cndLassoPositions.height}px;
+    "
+  ></div>{/if}
+
 <style type="text/css">
   .toolbar {
     text-align: center;
@@ -472,5 +546,10 @@
     position: absolute;
     left: 49%;
     top: 55%;
+  }
+  .dndLasso {
+    position: fixed;
+    border: 1px dashed;
+    border-color: var(--border);
   }
 </style>
