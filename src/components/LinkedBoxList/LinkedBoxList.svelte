@@ -10,8 +10,10 @@
         href={item.href}
         title={item.title}
         orderbadge={item.orderbadge}
+        description={item.description}
         on:click
       />
+      <slot />
     </div>
   {/each}
 </div>

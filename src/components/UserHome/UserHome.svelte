@@ -12,11 +12,11 @@
 <div class="main-wrapper">
   <div class="display">
     {#if user}
-      <h1>Prøv deg!</h1>
+      <h1>Spill og utfordringer!</h1>
       <LinkedBoxList items={[{
-        title: "Notesprint",
+        title: "Spill notesprint!",
         href: `/lek/notesprint`,
-        orderbadge: 'Spill!',
+        orderbadge: "♩♩",
       }]}
       />
 

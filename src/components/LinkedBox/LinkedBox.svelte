@@ -2,6 +2,7 @@
   export let href;
   export let title;
   export let orderbadge;
+  export let description = '';
 </script>
 
 <a {href} on:click>
@@ -13,11 +14,13 @@
   {:else}
     <slot />
   {/if}
+  {#if description}
+    <small class="desc">{description}</small>
+  {/if}
 </a>
 
 <style>
   a {
-    display: block;
     width: 100%;
     height: 100%;
     padding: 5px 20px;
@@ -25,7 +28,8 @@
     box-shadow: var(--shadow);
     transition: 0.3s;
     display: flex;
-    justify-content: center;
+    flex-wrap: wrap;
+    justify-content: space-around;
     align-items: center;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -54,5 +58,12 @@
     font-size: 1.5vw;
     transform-origin: 65% 65%;
     margin-top: -1.5vw;
+    min-width: 9vw;
+  }
+  .desc, .desc:hover {
+    display: block;
+    font-size: smaller;
+    text-decoration: none;
+    color: var(--textColorDark);
   }
 </style>
