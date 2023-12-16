@@ -87,7 +87,10 @@ const authenticate = async function (req, res, next) {
     // If original secret link is for a specific project, redirect
     // token in cookie should grant access when user arrives there
     if (tokenData.projectId && req.url.indexOf('/ta-opp/') === -1) {
-      return res.redirect(`/ta-opp/${tokenData.projectId}`);
+      res.statusCode = 302;
+      res.setHeader('Location', `/ta-opp/${tokenData.projectId}`);
+      res.end();
+      return;
     }
     return next();
   } catch (e) {
