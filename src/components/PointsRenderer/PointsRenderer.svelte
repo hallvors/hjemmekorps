@@ -25,15 +25,15 @@
       ><b>Du har øvd </b>
       {furtherStats.userStreak}
       <b
-        >{furtherStats.userStreak === 1 ? 'dag' : 'dager'} i strekk. {subGroupName.toLowerCase()}
+        >{furtherStats.userStreak === 1 ? 'dag' : 'dager'} i strekk. {subGroupName.toLowerCase()}</b>
         {furtherStats.groupStreak}
         <b
           >{furtherStats.groupStreak === 1 ? 'dag' : 'dager'} og hele korpset har
           øvd
         </b>
         {furtherStats.bandStreak}
-        <b>{furtherStats.bandStreak === 1 ? 'dag' : 'dager'} i strekk.</b></b
-      ></small
+        <b>{furtherStats.bandStreak === 1 ? 'dag' : 'dager'} i strekk.</b>
+      </small
     >
     <br />
     <small
