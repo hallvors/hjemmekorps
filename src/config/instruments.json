@@ -33,7 +33,7 @@
       "value": "alto-saxophone",
       "clef": "treble",
       "key": "Eb",
-      "transpose": 1.68179646440516
+      "transpose": 1.675668760082664
     },
     {
       "title": "Tenorsaxofon",
@@ -47,7 +47,7 @@
       "value": "baritone-saxophone",
       "clef": "treble",
       "key": "Eb",
-      "transpose": 3.363657212751319
+      "transpose": 3.36361778928012
     },
     {
       "title": "Kornett",
@@ -66,7 +66,7 @@
     {
       "title": "Waldhorn",
       "value": "french-horn",
-      "clef": "bass",
+      "clef": "treble",
       "key": "F",
       "transpose": 1.498367791077258
     },
@@ -75,7 +75,7 @@
       "value": "trombone",
       "clef": "bass",
       "key": "Bb",
-      "transpose": 1.123882503192848
+      "transpose": 1
     },
     {
       "title": "Baryton",

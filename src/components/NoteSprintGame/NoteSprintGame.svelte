@@ -462,7 +462,7 @@
     console.log(currentTaskNote);
   }
   function drawTask() {
-    const npNoteValue = nowPlayingNote
+    const npNoteValue = nowPlayingNote && nowPlayingOctave > 1
       ? `${nowPlayingNote}/${nowPlayingOctave}`
       : null;
     const isCorrect = npNoteValue === currentTaskNote;
@@ -563,6 +563,7 @@
   }
   .parent {
     position: relative;
+    overflow-x: auto;
   }
   .star {
     position: absolute;
