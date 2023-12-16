@@ -17,8 +17,7 @@
   import { autoCorrelate } from '../../lib/pitch';
   import { instruments } from '../../lib/datastore';
 
-  // Not sure if we'll use this
-  const noteFrequencies = {
+  const noteNameFrequencyMappingNatural = {
     C2: 65.41,
     'C#2': 69.3,
     D2: 73.42,
@@ -85,11 +84,11 @@
     B6: 1975.53,
   };
   const octaveSplits = [0, 0];
-  const noteAndOctaveNames = Object.keys(noteFrequencies);
+  const noteAndOctaveNames = Object.keys(noteNameFrequencyMappingNatural);
   noteAndOctaveNames.forEach((key, idx) => {
     if (idx > 1 && idx % 12 === 0) {
       octaveSplits.push(
-        (noteFrequencies[key] + noteFrequencies[noteAndOctaveNames[idx - 1]]) /
+        (noteNameFrequencyMappingNatural[key] + noteNameFrequencyMappingNatural[noteAndOctaveNames[idx - 1]]) /
           2
       );
     }
@@ -98,7 +97,7 @@
     return octaveSplits.findIndex(num => num > hz);
   }
   let sheetmusicElm;
-  const availableNotes = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
+  let availableNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
   const selectedNotes = [];
   const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
   let mode = MODES.CONFIGURE;
@@ -122,7 +121,8 @@
       context.clear();
     }
     stave = new Stave(110 /* x */, 60 /* y */, width /* width */);
-    stave.addClef(instrument.clef ? instrument.clef : 'treble');
+    const clef = instrument.clef ? instrument.clef : 'treble';
+    stave.addClef(clef);
     stave.setContext(context).draw();
     const voice = new Voice({
       num_beats: availableNotes.length * octaves.length,
@@ -134,6 +134,7 @@
         const valueWithOctave = `${note}/${octave}`;
         const staveNote = new StaveNote({
           keys: [valueWithOctave],
+          clef,
           duration: 'q',
         });
         const isActive = selectedNotes.includes(valueWithOctave);
@@ -164,12 +165,18 @@
       instr => instr.value === user.instrument
     );
     console.log({ userInstrument });
+/*
+    switch(userInstrument.key) {
+      case 'Bb':
+        availableNotes = ['Bb', 'C', 'D', 'E', 'F', 'G', 'A']
+    }
+*/
     width = sheetmusicElm.offsetWidth * 0.9;
     const { Renderer } = Vex.Flow;
     renderer = new Renderer(sheetmusicElm, Renderer.Backends.SVG);
     renderer.resize(width, 250);
     context = renderer.getContext();
-    octaves = userInstrument.clef === 'bass' ? [3, 4] : [4, 5];
+    octaves = userInstrument.clef === 'bass' ? [2, 3, 4] : [4, 5];
     drawConfigNotes(availableNotes, octaves, userInstrument);
     document.addEventListener(
       'mousedown',
@@ -177,6 +184,7 @@
         if (mode !== MODES.CONFIGURE) {
           return;
         }
+        console.log({ selectedNotes });
         let elm = evt.target;
         let insideSvg = elm.tagName === 'svg'; // to enable Dnd only over SVG
         while (elm && elm.dataset && !elm.dataset.notevalue) {
@@ -187,7 +195,14 @@
         }
         if (elm && elm.dataset && elm.dataset.notevalue) {
           // we clicked a note!
-          selectedNotes.push(elm.dataset.notevalue);
+          if (selectedNotes.includes(elm.dataset.notevalue)) {
+            selectedNotes.splice(
+              selectedNotes.indexOf(elm.dataset.notevalue),
+              1
+            );
+          } else {
+            selectedNotes.push(elm.dataset.notevalue);
+          }
           drawConfigNotes(availableNotes, octaves, userInstrument);
         } else if (insideSvg) {
           // init click-and-drag
@@ -231,10 +246,10 @@
             const coords = elms[i].getBoundingClientRect();
             const overlap = rectsOverlap(cndLassoPositions, coords);
             if (overlap) {
-  console.log({cndLassoPositions, coords, note: elms[i].dataset.notevalue})
-
-              selectedNotes.push(elms[i].dataset.notevalue);
-              changed = true;
+              if (!selectedNotes.includes(elms[i].dataset.notevalue)) {
+                selectedNotes.push(elms[i].dataset.notevalue);
+                changed = true;
+              }
             } else if (selectedNotes.includes(elms[i].dataset.notevalue)) {
               selectedNotes.splice(
                 selectedNotes.indexOf(elms[i].dataset.notevalue),
@@ -349,14 +364,18 @@
     // corresponding to the note we actually want to see on
     // the screen..
     if (userInstrument.transpose) {
+      const obj = {preHz: autoCorrelateValue, preHzNote: noteStrings[noteFromPitch(autoCorrelateValue) % 12]};
       autoCorrelateValue *= userInstrument.transpose;
+      obj.postHz = autoCorrelateValue;
+      obj.postHzNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
+      console.log(obj)
     }
-
-    nowPlayingNote =
-      noteStrings[noteFromPitch(autoCorrelateValue) % 12].toLowerCase();
-
     // we also need octave info
     nowPlayingOctave = selectConcertPitchOctave(autoCorrelateValue);
+
+    nowPlayingNote =
+      noteStrings[noteFromPitch(autoCorrelateValue) % 12];
+
     console.log({
       nowPlayingNote,
       nowPlayingOctave,
@@ -447,10 +466,10 @@
       ? `${nowPlayingNote}/${nowPlayingOctave}`
       : null;
     const isCorrect = npNoteValue === currentTaskNote;
-    console.log({ isCorrect, npNoteValue });
+    const clef = userInstrument.clef || 'treble';
     context.clear();
     stave = new Stave(110 /* x */, 60 /* y */, width /* width */);
-    stave.addClef(userInstrument.clef || 'treble');
+    stave.addClef(clef);
     stave.setContext(context).draw();
     const voice = new Voice({
       num_beats: 1,
@@ -458,6 +477,7 @@
     });
     const taskNote = new StaveNote({
       keys: [currentTaskNote],
+      clef,
       duration: 'q',
       align_center: true,
     });
@@ -481,6 +501,7 @@
       npVoice.addTickables([
         new StaveNote({
           keys: [npNoteValue],
+          clef,
           duration: 'q',
           align_center: true,
         }).setStyle({ fillStyle: 'grey', strokeStyle: 'grey' }),
@@ -500,7 +521,7 @@
 </script>
 
 {#if mode === MODES.CONFIGURE}
-  <UsageHint message="Klikk alle noter du vil øve på." />
+  <UsageHint message="Velg hvilke noter du vil øve på ved å klikke på hver note. Du kan også klikke og dra." />
 {:else if mode === MODES.PLAY}
   <UsageHint message="Spill noten du ser!" />
 {/if}

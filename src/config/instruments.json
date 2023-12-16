@@ -77,8 +77,20 @@
       "key": "Bb",
       "transpose": 1.123882503192848
     },
-    { "title": "Baryton", "value": "baritone", "clef": "bass", "key": "Bb" },
-    { "title": "Tuba", "value": "bass", "clef": "bass", "key": "Bb" },
+    {
+      "title": "Baryton",
+      "value": "baritone",
+      "clef": "bass",
+      "key": "Bb",
+      "transpose": 1.05946456152394
+    },
+    {
+      "title": "Tuba",
+      "value": "bass",
+      "clef": "bass",
+      "key": "Bb",
+      "transpose": 1.05946456152394
+    },
     { "title": "Melodisk slagverk", "value": "pitched_percussion" },
     { "title": "Perkusjon", "value": "percussion" },
     { "title": "Trommesett", "value": "drum" },
