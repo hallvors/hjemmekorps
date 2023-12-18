@@ -88,7 +88,8 @@
   noteAndOctaveNames.forEach((key, idx) => {
     if (idx > 1 && idx % 12 === 0) {
       octaveSplits.push(
-        (noteNameFrequencyMappingNatural[key] + noteNameFrequencyMappingNatural[noteAndOctaveNames[idx - 1]]) /
+        (noteNameFrequencyMappingNatural[key] +
+          noteNameFrequencyMappingNatural[noteAndOctaveNames[idx - 1]]) /
           2
       );
     }
@@ -361,17 +362,19 @@
     // corresponding to the note we actually want to see on
     // the screen..
     if (userInstrument.transpose) {
-      const obj = {preHz: autoCorrelateValue, preHzNote: noteStrings[noteFromPitch(autoCorrelateValue) % 12]};
+      const obj = {
+        preHz: autoCorrelateValue,
+        preHzNote: noteStrings[noteFromPitch(autoCorrelateValue) % 12],
+      };
       autoCorrelateValue *= userInstrument.transpose;
       obj.postHz = autoCorrelateValue;
       obj.postHzNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
-      console.log(obj)
+      console.log(obj);
     }
     // we also need octave info
     nowPlayingOctave = selectConcertPitchOctave(autoCorrelateValue);
 
-    nowPlayingNote =
-      noteStrings[noteFromPitch(autoCorrelateValue) % 12];
+    nowPlayingNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
 
     console.log({
       nowPlayingNote,
@@ -459,9 +462,10 @@
     console.log(currentTaskNote);
   }
   function drawTask() {
-    const npNoteValue = nowPlayingNote && nowPlayingOctave > 1
-      ? `${nowPlayingNote}/${nowPlayingOctave}`
-      : null;
+    const npNoteValue =
+      nowPlayingNote && nowPlayingOctave > 1
+        ? `${nowPlayingNote}/${nowPlayingOctave}`
+        : null;
     const isCorrect = npNoteValue === currentTaskNote;
     const clef = userInstrument.clef || 'treble';
     context.clear();
@@ -518,7 +522,9 @@
 </script>
 
 {#if mode === MODES.CONFIGURE}
-  <UsageHint message="Velg hvilke noter du vil øve på ved å klikke på hver note. Du kan også klikke og dra." />
+  <UsageHint
+    message="Velg hvilke noter du vil øve på ved å klikke på hver note. Du kan også klikke og dra for å merke flere."
+  />
 {:else if mode === MODES.PLAY}
   <UsageHint message="Spill noten du ser!" />
 {/if}
