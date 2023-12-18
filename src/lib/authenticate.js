@@ -91,6 +91,15 @@ const authenticate = async function (req, res, next) {
       res.setHeader('Location', `/ta-opp/${tokenData.projectId}`);
       res.end();
       return;
+    } else if (
+      tokenData.url &&
+      tokenData.url.indexOf('/') === 0 &&
+      req.url.indexOf(tokenData.url) === -1
+    ) {
+      res.statusCode = 302;
+      res.setHeader('Location', tokenData.url);
+      res.end();
+      return;
     }
     return next();
   } catch (e) {
