@@ -186,7 +186,7 @@
         return;
       }
       console.log({ selectedNotes });
-      let elm = evt.target || evt.touchTargets[0];
+      let elm = evt.target;
       let insideSvg = elm.tagName === 'svg'; // to enable Dnd only over SVG
       while (elm && elm.dataset && !elm.dataset.notevalue && !insideSvg) {
         elm = elm.parentElement;
@@ -212,6 +212,11 @@
           height: 0,
         };
         evt.preventDefault();
+        if (evt.type === 'touchstart') {
+          sheetmusicElm.addEventListener('touchcancel', cndStop, true);
+          sheetmusicElm.addEventListener('touchend', cndStop, true);
+          sheetmusicElm.addEventListener('touchmove', cndMoveSelectNotes, true);
+        }
       }
     }
     sheetmusicElm.addEventListener('touchstart', cndSelectNotesInit, true);
@@ -220,13 +225,16 @@
       if (cndLassoPositions.x !== undefined) {
         cndLassoPositions = {};
         evt.preventDefault();
+        if (/^touch/.test(evt.type)) {
+          sheetmusicElm.removeEventListener('touchcancel', cndStop, true);
+          sheetmusicElm.removeEventListener('touchend', cndStop, true);
+          sheetmusicElm.removeEventListener('touchmove', cndMoveSelectNotes, true);
+
+        }
       }
     }
     sheetmusicElm.addEventListener('mouseup', cndStop, true);
-    sheetmusicElm.addEventListener('touchcancel', cndStop, true);
-    sheetmusicElm.addEventListener('touchenc', cndStop, true);
     function cndMoveSelectNotes(evt) {
-      console.log(evt.type, cndLassoPositions.x)
       if (cndLassoPositions.x !== undefined) {
         // We don't support right-to-left selections, sorry
         if (
@@ -264,7 +272,6 @@
       }
     }
     sheetmusicElm.addEventListener('mousemove', cndMoveSelectNotes, true);
-    sheetmusicElm.addEventListener('touchmove', cndMoveSelectNotes, true);
 
     serverData = await (
       await fetch('/api/games/note-sprint', { credentials: 'same-origin' })
