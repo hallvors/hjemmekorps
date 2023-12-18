@@ -13,7 +13,12 @@
   import Star from '../Star/Star.svelte';
   import PointsRenderer from '../PointsRenderer/PointsRenderer.svelte';
   import Button from '../Button/Button.svelte';
-  import { getRandomInt, rectsOverlap } from '../../lib/utils';
+  import {
+    getRandomInt,
+    rectsOverlap,
+    getEvtX,
+    getEvtY,
+  } from '../../lib/utils';
   import { autoCorrelate } from '../../lib/pitch';
   import { instruments } from '../../lib/datastore';
 
@@ -205,14 +210,16 @@
         drawConfigNotes(availableNotes, octaves, userInstrument);
       } else if (insideSvg) {
         // init click-and-drag
+        const x = getEvtX(evt);
+        const y = getEvtY(evt);
         cndLassoPositions = {
-          x: evt.clientX,
-          y: evt.clientY,
+          x,
+          y,
           width: 0,
           height: 0,
         };
-        evt.preventDefault();
         if (evt.type === 'touchstart') {
+          cndLassoPositions.touchId = evt.touches[0].identifier;
           sheetmusicElm.addEventListener('touchcancel', cndStop, true);
           sheetmusicElm.addEventListener('touchend', cndStop, true);
           sheetmusicElm.addEventListener('touchmove', cndMoveSelectNotes, true);
@@ -228,24 +235,30 @@
         if (/^touch/.test(evt.type)) {
           sheetmusicElm.removeEventListener('touchcancel', cndStop, true);
           sheetmusicElm.removeEventListener('touchend', cndStop, true);
-          sheetmusicElm.removeEventListener('touchmove', cndMoveSelectNotes, true);
-
+          sheetmusicElm.removeEventListener(
+            'touchmove',
+            cndMoveSelectNotes,
+            true
+          );
         }
       }
     }
     sheetmusicElm.addEventListener('mouseup', cndStop, true);
     function cndMoveSelectNotes(evt) {
       if (cndLassoPositions.x !== undefined) {
+        const x = getEvtX(evt, cndLassoPositions.touchId);
+        const y = getEvtY(evt, cndLassoPositions.touchId);
         // We don't support right-to-left selections, sorry
         if (
-          evt.clientX < cndLassoPositions.x ||
-          evt.clientY < cndLassoPositions.y
+          x < cndLassoPositions.x ||
+          y < cndLassoPositions.y
         ) {
-          cndLassoPositions = {};
+          cndStop(evt);
           return;
         }
-        cndLassoPositions.width = evt.clientX - cndLassoPositions.x;
-        cndLassoPositions.height = evt.clientY - cndLassoPositions.y;
+
+        cndLassoPositions.width = x - cndLassoPositions.x;
+        cndLassoPositions.height = y - cndLassoPositions.y;
         const elms = document.querySelectorAll('[data-notevalue]');
         let changed;
         for (let i = 0; i < elms.length; i++) {

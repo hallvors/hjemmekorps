@@ -86,6 +86,30 @@ function rectsOverlap(rect1, rect2) {
   return true;
 }
 
+function getEvtX(evt, touchIdentifier) {
+  if (evt.clientX) {
+    return evt.clientX;
+  }
+  if (evt.touches) {
+    const touch = touchIdentifier ? evt.touches.find(touch => touch.identifier = touchIdentifier) : evt.touches[0];
+    if (touch) {
+      return touch.clientX;
+    }
+  }
+}
+
+function getEvtY(evt, touchIdentifier) {
+  if (evt.clientY) {
+    return evt.clientY;
+  }
+  if (evt.touches) {
+    const touch = touchIdentifier ? evt.touches.find(touch => touch.identifier = touchIdentifier) : evt.touches[0];
+    if (touch) {
+      return touch.clientY;
+    }
+  }
+}
+
 module.exports = {
   jsonSender,
   parseUrl,
@@ -94,4 +118,6 @@ module.exports = {
   filterInstrumentName,
   getRandomInt,
   rectsOverlap,
+  getEvtX,
+  getEvtY,
 };
