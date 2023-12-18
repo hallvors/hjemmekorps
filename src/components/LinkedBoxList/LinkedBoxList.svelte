@@ -31,7 +31,9 @@
   .wrapper > div {
     flex: 0 1 auto;
     width: 18vw;
+    min-width: 250px;
     height: 18vw;
+    min-height: 250px;
     margin: 1vw;
   }
 </style>

@@ -120,7 +120,7 @@
     if (context) {
       context.clear();
     }
-    stave = new Stave(110 /* x */, 60 /* y */, width /* width */);
+    stave = new Stave(0 /* x */, 0 /* y */, width /* width */);
     const clef = instrument.clef ? instrument.clef : 'treble';
     stave.addClef(clef);
     stave.setContext(context).draw();
@@ -165,108 +165,105 @@
       instr => instr.value === user.instrument
     );
     console.log({ userInstrument });
-/*
+    /*
     switch(userInstrument.key) {
       case 'Bb':
         availableNotes = ['Bb', 'C', 'D', 'E', 'F', 'G', 'A']
     }
-*/
-    width = sheetmusicElm.offsetWidth * 0.9;
+    */
+    width = Math.min(sheetmusicElm.offsetWidth * 0.9, window.innerWidth);
     const { Renderer } = Vex.Flow;
     renderer = new Renderer(sheetmusicElm, Renderer.Backends.SVG);
     renderer.resize(width, 250);
     context = renderer.getContext();
     octaves = userInstrument.clef === 'bass' ? [2, 3, 4] : [4, 5];
     drawConfigNotes(availableNotes, octaves, userInstrument);
-    document.addEventListener(
-      'mousedown',
-      evt => {
-        if (mode !== MODES.CONFIGURE) {
+
+    // Initiate click-and-drag to select notes
+    function cndSelectNotesInit(evt) {
+      if (mode !== MODES.CONFIGURE) {
+        return;
+      }
+      console.log({ selectedNotes });
+      let elm = evt.target || evt.touchTargets[0];
+      let insideSvg = elm.tagName === 'svg'; // to enable Dnd only over SVG
+      while (elm && elm.dataset && !elm.dataset.notevalue && !insideSvg) {
+        elm = elm.parentElement;
+        if (elm && elm.tagName === 'svg') {
+          insideSvg = true;
+        }
+      }
+      if (elm && elm.dataset && elm.dataset.notevalue) {
+        // we clicked a note!
+        if (selectedNotes.includes(elm.dataset.notevalue)) {
+          selectedNotes.splice(selectedNotes.indexOf(elm.dataset.notevalue), 1);
+        } else {
+          selectedNotes.push(elm.dataset.notevalue);
+        }
+        evt.preventDefault();
+        drawConfigNotes(availableNotes, octaves, userInstrument);
+      } else if (insideSvg) {
+        // init click-and-drag
+        cndLassoPositions = {
+          x: evt.clientX,
+          y: evt.clientY,
+          width: 0,
+          height: 0,
+        };
+        evt.preventDefault();
+      }
+    }
+    sheetmusicElm.addEventListener('touchstart', cndSelectNotesInit, true);
+    sheetmusicElm.addEventListener('mousedown', cndSelectNotesInit, true);
+    function cndStop(evt) {
+      if (cndLassoPositions.x !== undefined) {
+        cndLassoPositions = {};
+        evt.preventDefault();
+      }
+    }
+    sheetmusicElm.addEventListener('mouseup', cndStop, true);
+    sheetmusicElm.addEventListener('touchcancel', cndStop, true);
+    sheetmusicElm.addEventListener('touchenc', cndStop, true);
+    function cndMoveSelectNotes(evt) {
+      console.log(evt.type, cndLassoPositions.x)
+      if (cndLassoPositions.x !== undefined) {
+        // We don't support right-to-left selections, sorry
+        if (
+          evt.clientX < cndLassoPositions.x ||
+          evt.clientY < cndLassoPositions.y
+        ) {
+          cndLassoPositions = {};
           return;
         }
-        console.log({ selectedNotes });
-        let elm = evt.target;
-        let insideSvg = elm.tagName === 'svg'; // to enable Dnd only over SVG
-        while (elm && elm.dataset && !elm.dataset.notevalue) {
-          elm = elm.parentElement;
-          if (elm && elm.tagName === 'svg') {
-            insideSvg = true;
-          }
-        }
-        if (elm && elm.dataset && elm.dataset.notevalue) {
-          // we clicked a note!
-          if (selectedNotes.includes(elm.dataset.notevalue)) {
-            selectedNotes.splice(
-              selectedNotes.indexOf(elm.dataset.notevalue),
-              1
-            );
-          } else {
-            selectedNotes.push(elm.dataset.notevalue);
-          }
-          drawConfigNotes(availableNotes, octaves, userInstrument);
-        } else if (insideSvg) {
-          // init click-and-drag
-          cndLassoPositions = {
-            x: evt.clientX,
-            y: evt.clientY,
-            width: 0,
-            height: 0,
-          };
-        }
-      },
-      true
-    );
-
-    document.addEventListener(
-      'mouseup',
-      evt => {
-        if (cndLassoPositions.x !== undefined) {
-          cndLassoPositions = {};
-        }
-      },
-      true
-    );
-    document.addEventListener(
-      'mousemove',
-      evt => {
-        if (cndLassoPositions.x !== undefined) {
-          // We don't support right-to-left selections, sorry
-          if (
-            evt.clientX < cndLassoPositions.x ||
-            evt.clientY < cndLassoPositions.y
-          ) {
-            cndLassoPositions = {};
-            return;
-          }
-          cndLassoPositions.width = evt.clientX - cndLassoPositions.x;
-          cndLassoPositions.height = evt.clientY - cndLassoPositions.y;
-          const elms = document.querySelectorAll('[data-notevalue]');
-          let changed;
-          for (let i = 0; i < elms.length; i++) {
-            const coords = elms[i].getBoundingClientRect();
-            const overlap = rectsOverlap(cndLassoPositions, coords);
-            if (overlap) {
-              if (!selectedNotes.includes(elms[i].dataset.notevalue)) {
-                selectedNotes.push(elms[i].dataset.notevalue);
-                changed = true;
-              }
-            } else if (selectedNotes.includes(elms[i].dataset.notevalue)) {
-              selectedNotes.splice(
-                selectedNotes.indexOf(elms[i].dataset.notevalue),
-                1
-              );
+        cndLassoPositions.width = evt.clientX - cndLassoPositions.x;
+        cndLassoPositions.height = evt.clientY - cndLassoPositions.y;
+        const elms = document.querySelectorAll('[data-notevalue]');
+        let changed;
+        for (let i = 0; i < elms.length; i++) {
+          const coords = elms[i].getBoundingClientRect();
+          const overlap = rectsOverlap(cndLassoPositions, coords);
+          if (overlap) {
+            if (!selectedNotes.includes(elms[i].dataset.notevalue)) {
+              selectedNotes.push(elms[i].dataset.notevalue);
               changed = true;
             }
+          } else if (selectedNotes.includes(elms[i].dataset.notevalue)) {
+            selectedNotes.splice(
+              selectedNotes.indexOf(elms[i].dataset.notevalue),
+              1
+            );
+            changed = true;
           }
-          if (changed) {
-            drawConfigNotes(availableNotes, octaves, userInstrument);
-          }
-          evt.preventDefault();
-          return false;
         }
-      },
-      true
-    );
+        if (changed) {
+          drawConfigNotes(availableNotes, octaves, userInstrument);
+        }
+        evt.preventDefault();
+        return false;
+      }
+    }
+    sheetmusicElm.addEventListener('mousemove', cndMoveSelectNotes, true);
+    sheetmusicElm.addEventListener('touchmove', cndMoveSelectNotes, true);
 
     serverData = await (
       await fetch('/api/games/note-sprint', { credentials: 'same-origin' })
@@ -468,7 +465,7 @@
     const isCorrect = npNoteValue === currentTaskNote;
     const clef = userInstrument.clef || 'treble';
     context.clear();
-    stave = new Stave(110 /* x */, 60 /* y */, width /* width */);
+    stave = new Stave(0 /* x */, 0 /* y */, width /* width */);
     stave.addClef(clef);
     stave.setContext(context).draw();
     const voice = new Voice({
@@ -564,6 +561,7 @@
   .parent {
     position: relative;
     overflow-x: auto;
+    text-align: center;
   }
   .star {
     position: absolute;

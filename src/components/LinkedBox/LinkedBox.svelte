@@ -37,6 +37,7 @@
     text-transform: uppercase;
     font-weight: lighter;
     font-size: 2vw;
+    font-size: max(2vw, 1.4em); /* min-font-size hack*/
     text-align: center;
     position: relative;
     overflow: hidden;
