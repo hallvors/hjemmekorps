@@ -8,7 +8,7 @@ import schemas from './schemas/schema';
 export default defineConfig({
   title: 'Hjemmekorps',
   projectId: '5ggq2na3',
-  dataset: process.env['SANITY_DATASET'] || 'production',
+  dataset: 'production',
   plugins: [deskTool(), visionTool()],
   schema: {
     types: schemas,
