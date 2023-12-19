@@ -3,22 +3,28 @@ const jwt = require('jsonwebtoken');
 const sClient = require('./sanity_client');
 
 function isOkWithoutSession(url) {
-  if (url && /^\/feil\//.test(url)) {
-    // Error messages are shown without a user session
-    return true;
-  }
-  if (url && /^\/om\//.test(url)) {
-    // A few other pages are shown without a user session too - /om/personvern for example
-    return true;
-  }
+  console.log('ok without session check, ' + url);
+
+  const exceptions = [
+    '/', // there is some front page content for non-session guests
+    /^\/\?rnd=/, // redirecting to random URL after for example log out
+    /^\/feil\//, // Error messages are shown without a user session
+    /^\/om\//, // A few other pages are shown without a user session too - /om/personvern for example
+    '/api/communications/loginlink', // API route for creating login links must be available
+    '/lek/notesprint', // Notesprint game has adapted login form
+    '/api/logout', // Odd one
+  ];
+
   if (
-    url === '/' ||
-    url.indexOf('/?rnd') === 0 ||
-    url === '/api/communications/loginlink' ||
-    url === '/api/logout'
+    exceptions.find(item => {
+      if (item instanceof RegExp && item.test(url)) {
+        return true;
+      }
+      if (item === url) {
+        return true;
+      }
+    })
   ) {
-    // there is some front page content for non-session guests
-    // also API route for creating login links must be available
     return true;
   }
   return false;
