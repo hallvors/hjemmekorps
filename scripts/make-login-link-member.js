@@ -1,12 +1,14 @@
 const jwt = require('jsonwebtoken');
 const env = require('../src/config/environment');
 const userId = process.argv[2];
+const url = process.argv[3] || undefined;
 if (!userId) {
 	console.error('missing argument: userId');
 	process.exit(1);
 }
-console.log(userId)
-const token = jwt.sign({userId}, env.config.site.tokensecret);
+console.log('creating login link for ' + userId)
+
+const token = jwt.sign({userId, url}, env.config.site.tokensecret);
 
 console.log('\nLokal utvikling:\n');
 console.log(`http://localhost:${env.port}/?t=${token}`);
