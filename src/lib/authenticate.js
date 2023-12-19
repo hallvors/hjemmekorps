@@ -75,7 +75,7 @@ const authenticate = async function (req, res, next) {
     }
     // if user, session token should contain ID but not project ID
     token =
-      user._type === 'member' && tokenData.projectId
+      user._type === 'member' && (tokenData.projectId || tokenData.url)
         ? jwt.sign({ userId: user._id }, env.config.site.tokensecret)
         : token;
 
