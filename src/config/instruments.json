@@ -82,14 +82,14 @@
       "value": "baritone",
       "clef": "bass",
       "key": "Bb",
-      "transpose": 1.05946456152394
+      "transpose": 1
     },
     {
       "title": "Tuba",
       "value": "bass",
       "clef": "bass",
       "key": "Bb",
-      "transpose": 1.05946456152394
+      "transpose": 1
     },
     { "title": "Melodisk slagverk", "value": "pitched_percussion" },
     { "title": "Perkusjon", "value": "percussion" },
