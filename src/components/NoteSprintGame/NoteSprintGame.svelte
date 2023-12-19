@@ -1,18 +1,17 @@
 <script>
   // TODO:
-  // real support for F-nøkkel
-  // Show band streak, band points in page
   // fortegn!
   // longer durations for older members?
 
   import { onMount } from 'svelte';
-  export let band;
   export let user;
+  export let queryNotes;
   import { Vex, Stave, StaveNote, Voice, Formatter, Accidental } from 'vexflow';
   import UsageHint from '../UsageHint/UsageHint.svelte';
   import Star from '../Star/Star.svelte';
-  import PointsRenderer from '../PointsRenderer/PointsRenderer.svelte';
   import Button from '../Button/Button.svelte';
+  import PointsRenderer from '../PointsRenderer/PointsRenderer.svelte';
+  import SendLoginLink from '../SendLoginLink/SendLoginLink.svelte';
   import {
     getRandomInt,
     rectsOverlap,
@@ -103,7 +102,11 @@
     return octaveSplits.findIndex(num => num > hz);
   }
   let sheetmusicElm;
-  let availableNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+  let availableNotes =
+    queryNotes && queryNotes.length
+      ? queryNotes
+      : ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+  console.log({availableNotes, queryNotes});
   const selectedNotes = [];
   const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
   let mode = MODES.CONFIGURE;
@@ -167,6 +170,9 @@
   }
 
   onMount(async function () {
+    if (!user._id) {
+      return;
+    }
     userInstrument = $instruments.find(
       instr => instr.value === user.instrument
     );
@@ -249,10 +255,7 @@
         const x = getEvtX(evt, cndLassoPositions.touchId);
         const y = getEvtY(evt, cndLassoPositions.touchId);
         // We don't support right-to-left selections, sorry
-        if (
-          x < cndLassoPositions.x ||
-          y < cndLassoPositions.y
-        ) {
+        if (x < cndLassoPositions.x || y < cndLassoPositions.y) {
           cndStop(evt);
           return;
         }
@@ -541,44 +544,56 @@
   }
 </script>
 
-{#if mode === MODES.CONFIGURE}
-  <UsageHint
-    message="Velg hvilke noter du vil øve på ved å klikke på hver note. Du kan også klikke og dra for å merke flere."
-  />
-{:else if mode === MODES.PLAY}
-  <UsageHint message="Spill noten du ser!" />
-{/if}
-
-<div class="parent">
-  <div bind:this={sheetmusicElm}></div>
-  {#if celebrate}<div class="star"><Star /></div>{/if}
-</div>
-<div class="toolbar">
+{#if user && user._id && user.instrument}
   {#if mode === MODES.CONFIGURE}
-    <Button onClick={startGame}>Start</Button>
+    <UsageHint
+      message="Velg hvilke noter du vil øve på ved å klikke på hver note. Du kan også klikke og dra for å merke flere."
+    />
+  {:else if mode === MODES.PLAY}
+    <UsageHint message="Spill noten du ser!" />
   {/if}
-  {#if mode === MODES.PLAY}
-    <Button onClick={stopGame}>Avslutt</Button>
-  {/if}
-</div>
-{#if serverData}
-  <PointsRenderer
-    {points}
-    subGroupName={user.subgroup}
-    furtherStats={serverData}
-    extraPointsSinceLoad={points - serverData.userPointsToday}
-  />
-{/if}
 
-{#if cndLassoPositions.x !== undefined}<div
-    class="dndLasso"
-    style="
+  <div class="parent">
+    <div bind:this={sheetmusicElm}></div>
+    {#if celebrate}<div class="star"><Star /></div>{/if}
+  </div>
+  <div class="toolbar">
+    {#if mode === MODES.CONFIGURE}
+      <Button onClick={startGame}>Start</Button>
+    {/if}
+    {#if mode === MODES.PLAY}
+      <Button onClick={stopGame}>Avslutt</Button>
+    {/if}
+  </div>
+  {#if serverData}
+    <PointsRenderer
+      {points}
+      subGroupName={user.subgroup}
+      furtherStats={serverData}
+      extraPointsSinceLoad={points - serverData.userPointsToday}
+    />
+  {/if}
+
+  {#if cndLassoPositions.x !== undefined}<div
+      class="dndLasso"
+      style="
       left: {cndLassoPositions.x}px;
       top: {cndLassoPositions.y}px;
       width: {cndLassoPositions.width}px;
       height: {cndLassoPositions.height}px;
     "
-  ></div>{/if}
+    ></div>{/if}
+{:else}
+  <div class="parent">
+    <h1>Velkommen</h1>
+    <p>Her kan du prøve notesprint-spillet.</p>
+    <p>
+      Skriv inn epost-adresse til musikant eller foresatt for å få
+      innloggingslenke til spillet på epost:
+    </p>
+    <SendLoginLink targetUrl="/lek/notesprint"></SendLoginLink>
+  </div>
+{/if}
 
 <style type="text/css">
   .toolbar {

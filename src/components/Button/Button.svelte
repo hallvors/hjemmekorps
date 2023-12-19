@@ -25,11 +25,11 @@
     color: var(--light);
   }
   button::after {
-    content: " ♪♪";
+    content: ' ♪♪';
     color: var(--activeNoteColor);
   }
   button::before {
-    content: "♪♪ ";
+    content: '♪♪ ';
     color: var(--activeNoteColor);
   }
   @keyframes pulse {

@@ -1,5 +1,7 @@
 <script>
   import { createSubmitHandler } from '../utils/forms';
+  import Button from '../Button/Button.svelte'
+  export let targetUrl;
   const handleSubmit = createSubmitHandler(evt => {
     evt.target.reset();
     alert(
@@ -14,9 +16,17 @@
   action="/api/communications/loginlink"
 >
   <p>
-    E-post: <input type="email" name="email" required /><button
-      type="submit"
-      class="fa fa-paper-plane">Send</button
-    >
+    E-post: <input type="email" name="email" required />
+    <br />
+    <Button type="submit" className="fa fa-paper-plane">Send</Button>
+    {#if targetUrl}
+      <input type="hidden" name="url" value={targetUrl} />
+    {/if}
   </p>
 </form>
+<style>
+  input {
+    padding: .8em;
+    font-size: large;
+  }
+</style>

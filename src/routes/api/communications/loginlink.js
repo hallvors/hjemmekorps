@@ -22,8 +22,9 @@ export async function post(req, res, next) {
     console.log('get admin by email ' + email)
     user = await sClient.getAdminUserDataByEmail(email);
     console.log('admin user', user)
+    const url = req.body.url && /^\//.test(req.body.url) ? req.body.url : undefined;
     if (user && user.name) {
-      token = sign({ email }, env.config.site.tokensecret);
+      token = sign({ email, url }, env.config.site.tokensecret);
     } else {
       console.log('get user by email ' + email)
       user = await sClient.getUserByEmail(email);
@@ -31,7 +32,7 @@ export async function post(req, res, next) {
       if (user && user.name) {
         console.log('found user', user)
         // login link requested by a band member, not admin
-        token = sign({ userId: user._id }, env.config.site.tokensecret);
+        token = sign({ userId: user._id, url }, env.config.site.tokensecret);
       } else {
         // do not reveal valid email addresses by timing detection
         setTimeout(function () {

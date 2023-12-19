@@ -47,6 +47,14 @@
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
   }
 
+  a:hover,
+  a:focus {
+    animation: pulse 0.8s;
+    box-shadow: 0 0 0 1em rgba(255, 255, 255, 0);
+    background-color: var(--dark);
+    color: var(--light);
+  }
+
   .orderbadge {
     position: absolute;
     top: -1vw;
@@ -61,10 +69,16 @@
     margin-top: -1.5vw;
     min-width: 9vw;
   }
-  .desc, .desc:hover {
+  .desc,
+  .desc:hover {
     display: block;
     font-size: smaller;
     text-decoration: none;
     color: var(--textColorDark);
+  }
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 var(--secondaryColor);
+    }
   }
 </style>
