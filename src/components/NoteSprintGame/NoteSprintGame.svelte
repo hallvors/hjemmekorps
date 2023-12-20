@@ -6,7 +6,15 @@
   import { onMount } from 'svelte';
   export let user;
   export let queryNotes;
-  import { Vex, Stave, StaveNote, Voice, Formatter, Accidental } from 'vexflow';
+  import {
+    Vex,
+    Stave,
+    StaveNote,
+    Voice,
+    Formatter,
+    Accidental,
+    KeySignature,
+  } from 'vexflow';
   import UsageHint from '../UsageHint/UsageHint.svelte';
   import Star from '../Star/Star.svelte';
   import Button from '../Button/Button.svelte';
@@ -18,102 +26,60 @@
     getEvtX,
     getEvtY,
   } from '../../lib/utils';
+  import {
+    getNotesMappedToOctave,
+    notes,
+    noteNames,
+    toSlashNotation,
+  } from '../../lib/notes';
   import { autoCorrelate } from '../../lib/pitch';
   import { instruments } from '../../lib/datastore';
 
-  const noteNameFrequencyMappingNatural = {
-    C2: 65.41,
-    'C#2': 69.3,
-    D2: 73.42,
-    'D#2': 77.78,
-    E2: 82.41,
-    F2: 87.31,
-    'F#2': 92.5,
-    G2: 98.0,
-    'G#2': 103.83,
-    A2: 110.0,
-    'A#2': 116.54,
-    B2: 123.47,
-
-    C3: 130.81,
-    'C#3': 138.59,
-    D3: 146.83,
-    'D#3': 155.56,
-    E3: 164.81,
-    F3: 174.61,
-    'F#3': 185.0,
-    G3: 196.0,
-    'G#3': 207.65,
-    A3: 220.0,
-    'A#3': 233.08,
-    B3: 246.94,
-
-    C4: 261.63,
-    'C#4': 277.18,
-    D4: 293.66,
-    'D#4': 311.13,
-    E4: 329.63,
-    F4: 349.23,
-    'F#4': 369.99,
-    G4: 392.0,
-    'G#4': 415.3,
-    A4: 440.0,
-    'A#4': 466.16,
-    B4: 493.88,
-
-    C5: 523.25,
-    'C#5': 554.37,
-    D5: 587.33,
-    'D#5': 622.25,
-    E5: 659.26,
-    F5: 698.46,
-    'F#5': 739.99,
-    G5: 783.99,
-    'G#5': 830.61,
-    A5: 880.0,
-    'A#5': 932.33,
-    B5: 987.77,
-
-    C6: 1046.5,
-    'C#6': 1108.73,
-    D6: 1174.66,
-    'D#6': 1244.51,
-    E6: 1318.51,
-    F6: 1396.91,
-    'F#6': 1479.98,
-    G6: 1567.98,
-    'G#6': 1661.22,
-    A6: 1760.0,
-    'A#6': 1864.66,
-    B6: 1975.53,
+  const scales = {
+    CMaj: {
+      name: 'C-dur',
+      notes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+    },
+    FMaj: {
+      name: 'F-dur',
+      notes: ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'],
+    },
+    BbMaj: {
+      name: 'B-dur',
+      notes: ['Bb', 'C', 'D', 'Eb', 'F', 'G', 'A'],
+    },
+    EbMaj: {
+      name: 'Ess-dur',
+      notes: ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'],
+    },
   };
-  const octaveSplits = [0, 0];
-  const noteAndOctaveNames = Object.keys(noteNameFrequencyMappingNatural);
-  noteAndOctaveNames.forEach((key, idx) => {
-    if (idx > 1 && idx % 12 === 0) {
-      octaveSplits.push(
-        (noteNameFrequencyMappingNatural[key] +
-          noteNameFrequencyMappingNatural[noteAndOctaveNames[idx - 1]]) /
-          2
-      );
-    }
-  });
+
   function selectConcertPitchOctave(hz) {
-    return octaveSplits.findIndex(num => num > hz);
+    for (let i = 0; i < noteNames.length; i++) {
+      if (notes[noteNames[i]] > hz) {
+        // we've found the first note greater than this hz value
+        // but is the hz closer to notes[i] or notes[i-1] ?
+        if (hz > (notes[noteNames[i]] + notes[noteNames[i - 1]]) / 2) {
+          // [i] is closest match
+          return parseInt(noteNames[i].match(/\d+/)[0]);
+        }
+        return parseInt(noteNames[i - 1].match(/\d+/)[0]);
+      }
+    }
   }
   let sheetmusicElm;
   let availableNotes =
     queryNotes && queryNotes.length
       ? queryNotes
       : ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-  console.log({availableNotes, queryNotes});
+  console.log({ availableNotes, queryNotes });
   const selectedNotes = [];
   const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
   let mode = MODES.CONFIGURE;
   let celebrate = false;
   let octaves;
   let renderer, context, stave, width, drawNoteVisual;
-  let currentTaskNote, nowPlayingNote, nowPlayingOctave;
+  let currentTaskNote, nowPlayingHz, nowPlayingNote, nowPlayingOctave;
   let analyser, audioContext, source;
   let hits = [];
   let points = 0;
@@ -129,20 +95,23 @@
     if (context) {
       context.clear();
     }
-    stave = new Stave(0 /* x */, 0 /* y */, width /* width */);
+    stave = new Stave(0 /* x */, 60 /* y */, width /* width */);
     const clef = instrument.clef ? instrument.clef : 'treble';
     stave.addClef(clef);
+    const keySig = new KeySignature(availableNotes[0]);
+    keySig.addToStave(stave);
+    stave.setKeySignature(availableNotes[0]);
     stave.setContext(context).draw();
     const voice = new Voice({
-      num_beats: availableNotes.length * octaves.length,
+      num_beats: noteNames.length * octaves.length,
       beat_value: 4,
     });
     const notes = [];
+
     octaves.forEach(octave => {
-      noteNames.forEach(note => {
-        const valueWithOctave = `${note}/${octave}`;
+      getNotesMappedToOctave(noteNames, octave).forEach(valueWithOctave => {
         const staveNote = new StaveNote({
-          keys: [valueWithOctave],
+          keys: [toSlashNotation(valueWithOctave)],
           clef,
           duration: 'q',
         });
@@ -188,7 +157,7 @@
     renderer = new Renderer(sheetmusicElm, Renderer.Backends.SVG);
     renderer.resize(width, 250);
     context = renderer.getContext();
-    octaves = userInstrument.clef === 'bass' ? [2, 3, 4] : [4, 5];
+    octaves = userInstrument.clef === 'bass' ? [2, 3] : [4, 5];
     drawConfigNotes(availableNotes, octaves, userInstrument);
 
     // Initiate click-and-drag to select notes
@@ -346,16 +315,16 @@
 
   var noteStrings = [
     'C',
-    'C#',
+    'Db',
     'D',
-    'D#',
+    'Eb',
     'E',
     'F',
-    'F#',
+    'Gb',
     'G',
-    'G#',
+    'Ab',
     'A',
-    'A#',
+    'Bb',
     'B',
   ];
   function noteFromPitch(frequency) {
@@ -377,6 +346,7 @@
     if (autoCorrelateValue === -1) {
       //        document.getElementById('note').innerText = 'Too quiet...';
       nowPlayingNote = null;
+      nowPlayingHz = null;
       drawTask();
       return;
     }
@@ -398,16 +368,18 @@
     nowPlayingOctave = selectConcertPitchOctave(autoCorrelateValue);
 
     nowPlayingNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
+    nowPlayingHz = autoCorrelateValue;
 
     console.log({
       nowPlayingNote,
+      nowPlayingHz,
       nowPlayingOctave,
       currentTaskNote,
       hits: hits.length,
     });
 
     if (
-      `${nowPlayingNote}/${nowPlayingOctave}` === currentTaskNote &&
+      `${nowPlayingNote}${nowPlayingOctave}` === currentTaskNote &&
       !celebrate
     ) {
       // nice work! but maybe have to hold it for some duration??
@@ -485,54 +457,101 @@
     console.log(currentTaskNote);
   }
   function drawTask() {
+    if (!currentTaskNote) {
+      return;
+    }
     const npNoteValue =
       nowPlayingNote && nowPlayingOctave > 1
-        ? `${nowPlayingNote}/${nowPlayingOctave}`
+        ? `${nowPlayingNote}${nowPlayingOctave}`
         : null;
+    const offByHz = nowPlayingHz ? notes[npNoteValue] - nowPlayingHz : null;
+    const offByHzPct = offByHz ? (offByHz / notes[npNoteValue]) * 100 : null;
     const isCorrect = npNoteValue === currentTaskNote;
+    console.log({
+      offByHz,
+      offByHzPct,
+      isCorrect,
+      npNoteValue,
+      currentTaskNote,
+      calcOpacity: Math.max(
+          0.1,
+          1 - (Math.abs(offByHzPct) * 8) / 10
+        )
+    });
     const clef = userInstrument.clef || 'treble';
     context.clear();
-    stave = new Stave(0 /* x */, 0 /* y */, width /* width */);
+    stave = new Stave(0 /* x */, 60 /* y */, width /* width */);
     stave.addClef(clef);
+    const keySig = new KeySignature(availableNotes[0]);
+    keySig.addToStave(stave);
+    stave.setKeySignature(availableNotes[0]);
     stave.setContext(context).draw();
     const voice = new Voice({
       num_beats: 1,
       beat_value: 4,
     });
-    const taskNote = new StaveNote({
-      keys: [currentTaskNote],
-      clef,
-      duration: 'q',
-      align_center: true,
-    });
-    taskNote.setStyle({
-      fillStyle: isCorrect ? 'green' : 'black',
-      strokeStyle: isCorrect ? 'green' : 'black',
-    });
-
-    voice.addTickables([taskNote]);
+    if (currentTaskNote) {
+      const taskNote = new StaveNote({
+        keys: [toSlashNotation(currentTaskNote)],
+        clef,
+        duration: 'q',
+        align_center: true,
+      });
+      taskNote.setStyle({
+        fillStyle: isCorrect ? 'rgb(0, 128, 0)' : 'black',
+        strokeStyle: isCorrect ? 'rgb(0, 128, 0)' : 'black',
+      });
+      voice.addTickables([taskNote]);
+    }
 
     Accidental.applyAccidentals([voice], 'C');
     new Formatter().joinVoices([voice]).format([voice], width * 0.8);
 
     voice.draw(context, stave);
 
-    if (!isCorrect && npNoteValue) {
+    if (npNoteValue) {
       const npVoice = new Voice({
         num_beats: 1,
         beat_value: 4,
       });
-      npVoice.addTickables([
-        new StaveNote({
-          keys: [npNoteValue],
-          clef,
-          duration: 'q',
-          align_center: true,
-        }).setStyle({ fillStyle: 'grey', strokeStyle: 'grey' }),
-      ]);
+      const nowPlayingStaveNote = new StaveNote({
+        keys: [toSlashNotation(npNoteValue)],
+        clef,
+        duration: 'q',
+        align_center: true,
+      });
+
+      nowPlayingStaveNote.setStyle({
+        fillStyle: 'green',
+        fillOpacity: Math.max(
+          0.2,
+          1 - (Math.abs(offByHzPct) * 8) / 10
+        ),
+        strokeStyle: 'green',
+        strokeOpacity: Math.max(
+          0.2,
+          1 - (Math.abs(offByHzPct) * 8) / 10
+        ),
+      });
+      npVoice.addTickables([nowPlayingStaveNote]);
       Accidental.applyAccidentals([npVoice], 'C');
       new Formatter().joinVoices([npVoice]).format([npVoice], width * 0.8);
       npVoice.draw(context, stave);
+      const svg = nowPlayingStaveNote.getSVGElement();
+
+      svg.setAttribute(
+        'style',
+        `transform: translateY(${Math.ceil(offByHzPct)}px);
+        fill-opacity: ${Math.max(
+          0.2,
+          1 - (Math.abs(offByHzPct) * 8) / 10
+        )};
+        stroke-opacity: ${Math.max(
+          0.2,
+          1 - (Math.abs(offByHzPct) * 8) / 10
+        )};
+        `
+      );
     }
   }
   function stopGame() {
@@ -542,18 +561,41 @@
     drawConfigNotes(availableNotes, octaves, userInstrument);
     savePoints(points);
   }
+
+  function selectScale(evt) {
+    if (scales[evt.target.value]) {
+      const scale = scales[evt.target.value];
+      availableNotes = scale.notes;
+      selectedNotes.length = 0;
+      octaves.forEach(octave => {
+        console.log(
+          'mapping for ' + evt.target.value,
+          getNotesMappedToOctave(availableNotes, octave)
+        );
+        selectedNotes.push(...getNotesMappedToOctave(availableNotes, octave));
+      });
+      drawConfigNotes(availableNotes, octaves, userInstrument);
+    }
+  }
 </script>
 
 {#if user && user._id && user.instrument}
   {#if mode === MODES.CONFIGURE}
     <UsageHint
-      message="Velg hvilke noter du vil øve på ved å klikke på hver note. Du kan også klikke og dra for å merke flere."
+      message="Velg hvilke noter du vil øve på. Du kan velge en skala, klikke på noter du vil øve på, eller klikke og dra for å merke flere."
     />
   {:else if mode === MODES.PLAY}
     <UsageHint message="Spill noten du ser!" />
   {/if}
 
   <div class="parent">
+    {#if mode === MODES.CONFIGURE}
+      <select on:blur={selectScale} on:change={selectScale}>
+        {#each Object.entries(scales) as [scaleName, info]}
+          <option value={scaleName}>{info.name}</option>
+        {/each}
+      </select>
+    {/if}
     <div bind:this={sheetmusicElm}></div>
     {#if celebrate}<div class="star"><Star /></div>{/if}
   </div>
