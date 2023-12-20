@@ -79,7 +79,11 @@
   let celebrate = false;
   let octaves;
   let renderer, context, stave, width, drawNoteVisual;
-  let currentTaskNote, nowPlayingHz, nowPlayingNote, nowPlayingOctave;
+  let currentTaskNote,
+    nowPlayingHz,
+    nowPlayingNote,
+    nowPlayingOctave,
+    selectedScale;
   let analyser, audioContext, source;
   let hits = [];
   let points = 0;
@@ -127,7 +131,7 @@
 
     voice.addTickables(notes);
 
-    Accidental.applyAccidentals([voice], 'C');
+    Accidental.applyAccidentals([voice], availableNotes[0]);
     new Formatter().joinVoices([voice]).format([voice], width * 0.75);
 
     voice.draw(context, stave);
@@ -473,10 +477,7 @@
       isCorrect,
       npNoteValue,
       currentTaskNote,
-      calcOpacity: Math.max(
-          0.1,
-          1 - (Math.abs(offByHzPct) * 8) / 10
-        )
+      calcOpacity: Math.max(0.1, 1 - (Math.abs(offByHzPct) * 8) / 10),
     });
     const clef = userInstrument.clef || 'treble';
     context.clear();
@@ -503,8 +504,7 @@
       });
       voice.addTickables([taskNote]);
     }
-
-    Accidental.applyAccidentals([voice], 'C');
+    Accidental.applyAccidentals([voice], availableNotes[0]);
     new Formatter().joinVoices([voice]).format([voice], width * 0.8);
 
     voice.draw(context, stave);
@@ -523,15 +523,9 @@
 
       nowPlayingStaveNote.setStyle({
         fillStyle: 'green',
-        fillOpacity: Math.max(
-          0.2,
-          1 - (Math.abs(offByHzPct) * 8) / 10
-        ),
+        fillOpacity: Math.max(0.2, 1 - (Math.abs(offByHzPct) * 8) / 10),
         strokeStyle: 'green',
-        strokeOpacity: Math.max(
-          0.2,
-          1 - (Math.abs(offByHzPct) * 8) / 10
-        ),
+        strokeOpacity: Math.max(0.2, 1 - (Math.abs(offByHzPct) * 8) / 10),
       });
       npVoice.addTickables([nowPlayingStaveNote]);
       Accidental.applyAccidentals([npVoice], 'C');
@@ -542,14 +536,8 @@
       svg.setAttribute(
         'style',
         `transform: translateY(${Math.ceil(offByHzPct)}px);
-        fill-opacity: ${Math.max(
-          0.2,
-          1 - (Math.abs(offByHzPct) * 8) / 10
-        )};
-        stroke-opacity: ${Math.max(
-          0.2,
-          1 - (Math.abs(offByHzPct) * 8) / 10
-        )};
+        fill-opacity: ${Math.max(0.2, 1 - (Math.abs(offByHzPct) * 8) / 10)};
+        stroke-opacity: ${Math.max(0.2, 1 - (Math.abs(offByHzPct) * 8) / 10)};
         `
       );
     }
@@ -575,6 +563,7 @@
         selectedNotes.push(...getNotesMappedToOctave(availableNotes, octave));
       });
       drawConfigNotes(availableNotes, octaves, userInstrument);
+      selectedScale = evt.target.value;
     }
   }
 </script>
@@ -592,7 +581,9 @@
     {#if mode === MODES.CONFIGURE}
       <select on:blur={selectScale} on:change={selectScale}>
         {#each Object.entries(scales) as [scaleName, info]}
-          <option value={scaleName}>{info.name}</option>
+          <option value={scaleName} selected={scaleName === selectedScale}
+            >{info.name}</option
+          >
         {/each}
       </select>
     {/if}
