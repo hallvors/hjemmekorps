@@ -19,6 +19,7 @@
   import Star from '../Star/Star.svelte';
   import Button from '../Button/Button.svelte';
   import PointsRenderer from '../PointsRenderer/PointsRenderer.svelte';
+  import ProgressIndicator from '../ProgressIndicator/ProgressIndicator.svelte';
   import SendLoginLink from '../SendLoginLink/SendLoginLink.svelte';
   import {
     getRandomInt,
@@ -72,9 +73,11 @@
     queryNotes && queryNotes.length
       ? queryNotes
       : ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-  console.log({ availableNotes, queryNotes });
+  console.log({ availableNotes, queryNotes, user });
   const selectedNotes = [];
   const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
+  const DIFFICULTIES = { EASY: 1, HARD: 2 };
+  let difficulty;
   let mode = MODES.CONFIGURE;
   let celebrate = false;
   let octaves;
@@ -83,12 +86,15 @@
     nowPlayingHz,
     nowPlayingNote,
     nowPlayingOctave,
+    nowPlayingRightLastTs,
     selectedScale;
+  let nowPlayingRightDuration = 0;
   let analyser, audioContext, source;
-  let hits = [];
   let points = 0;
   let serverData;
   let saveTimeout;
+  // smoothing mike note rendering (and time calc) somewhat
+  let ignoreImperfectionsCount = 30;
   // we persist points to server no later than 15 sec after last correct note
   // (we also save every immediately after every 10th correct note)
   const SAVE_DELAY_MS = 15000;
@@ -99,7 +105,7 @@
     if (context) {
       context.clear();
     }
-    stave = new Stave(0 /* x */, 60 /* y */, width /* width */);
+    stave = new Stave(0 /* x */, 40 /* y */, width /* width */);
     const clef = instrument.clef ? instrument.clef : 'treble';
     stave.addClef(clef);
     const keySig = new KeySignature(availableNotes[0]);
@@ -150,16 +156,17 @@
       instr => instr.value === user.instrument
     );
     console.log({ userInstrument });
-    /*
-    switch(userInstrument.key) {
-      case 'Bb':
-        availableNotes = ['Bb', 'C', 'D', 'E', 'F', 'G', 'A']
-    }
-    */
+
+    // band.groups should be in "chronological" order, later groups more advanced
+    difficulty =
+      user.band.groups.indexOf(user.subgroup) >= user.band.groups.length - 1
+        ? DIFFICULTIES.HARD
+        : DIFFICULTIES.EASY;
+
     width = Math.min(sheetmusicElm.offsetWidth * 0.9, window.innerWidth);
     const { Renderer } = Vex.Flow;
     renderer = new Renderer(sheetmusicElm, Renderer.Backends.SVG);
-    renderer.resize(width, 250);
+    renderer.resize(width, 150);
     context = renderer.getContext();
     octaves = userInstrument.clef === 'bass' ? [2, 3] : [4, 5];
     drawConfigNotes(availableNotes, octaves, userInstrument);
@@ -348,8 +355,8 @@
     valueToDisplay = Math.round(valueToDisplay);
     console.log(autoCorrelateValue);
     if (autoCorrelateValue === -1) {
-      //        document.getElementById('note').innerText = 'Too quiet...';
       nowPlayingNote = null;
+      nowPlayingRightLastTs = null;
       nowPlayingHz = null;
       drawTask();
       return;
@@ -374,39 +381,61 @@
     nowPlayingNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
     nowPlayingHz = autoCorrelateValue;
 
+    const diffInCents =
+      1200 * Math.log2(autoCorrelateValue / notes[currentTaskNote]);
+
+    /*
     console.log({
       nowPlayingNote,
       nowPlayingHz,
+      target: notes[currentTaskNote],
+      diffInCents,
+      nowPlayingRightDuration,
       nowPlayingOctave,
       currentTaskNote,
-      hits: hits.length,
-    });
+    });*/
 
-    if (
-      `${nowPlayingNote}${nowPlayingOctave}` === currentTaskNote &&
-      !celebrate
-    ) {
-      // nice work! but maybe have to hold it for some duration??
-      hits.push(1);
-      if (hits.length > 50) {
-        // TODO: longer for older members!
-        points++;
-        // we save data to server for each 10th point or after
-        // a given deadline
-        clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(() => {
-          savePoints(points);
-        }, SAVE_DELAY_MS);
-        if (points % 10 === 0) {
-          clearTimeout(saveTimeout);
-          savePoints(points);
+    if (Math.abs(diffInCents) <= 3) {
+      console.log('low diff', { nowPlayingRightLastTs });
+      ignoreImperfectionsCount = 30;
+      if (!celebrate) {
+        if (nowPlayingRightLastTs) {
+          nowPlayingRightDuration += Date.now() - nowPlayingRightLastTs;
+          console.log('increasted duration', nowPlayingRightDuration);
         }
-        celebrate = true;
-        setTimeout(() => {
-          celebrate = false;
-          nextTask();
-        }, 500);
-        return;
+        nowPlayingRightLastTs = Date.now();
+        console.log('set ts ' + nowPlayingRightLastTs);
+        // nice work! but maybe have to hold it for some duration??
+        if (
+          nowPlayingRightDuration >=
+          (difficulty === DIFFICULTIES.HARD ? 3000 : 1000)
+        ) {
+          console.log('adding point because of ' + nowPlayingRightDuration);
+          points++;
+          // we save data to server for each 10th point or after
+          // a given deadline
+          clearTimeout(saveTimeout);
+          saveTimeout = setTimeout(() => {
+            savePoints(points);
+          }, SAVE_DELAY_MS);
+          if (points % 10 === 0) {
+            clearTimeout(saveTimeout);
+            savePoints(points);
+          }
+          celebrate = true;
+          setTimeout(() => {
+            celebrate = false;
+            nextTask();
+          }, 500);
+          return;
+        }
+      }
+    } else {
+      // more than 3 cents off, set last TS to null
+      ignoreImperfectionsCount--;
+      if (ignoreImperfectionsCount <= 0) {
+        console.log('reset last ts due to ' + diffInCents);
+        nowPlayingRightLastTs = null;
       }
     }
 
@@ -450,16 +479,23 @@
 
   function nextTask() {
     let num = getRandomInt(0, selectedNotes.length - 1);
-    hits.length = 0;
+    ignoreImperfectionsCount = 30;
     // Try to avoid the same note twice in a row
     if (selectedNotes.length > 1) {
       while (selectedNotes[num] === currentTaskNote) {
         num = getRandomInt(0, selectedNotes.length - 1);
       }
     }
+    nowPlayingHz =
+      nowPlayingNote =
+      nowPlayingOctave =
+      nowPlayingRightLastTs =
+        null;
+    nowPlayingRightDuration = 0;
     currentTaskNote = selectedNotes[num];
     console.log(currentTaskNote);
   }
+
   function drawTask() {
     if (!currentTaskNote) {
       return;
@@ -470,32 +506,44 @@
         : null;
     const offByHz = nowPlayingHz ? notes[npNoteValue] - nowPlayingHz : null;
     const offByHzPct = offByHz ? (offByHz / notes[npNoteValue]) * 100 : null;
-    const isCorrect = npNoteValue === currentTaskNote;
+    const diffInCents = nowPlayingHz
+      ? 1200 * Math.log2(notes[currentTaskNote] / nowPlayingHz)
+      : null;
+
+    const isCorrect =
+      difficulty === DIFFICULTIES.HARD
+        ? diffInCents && Math.abs(diffInCents) <= 3
+        : npNoteValue === currentTaskNote;
+
     console.log({
       offByHz,
       offByHzPct,
+      diffInCents,
+      target: notes[currentTaskNote],
+      nowPlayingRightDuration,
       isCorrect,
       npNoteValue,
       currentTaskNote,
       calcOpacity: Math.max(0.1, 1 - (Math.abs(offByHzPct) * 8) / 10),
     });
+
     const clef = userInstrument.clef || 'treble';
     context.clear();
-    stave = new Stave(0 /* x */, 60 /* y */, width /* width */);
+    stave = new Stave(0 /* x */, 40 /* y */, width /* width */);
     stave.addClef(clef);
     const keySig = new KeySignature(availableNotes[0]);
     keySig.addToStave(stave);
     stave.setKeySignature(availableNotes[0]);
     stave.setContext(context).draw();
     const voice = new Voice({
-      num_beats: 1,
+      num_beats: difficulty === DIFFICULTIES.EASY ? 2 : 4,
       beat_value: 4,
     });
     if (currentTaskNote) {
       const taskNote = new StaveNote({
         keys: [toSlashNotation(currentTaskNote)],
         clef,
-        duration: 'q',
+        duration: difficulty === DIFFICULTIES.EASY ? 'h' : 'w',
         align_center: true,
       });
       taskNote.setStyle({
@@ -511,13 +559,13 @@
 
     if (npNoteValue) {
       const npVoice = new Voice({
-        num_beats: 1,
+        num_beats: difficulty === DIFFICULTIES.EASY ? 2 : 4,
         beat_value: 4,
       });
       const nowPlayingStaveNote = new StaveNote({
         keys: [toSlashNotation(npNoteValue)],
         clef,
-        duration: 'q',
+        duration: difficulty === DIFFICULTIES.EASY ? 'h' : 'w',
         align_center: true,
       });
 
@@ -531,21 +579,34 @@
       Accidental.applyAccidentals([npVoice], 'C');
       new Formatter().joinVoices([npVoice]).format([npVoice], width * 0.8);
       npVoice.draw(context, stave);
-      const svg = nowPlayingStaveNote.getSVGElement();
 
-      svg.setAttribute(
-        'style',
-        `transform: translateY(${Math.ceil(offByHzPct)}px);
-        fill-opacity: ${Math.max(0.2, 1 - (Math.abs(offByHzPct) * 8) / 10)};
-        stroke-opacity: ${Math.max(0.2, 1 - (Math.abs(offByHzPct) * 8) / 10)};
-        `
-      );
+      // extra intonation correctness indication for the older ones
+      if (difficulty === DIFFICULTIES.HARD) {
+        const svg = nowPlayingStaveNote.getSVGElement();
+
+        svg.setAttribute(
+          'style',
+          `transform: translateY(${offByHzPct}px);
+          fill-opacity: ${Math.max(0.2, 1 - (Math.abs(diffInCents) * 2) / 100)};
+          stroke-opacity: ${Math.max(
+            0.2,
+            1 - (Math.abs(diffInCents) * 2) / 100
+          )};
+          `
+        );
+      }
     }
   }
   function stopGame() {
     mode = MODES.CONFIGURE;
     source.disconnect(analyser);
     cancelAnimationFrame(drawNoteVisual);
+    nowPlayingNote =
+      nowPlayingHz =
+      nowPlayingOctave =
+      nowPlayingRightLastTs =
+        null;
+    nowPlayingRightDuration = 0;
     drawConfigNotes(availableNotes, octaves, userInstrument);
     savePoints(points);
   }
@@ -590,6 +651,16 @@
     <div bind:this={sheetmusicElm}></div>
     {#if celebrate}<div class="star"><Star /></div>{/if}
   </div>
+  {#if mode === MODES.PLAY}
+    <div class="progress">
+      <ProgressIndicator
+        instrument={user.instrument}
+        percentage={(nowPlayingRightDuration /
+          (difficulty === DIFFICULTIES.HARD ? 3000 : 1000)) *
+          100}
+      />
+    </div>
+  {/if}
   <div class="toolbar">
     {#if mode === MODES.CONFIGURE}
       <Button onClick={startGame}>Start</Button>
@@ -646,5 +717,8 @@
     position: fixed;
     border: 1px dashed;
     border-color: var(--border);
+  }
+  .progress {
+    margin-bottom: 1em;
   }
 </style>

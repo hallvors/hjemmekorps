@@ -23,7 +23,7 @@ function parseUrl(req, res, next) {
 function setCookie(req, res, next) {
   res.setCookie = function (name, value, options) {
     const cookieOpts = ['SameSite=Strict'];
-    if(options && options.expires) {
+    if (options && options.expires) {
       cookieOpts.push('Expires=' + options.expires.toGMTString());
     }
     if (options && options.path) {
@@ -44,7 +44,7 @@ function setCookie(req, res, next) {
 
 function ensureHttps(req, res, next) {
   let url = req.location.origin + req.url;
-  if (req.headers["x-forwarded-proto"] !== "https") {
+  if (req.headers['x-forwarded-proto'] !== 'https') {
     // do not redirect localhost to https
     if (req.location.origin.match(/(127\.0\.0\.1|localhost)/)) {
       return next();
@@ -91,7 +91,9 @@ function getEvtX(evt, touchIdentifier) {
     return evt.clientX;
   }
   if (evt.touches) {
-    const touch = touchIdentifier ? evt.touches.find(touch => touch.identifier = touchIdentifier) : evt.touches[0];
+    const touch = touchIdentifier
+      ? evt.touches.find(touch => (touch.identifier = touchIdentifier))
+      : evt.touches[0];
     if (touch) {
       return touch.clientX;
     }
@@ -103,7 +105,9 @@ function getEvtY(evt, touchIdentifier) {
     return evt.clientY;
   }
   if (evt.touches) {
-    const touch = touchIdentifier ? evt.touches.find(touch => touch.identifier = touchIdentifier) : evt.touches[0];
+    const touch = touchIdentifier
+      ? evt.touches.find(touch => (touch.identifier = touchIdentifier))
+      : evt.touches[0];
     if (touch) {
       return touch.clientY;
     }

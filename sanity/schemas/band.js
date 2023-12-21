@@ -17,6 +17,7 @@ export default {
       title: "Undergrupper",
       name: "groups",
       type: "array",
+      description: "Legg til navn på undergrupper i stigende rekkefølge, fra de yngste til de eldste. For eksempel: Aspirantkorps, Juniorkorps, Hovedkorps.",
       of: [{type: "string"}]
     },
     {

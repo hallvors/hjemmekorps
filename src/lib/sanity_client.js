@@ -117,6 +117,7 @@ function getUserData(id) {
     "band": band->{name, _id,
       "palette": logo.asset->metadata.palette,
       "logoUrl": logo.asset->url,
+      groups,
       "members": *[_type == 'member' && references(^._id)]{
         _id, name, instrument, "portrait": portrait.asset->
       }
