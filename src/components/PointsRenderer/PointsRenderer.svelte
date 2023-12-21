@@ -25,7 +25,7 @@
       ><b>Du har øvd </b>
       {furtherStats.userStreak}
       <b
-        >{furtherStats.userStreak === 1 ? 'dag' : 'dager'} i strekk. {subGroupName.toLowerCase()}</b>
+        >{furtherStats.userStreak === 1 ? 'dag' : 'dager'} i strekk, {subGroupName.toLowerCase()}</b>
         {furtherStats.groupStreak}
         <b
           >{furtherStats.groupStreak === 1 ? 'dag' : 'dager'} og hele korpset har

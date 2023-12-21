@@ -12,7 +12,6 @@ export async function get(req, res, next) {
   // Maybe weekly, monthly are also interesting..? Maybe too much..
 
   try {
-    console.log(req.user);
     const results = await env.slonik.connect(client => {
       return Promise.allSettled([
         // user TODAY
@@ -107,8 +106,7 @@ export async function get(req, res, next) {
         ),
       ]);
     });
-
-    console.log(results.map((obj, idx) => [idx, obj.value.rows]));
+    console.log(results.map((obj, idx) => [idx, JSON.stringify(obj.value.rows)]));
 
     res.json({
       userPointsToday: results[0].value.rows[0]?.points || 0,

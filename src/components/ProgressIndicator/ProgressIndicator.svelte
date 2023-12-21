@@ -9,7 +9,7 @@
 ></div>
 <div
   class="i2"
-  style="background-image: url(/images/instruments/{instrument}.png); clip-path: inset(0px {64 - (64 * percentage / 100)}px 0px 0px)"
+  style="background-image: url(/images/instruments/{instrument}.png); clip-path: inset(0px {128 - (128 * percentage / 100)}px 0px 0px)"
 ></div>
 </div>
 
@@ -17,21 +17,21 @@
 <style>
 .progress {
     position: relative;
-    width: 64px;
-    height: 64px;
+    width: 128px;
+    height: 128px;
     margin-left: auto;
     margin-right: auto;
   }
   .progress div.i1,
   .progress div.i2 {
-    width: 64px;
-    height: 64px;
+    width: 128px;
+    height: 128px;
     position: absolute;
     left: 0;
     background-size: cover;
   }
   .progress div.i2 {
-    clip-path: inset(0px 64px 0px 0px);
+    clip-path: inset(0px 128px 0px 0px);
     filter: invert(42%) sepia(94%) saturate(3108%) hue-rotate(167deg)
       brightness(103%) contrast(103%);
   }

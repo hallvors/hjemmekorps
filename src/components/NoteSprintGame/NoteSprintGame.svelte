@@ -94,7 +94,8 @@
   let serverData;
   let saveTimeout;
   // smoothing mike note rendering (and time calc) somewhat
-  let ignoreImperfectionsCount = 30;
+  const SMOOTHING_FACTOR = 20; // how many odd samples to ignore
+  let ignoreImperfectionsCount = SMOOTHING_FACTOR;
   // we persist points to server no later than 15 sec after last correct note
   // (we also save every immediately after every 10th correct note)
   const SAVE_DELAY_MS = 15000;
@@ -138,7 +139,7 @@
     voice.addTickables(notes);
 
     Accidental.applyAccidentals([voice], availableNotes[0]);
-    new Formatter().joinVoices([voice]).format([voice], width * 0.75);
+    new Formatter().joinVoices([voice]).format([voice], width * 0.9);
 
     voice.draw(context, stave);
     notes.forEach(note =>
@@ -321,6 +322,7 @@
         });
     }
     mode = MODES.PLAY;
+    cndLassoPositions = {};
     nextTask();
   }
 
@@ -353,7 +355,6 @@
     // Handle rounding
     var valueToDisplay = autoCorrelateValue;
     valueToDisplay = Math.round(valueToDisplay);
-    console.log(autoCorrelateValue);
     if (autoCorrelateValue === -1) {
       nowPlayingNote = null;
       nowPlayingRightLastTs = null;
@@ -397,7 +398,7 @@
 
     if (Math.abs(diffInCents) <= 3) {
       console.log('low diff', { nowPlayingRightLastTs });
-      ignoreImperfectionsCount = 30;
+      ignoreImperfectionsCount = SMOOTHING_FACTOR;
       if (!celebrate) {
         if (nowPlayingRightLastTs) {
           nowPlayingRightDuration += Date.now() - nowPlayingRightLastTs;
@@ -479,7 +480,7 @@
 
   function nextTask() {
     let num = getRandomInt(0, selectedNotes.length - 1);
-    ignoreImperfectionsCount = 30;
+    ignoreImperfectionsCount = SMOOTHING_FACTOR;
     // Try to avoid the same note twice in a row
     if (selectedNotes.length > 1) {
       while (selectedNotes[num] === currentTaskNote) {
@@ -493,13 +494,15 @@
         null;
     nowPlayingRightDuration = 0;
     currentTaskNote = selectedNotes[num];
-    console.log(currentTaskNote);
+    console.log({num, currentTaskNote});
   }
 
   function drawTask() {
     if (!currentTaskNote) {
       return;
     }
+    // TODO: for greater efficiency, if nowPlayingNote is same as last time
+    // we might skip drawing things again
     const npNoteValue =
       nowPlayingNote && nowPlayingOctave > 1
         ? `${nowPlayingNote}${nowPlayingOctave}`
@@ -547,13 +550,13 @@
         align_center: true,
       });
       taskNote.setStyle({
-        fillStyle: isCorrect ? 'rgb(0, 128, 0)' : 'black',
-        strokeStyle: isCorrect ? 'rgb(0, 128, 0)' : 'black',
+        fillStyle: isCorrect ? '#00a4d6' : 'black',
+        strokeStyle: isCorrect ? '#00a4d6' : 'black',
       });
       voice.addTickables([taskNote]);
     }
     Accidental.applyAccidentals([voice], availableNotes[0]);
-    new Formatter().joinVoices([voice]).format([voice], width * 0.8);
+    new Formatter().joinVoices([voice]).format([voice], width * 0.93);
 
     voice.draw(context, stave);
 
@@ -569,15 +572,9 @@
         align_center: true,
       });
 
-      nowPlayingStaveNote.setStyle({
-        fillStyle: 'green',
-        fillOpacity: Math.max(0.2, 1 - (Math.abs(offByHzPct) * 8) / 10),
-        strokeStyle: 'green',
-        strokeOpacity: Math.max(0.2, 1 - (Math.abs(offByHzPct) * 8) / 10),
-      });
       npVoice.addTickables([nowPlayingStaveNote]);
       Accidental.applyAccidentals([npVoice], 'C');
-      new Formatter().joinVoices([npVoice]).format([npVoice], width * 0.8);
+      new Formatter().joinVoices([npVoice]).format([npVoice], width * 0.93);
       npVoice.draw(context, stave);
 
       // extra intonation correctness indication for the older ones
@@ -587,11 +584,10 @@
         svg.setAttribute(
           'style',
           `transform: translateY(${offByHzPct}px);
-          fill-opacity: ${Math.max(0.2, 1 - (Math.abs(diffInCents) * 2) / 100)};
-          stroke-opacity: ${Math.max(
-            0.2,
-            1 - (Math.abs(diffInCents) * 2) / 100
-          )};
+          fill: var(${isCorrect ? '--activeNoteColor' : '--dark'});
+          stroke: var(${isCorrect ? '--activeNoteColor' : '--dark'});
+          fill-opacity: .5;
+          stroke-opacity:.5;
           `
         );
       }
@@ -648,19 +644,19 @@
         {/each}
       </select>
     {/if}
+    {#if mode === MODES.PLAY}
+      <div class="progress">
+        <ProgressIndicator
+          instrument={user.instrument}
+          percentage={(nowPlayingRightDuration /
+            (difficulty === DIFFICULTIES.HARD ? 3000 : 1000)) *
+            100}
+        />
+      </div>
+    {/if}
     <div bind:this={sheetmusicElm}></div>
     {#if celebrate}<div class="star"><Star /></div>{/if}
   </div>
-  {#if mode === MODES.PLAY}
-    <div class="progress">
-      <ProgressIndicator
-        instrument={user.instrument}
-        percentage={(nowPlayingRightDuration /
-          (difficulty === DIFFICULTIES.HARD ? 3000 : 1000)) *
-          100}
-      />
-    </div>
-  {/if}
   <div class="toolbar">
     {#if mode === MODES.CONFIGURE}
       <Button onClick={startGame}>Start</Button>
@@ -719,6 +715,10 @@
     border-color: var(--border);
   }
   .progress {
-    margin-bottom: 1em;
+    margin: 1em 0;
+    position: absolute;
+    left: calc(50% - 64px);
+    z-index: 10;
+    opacity: 0.2;
   }
 </style>
