@@ -96,6 +96,7 @@
   // smoothing mike note rendering (and time calc) somewhat
   const SMOOTHING_FACTOR = 20; // how many odd samples to ignore
   let ignoreImperfectionsCount = SMOOTHING_FACTOR;
+  let wasCorrect = true;
   // we persist points to server no later than 15 sec after last correct note
   // (we also save every immediately after every 10th correct note)
   const SAVE_DELAY_MS = 15000;
@@ -177,7 +178,6 @@
       if (mode !== MODES.CONFIGURE) {
         return;
       }
-      console.log({ selectedNotes });
       let elm = evt.target;
       let insideSvg = elm.tagName === 'svg'; // to enable Dnd only over SVG
       while (elm && elm.dataset && !elm.dataset.notevalue && !insideSvg) {
@@ -274,7 +274,6 @@
       await fetch('/api/games/note-sprint', { credentials: 'same-origin' })
     ).json();
     points = serverData.userPointsToday || 0;
-    console.log({ serverData });
   });
 
   function savePoints(points) {
@@ -345,6 +344,8 @@
     return Math.round(noteNum) + 69;
   }
 
+  // TODO: simplify this function or combine it with drawTask
+  // maybe this should be analyseInputSound and just set variables..
   var drawNote = function () {
     drawNoteVisual = requestAnimationFrame(drawNote); // TODO: too often??
     var bufferLength = analyser.fftSize;
@@ -359,7 +360,7 @@
       nowPlayingNote = null;
       nowPlayingRightLastTs = null;
       nowPlayingHz = null;
-      drawTask();
+      drawTask(false);
       return;
     }
 
@@ -381,20 +382,8 @@
 
     nowPlayingNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
     nowPlayingHz = autoCorrelateValue;
-
     const diffInCents =
       1200 * Math.log2(autoCorrelateValue / notes[currentTaskNote]);
-
-    /*
-    console.log({
-      nowPlayingNote,
-      nowPlayingHz,
-      target: notes[currentTaskNote],
-      diffInCents,
-      nowPlayingRightDuration,
-      nowPlayingOctave,
-      currentTaskNote,
-    });*/
 
     if (Math.abs(diffInCents) <= 3) {
       console.log('low diff', { nowPlayingRightLastTs });
@@ -435,7 +424,6 @@
       // more than 3 cents off, set last TS to null
       ignoreImperfectionsCount--;
       if (ignoreImperfectionsCount <= 0) {
-        console.log('reset last ts due to ' + diffInCents);
         nowPlayingRightLastTs = null;
       }
     }
@@ -475,7 +463,7 @@
     //      if (typeof(valueToDisplay) == 'number') {
     //        valueToDisplay += ' Hz';
     //      }
-    drawTask();
+    drawTask(false);
   };
 
   function nextTask() {
@@ -495,9 +483,10 @@
     nowPlayingRightDuration = 0;
     currentTaskNote = selectedNotes[num];
     console.log({num, currentTaskNote});
+    drawTask(true);
   }
 
-  function drawTask() {
+  function drawTask(starting) {
     if (!currentTaskNote) {
       return;
     }
@@ -518,6 +507,9 @@
         ? diffInCents && Math.abs(diffInCents) <= 3
         : npNoteValue === currentTaskNote;
 
+    if (wasCorrect && !isCorrect && !starting && ignoreImperfectionsCount > 0) {
+      return; // keep old rendering
+    }
     console.log({
       offByHz,
       offByHzPct,
@@ -592,6 +584,7 @@
         );
       }
     }
+    wasCorrect = isCorrect;
   }
   function stopGame() {
     mode = MODES.CONFIGURE;
@@ -613,10 +606,6 @@
       availableNotes = scale.notes;
       selectedNotes.length = 0;
       octaves.forEach(octave => {
-        console.log(
-          'mapping for ' + evt.target.value,
-          getNotesMappedToOctave(availableNotes, octave)
-        );
         selectedNotes.push(...getNotesMappedToOctave(availableNotes, octave));
       });
       drawConfigNotes(availableNotes, octaves, userInstrument);
