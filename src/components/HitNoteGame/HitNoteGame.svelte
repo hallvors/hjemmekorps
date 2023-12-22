@@ -99,7 +99,7 @@
   let wasCorrect = true;
   // we persist points to server no later than 15 sec after last correct note
   // (we also save every immediately after every 10th correct note)
-  const SAVE_DELAY_MS = 15000;
+  const SAVE_DELAY_MS = 5000;
   let userInstrument;
   let cndLassoPositions = {};
 
