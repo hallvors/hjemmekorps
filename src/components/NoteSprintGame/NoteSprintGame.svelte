@@ -94,7 +94,7 @@
   let serverData;
   let saveTimeout;
   // smoothing mike note rendering (and time calc) somewhat
-  const SMOOTHING_FACTOR = 15; // how many "odd" samples to ignore if we've seen a correct note
+  const SMOOTHING_FACTOR = 10; // how many "odd" samples to ignore if we've seen a correct note
   let ignoreImperfectionsCount = SMOOTHING_FACTOR;
   let wasCorrect = true;
   // we persist points to server no later than 15 sec after last correct note
@@ -418,13 +418,16 @@
         }
       }
     } else {
-      // more than 3 cents off more than _threshold_ times: set last TS to null
       ignoreImperfectionsCount--;
+      // We make the now playing note less jumpy by ignoring some values if
+      // we hit the note correctly earlier
       if (ignoreImperfectionsCount <= 0) {
+        // more than 3 cents off more than _threshold_ times: set last TS to null
         nowPlayingRightLastTs = null;
       } else {
         if (nowPlayingRightLastTs) {
           nowPlayingRightDuration += Date.now() - nowPlayingRightLastTs;
+          nowPlayingRightLastTs = Date.now();
         }
       }
     }
