@@ -94,7 +94,7 @@
   let serverData;
   let saveTimeout;
   // smoothing mike note rendering (and time calc) somewhat
-  const SMOOTHING_FACTOR = 10; // how many "odd" samples to ignore if we've seen a correct note
+  const SMOOTHING_FACTOR = 20; // how many "odd" samples to ignore if we've seen a correct note
   let ignoreImperfectionsCount = SMOOTHING_FACTOR;
   let wasCorrect = true;
   // we persist points to server no later than 15 sec after last correct note
@@ -382,10 +382,16 @@
 
     nowPlayingNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
     nowPlayingHz = autoCorrelateValue;
+
     const diffInCents =
       1200 * Math.log2(autoCorrelateValue / notes[currentTaskNote]);
+      const isCorrect =
+      difficulty === DIFFICULTIES.HARD
+        ? diffInCents && Math.abs(diffInCents) <= 3
+        : `${nowPlayingNote}${nowPlayingOctave}` === currentTaskNote;
 
-    if (Math.abs(diffInCents) <= 3) {
+
+    if (isCorrect) {
       ignoreImperfectionsCount = SMOOTHING_FACTOR;
       if (!celebrate) {
         if (nowPlayingRightLastTs) {
@@ -573,20 +579,18 @@
       new Formatter().joinVoices([npVoice]).format([npVoice], width * 0.93);
       npVoice.draw(context, stave);
 
-      // extra intonation correctness indication for the older ones
-      if (difficulty === DIFFICULTIES.HARD) {
-        const svg = nowPlayingStaveNote.getSVGElement();
+      // extra intonation correctness indication
+      const svg = nowPlayingStaveNote.getSVGElement();
 
-        svg.setAttribute(
-          'style',
-          `transform: translateY(${offByHzPct * 4}px);
+      svg.setAttribute(
+        'style',
+        `transform: translateY(${offByHzPct * 4}px);
           fill: var(${isCorrect ? '--activeNoteColor' : '--dark'});
           stroke: var(${isCorrect ? '--activeNoteColor' : '--dark'});
           fill-opacity: .5;
           stroke-opacity:.5;
           `
-        );
-      }
+      );
     }
     wasCorrect = isCorrect;
   }
