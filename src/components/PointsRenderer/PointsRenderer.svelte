@@ -15,8 +15,8 @@
   {#key points}
     <div transition:blur class="points">
       <p>
-        <b>Du har spilt</b>
-        {points} <b>noter i dag!</b>
+        <b>Du har fått</b>
+        {points} <b>poeng i dag!</b>
       </p>
     </div>
   {/key}
@@ -37,14 +37,14 @@
     >
     <br />
     <small
-      ><b>Til sammen har du spilt </b>
+      ><b>Til sammen har du </b>
       {furtherStats.userPointsTotal + extraPointsSinceLoad}
       <b>
-        noter, {subGroupName.toLowerCase()}
+        poeng, {subGroupName.toLowerCase()}
       </b>{furtherStats.groupPointsTotal + extraPointsSinceLoad}<b>,
         og hele korpset
       </b>
-      {furtherStats.bandPointsTotal + extraPointsSinceLoad} <b>noter</b></small
+      {furtherStats.bandPointsTotal + extraPointsSinceLoad} <b>poeng</b></small
     >
   </p>
 </div>
