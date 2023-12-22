@@ -57,7 +57,7 @@ export async function post(req, res, next) {
           let templatePlain = Handlebars.compile(templateText);
           let templateRich = Handlebars.compile(templateHTML);
           let result = await send(
-            String(users[i].email),
+            email,
             { name: 'Admin' },
             'Innlogging til ' + env.hostname + ' for ' + users[i].name,
             templatePlain(data),
