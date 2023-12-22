@@ -395,7 +395,7 @@
         // nice work! but maybe have to hold it for some duration??
         if (
           nowPlayingRightDuration >=
-          (difficulty === DIFFICULTIES.HARD ? 3500 : 1000)
+          (difficulty === DIFFICULTIES.HARD ? 3000 : 1000)
         ) {
           console.log('adding point because of ' + nowPlayingRightDuration);
           points++;
@@ -579,7 +579,7 @@
 
         svg.setAttribute(
           'style',
-          `transform: translateY(${offByHzPct}px);
+          `transform: translateY(${offByHzPct * 4}px);
           fill: var(${isCorrect ? '--activeNoteColor' : '--dark'});
           stroke: var(${isCorrect ? '--activeNoteColor' : '--dark'});
           fill-opacity: .5;
@@ -699,8 +699,8 @@
   }
   .star {
     position: absolute;
-    left: 49%;
-    top: 55%;
+    left: 45%;
+    top: 40%;
   }
   .dndLasso {
     position: fixed;

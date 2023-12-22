@@ -39,8 +39,8 @@
 
 <style>
   div {
-    width: 50px;
-    height: 50px;
+    width: 100px;
+    height: 100px;
     animation-name: burst;
     animation-duration: .8s;
     animation-timing-function: ease-out;

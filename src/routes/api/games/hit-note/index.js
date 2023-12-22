@@ -154,7 +154,7 @@ export async function post(req, res, next) {
                 ${req.user.subgroup},
                 ${req.body.points}
             )
-            ON CONFLICT ON CONSTRAINT hit_note_game_user_id_band_id_date_key DO UPDATE
+            ON CONFLICT ON CONSTRAINT note_sprint_game_user_id_band_id_date_key DO UPDATE
             SET points = EXCLUDED.points
         `);
     });
