@@ -56,7 +56,7 @@ function getAdminUserDataByEmail(email) {
     });
 }
 
-function getUserByEmail(email) {
+function getUsersByEmail(email) {
   // we want admin user data for nearly all API requests. Cache it..
   if (sanityCache.has(email)) {
     console.log('cache hit!')
@@ -64,7 +64,7 @@ function getUserByEmail(email) {
   }
   return getSanityClient()
     .fetch(
-      `*[_type == $type && $email in email && visible && !(_id in path("drafts.**"))][0]{
+      `*[_type == $type && $email in email && visible && !(_id in path("drafts.**"))]{
     name, surname, _id, email
   }`,
       {
@@ -687,7 +687,7 @@ function purgeCache() {
 module.exports = {
   getSanityClient,
   getAdminUserDataByEmail,
-  getUserByEmail,
+  getUsersByEmail,
   getAdminUserDataById,
   getUserData,
   getBandsForAdminUser,

@@ -16,50 +16,57 @@ const templateHTML = fs.readFileSync(
 );
 
 export async function post(req, res, next) {
-  let user, link, token;
+  let user, users, link, token;
   if (!req.user) {
     const email = req.body.email;
-    console.log('get admin by email ' + email)
+    console.log('get admin by email ' + email);
     user = await sClient.getAdminUserDataByEmail(email);
-    console.log('admin user', user)
-    const url = req.body.url && /^\//.test(req.body.url) ? req.body.url : undefined;
+    console.log('admin user', user);
+    const url =
+      req.body.url && /^\//.test(req.body.url) ? req.body.url : undefined;
     if (user && user.name) {
-      token = sign({ email, url }, env.config.site.tokensecret);
+      users = [user];
     } else {
-      console.log('get user by email ' + email)
-      user = await sClient.getUserByEmail(email);
-      console.log('user user', user)
-      if (user && user.name) {
-        console.log('found user', user)
-        // login link requested by a band member, not admin
-        token = sign({ userId: user._id, url }, env.config.site.tokensecret);
+      console.log('get users by email ' + email);
+      users = await sClient.getUsersByEmail(email);
+      console.log('user users', users);
+      if (users && users.length) {
+        console.log('found users', users.length);
       } else {
         // do not reveal valid email addresses by timing detection
         setTimeout(function () {
           res.json({ status: 'ok' });
-        }, 450);
+        }, Math.ceil(Math.random() * 150));
         return;
       }
     }
+    // if we're querying by the email of a parent with several children,
+    // we have to send one email per child..
+    for (let i = 0; i < users.length; i++) {
+      token =
+        users[i]._type === 'adminUser'
+          ? sign({ email: users[i].email }, env.config.site.tokensecret)
+          : sign({ userId: users[i]._id, url }, env.config.site.tokensecret);
+          link = `https://${env.hostname}/?t=${token}`;
+          let data = {
+            link,
+            hostname: env.hostname,
+            user: users[i],
+          };
+          console.log('compiling text with ', data);
+          let templatePlain = Handlebars.compile(templateText);
+          let templateRich = Handlebars.compile(templateHTML);
+          let result = await send(
+            String(users[i].email),
+            { name: 'Admin' },
+            'Innlogging til ' + env.hostname + ' for ' + users[i].name,
+            templatePlain(data),
+            templateRich(data)
+          );
+          console.log(result);
+    }
 
-    link = `https://${env.hostname}/?t=${token}`;
-    let data = {
-      link,
-      hostname: env.hostname,
-      user,
-    };
-    console.log('compiling text with ', data)
-    let templatePlain = Handlebars.compile(templateText);
-    let templateRich = Handlebars.compile(templateHTML);
-    let result = await send(
-      user.email,
-      { name: 'Admin' },
-      'Innlogging til ' + env.hostname,
-      templatePlain(data),
-      templateRich(data)
-    );
-    console.log(result);
-    res.json({ result });
+    res.json({ status: 'ok' });
   }
   // should never get here..
   res.statusCode = 401;
