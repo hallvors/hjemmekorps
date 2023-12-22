@@ -94,7 +94,7 @@
   let serverData;
   let saveTimeout;
   // smoothing mike note rendering (and time calc) somewhat
-  const SMOOTHING_FACTOR = 20; // how many odd samples to ignore
+  const SMOOTHING_FACTOR = 15; // how many "odd" samples to ignore if we've seen a correct note
   let ignoreImperfectionsCount = SMOOTHING_FACTOR;
   let wasCorrect = true;
   // we persist points to server no later than 15 sec after last correct note
@@ -386,19 +386,16 @@
       1200 * Math.log2(autoCorrelateValue / notes[currentTaskNote]);
 
     if (Math.abs(diffInCents) <= 3) {
-      console.log('low diff', { nowPlayingRightLastTs });
       ignoreImperfectionsCount = SMOOTHING_FACTOR;
       if (!celebrate) {
         if (nowPlayingRightLastTs) {
           nowPlayingRightDuration += Date.now() - nowPlayingRightLastTs;
-          console.log('increasted duration', nowPlayingRightDuration);
         }
         nowPlayingRightLastTs = Date.now();
-        console.log('set ts ' + nowPlayingRightLastTs);
         // nice work! but maybe have to hold it for some duration??
         if (
           nowPlayingRightDuration >=
-          (difficulty === DIFFICULTIES.HARD ? 3000 : 1000)
+          (difficulty === DIFFICULTIES.HARD ? 3500 : 1000)
         ) {
           console.log('adding point because of ' + nowPlayingRightDuration);
           points++;
@@ -421,10 +418,14 @@
         }
       }
     } else {
-      // more than 3 cents off, set last TS to null
+      // more than 3 cents off more than _threshold_ times: set last TS to null
       ignoreImperfectionsCount--;
       if (ignoreImperfectionsCount <= 0) {
         nowPlayingRightLastTs = null;
+      } else {
+        if (nowPlayingRightLastTs) {
+          nowPlayingRightDuration += Date.now() - nowPlayingRightLastTs;
+        }
       }
     }
 
@@ -482,7 +483,7 @@
         null;
     nowPlayingRightDuration = 0;
     currentTaskNote = selectedNotes[num];
-    console.log({num, currentTaskNote});
+    console.log({ num, currentTaskNote });
     drawTask(true);
   }
 
