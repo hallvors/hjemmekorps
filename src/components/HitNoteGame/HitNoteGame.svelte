@@ -703,8 +703,8 @@
   }
   .star {
     position: absolute;
-    left: 45%;
-    top: 40%;
+    left: calc((100% - 200px) / 2);
+    top: -10%;
   }
   .dndLasso {
     position: fixed;
