@@ -679,7 +679,7 @@
 {:else}
   <div class="parent">
     <h1>Velkommen</h1>
-    <p>Her kan du prøve notesprint-spillet.</p>
+    <p>Her kan du prøve <em>Treff noten</em>-spillet.</p>
     <p>
       Skriv inn epost-adresse til musikant eller foresatt for å få
       innloggingslenke til spillet på epost:

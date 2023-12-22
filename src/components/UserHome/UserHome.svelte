@@ -14,7 +14,7 @@
     {#if user}
       <h1>Spill</h1>
       <LinkedBoxList items={[{
-        title: "Notesprint!",
+        title: "Treff noten!",
         href: `/lek/notesprint`,
         orderbadge: "♩♩",
       }]}
