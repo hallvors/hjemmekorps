@@ -15,7 +15,7 @@
       <h1>Spill</h1>
       <LinkedBoxList items={[{
         title: "Treff noten!",
-        href: `/lek/notesprint`,
+        href: `/lek/treffnoten`,
         orderbadge: "♩♩",
       }]}
       />

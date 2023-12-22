@@ -11,7 +11,7 @@ function isOkWithoutSession(url) {
     /^\/feil\//, // Error messages are shown without a user session
     /^\/om\//, // A few other pages are shown without a user session too - /om/personvern for example
     '/api/communications/loginlink', // API route for creating login links must be available
-    '/lek/notesprint', // Notesprint game has adapted login form
+    '/lek/treffnoten', // Hit note game has adapted login form
     '/api/logout', // Odd one
   ];
 

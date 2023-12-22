@@ -7,11 +7,11 @@
 
 <script>
   export let queryNotes;
-  import NoteSprintGame from '../../../components/NoteSprintGame/NoteSprintGame.svelte';
+  import HitNoteGame from '../../../components/HitNoteGame/HitNoteGame.svelte';
   import { user, bands } from '../../../lib/datastore';
   const band = $bands[0];
 </script>
 
 <div>
-  <NoteSprintGame user={$user} {queryNotes} />
+  <HitNoteGame user={$user} {queryNotes} />
 </div>

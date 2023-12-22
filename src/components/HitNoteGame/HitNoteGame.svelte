@@ -271,13 +271,13 @@
     sheetmusicElm.addEventListener('mousemove', cndMoveSelectNotes, true);
 
     serverData = await (
-      await fetch('/api/games/note-sprint', { credentials: 'same-origin' })
+      await fetch('/api/games/hit-note', { credentials: 'same-origin' })
     ).json();
     points = serverData.userPointsToday || 0;
   });
 
   function savePoints(points) {
-    return fetch('/api/games/note-sprint', {
+    return fetch('/api/games/hit-note', {
       credentials: 'same-origin',
       method: 'post',
       body: JSON.stringify({ points }),
@@ -684,7 +684,7 @@
       Skriv inn epost-adresse til musikant eller foresatt for å få
       innloggingslenke til spillet på epost:
     </p>
-    <SendLoginLink targetUrl="/lek/notesprint"></SendLoginLink>
+    <SendLoginLink targetUrl="/lek/treffnoten"></SendLoginLink>
   </div>
 {/if}
 

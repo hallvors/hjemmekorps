@@ -16,15 +16,15 @@ export async function get(req, res, next) {
       return Promise.allSettled([
         // user TODAY
         client.query(
-          sql`SELECT points FROM note_sprint_game WHERE user_id = ${req.user._id} AND date = CURRENT_DATE`
+          sql`SELECT points FROM hit_note_game WHERE user_id = ${req.user._id} AND date = CURRENT_DATE`
         ),
         // band TODAY
         client.query(
-          sql`SELECT SUM(points) as points FROM note_sprint_game WHERE band_id = ${req.user.band._id} AND date = CURRENT_DATE`
+          sql`SELECT SUM(points) as points FROM hit_note_game WHERE band_id = ${req.user.band._id} AND date = CURRENT_DATE`
         ),
         // band subgroup TODAY
         client.query(
-          sql`SELECT SUM(points) as points FROM note_sprint_game WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup} AND date = CURRENT_DATE`
+          sql`SELECT SUM(points) as points FROM hit_note_game WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup} AND date = CURRENT_DATE`
         ),
         // raw data for user STREAK
         client.query(sql`WITH date_with_prev AS (
@@ -32,7 +32,7 @@ export async function get(req, res, next) {
           date,
           LAG(date) OVER (ORDER BY date) AS prev_date
         FROM
-          note_sprint_game
+          hit_note_game
         WHERE user_id = ${req.user._id}
       )
       SELECT
@@ -54,7 +54,7 @@ export async function get(req, res, next) {
           date,
           LAG(date) OVER (ORDER BY date) AS prev_date
         FROM
-          note_sprint_game
+          hit_note_game
         WHERE band_id = ${req.user.band._id}
       )
       SELECT
@@ -76,7 +76,7 @@ export async function get(req, res, next) {
           date,
           LAG(date) OVER (ORDER BY date) AS prev_date
         FROM
-          note_sprint_game
+          hit_note_game
         WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup}
       )
       SELECT
@@ -94,15 +94,15 @@ export async function get(req, res, next) {
       `),
         // user TOTALS
         client.query(
-          sql`SELECT SUM(points) AS points FROM note_sprint_game WHERE user_id = ${req.user._id}`
+          sql`SELECT SUM(points) AS points FROM hit_note_game WHERE user_id = ${req.user._id}`
         ),
         // band TOTALS
         client.query(
-          sql`SELECT SUM(points) AS points FROM note_sprint_game WHERE band_id = ${req.user.band._id}`
+          sql`SELECT SUM(points) AS points FROM hit_note_game WHERE band_id = ${req.user.band._id}`
         ),
         // band subgroup TOTALS
         client.query(
-          sql`SELECT SUM(points) AS points FROM note_sprint_game WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup}`
+          sql`SELECT SUM(points) AS points FROM hit_note_game WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup}`
         ),
       ]);
     });
@@ -142,7 +142,7 @@ export async function post(req, res, next) {
   try {
     const upsertResult = await env.slonik.connect(client => {
       return client.query(sql`
-            INSERT INTO note_sprint_game (
+            INSERT INTO hit_note_game (
                 user_id,
                 band_id,
                 subgroup,
@@ -154,7 +154,7 @@ export async function post(req, res, next) {
                 ${req.user.subgroup},
                 ${req.body.points}
             )
-            ON CONFLICT ON CONSTRAINT note_sprint_game_user_id_band_id_date_key DO UPDATE
+            ON CONFLICT ON CONSTRAINT hit_note_game_user_id_band_id_date_key DO UPDATE
             SET points = EXCLUDED.points
         `);
     });
