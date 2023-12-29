@@ -15,7 +15,7 @@ WORKDIR /home/node/app
 
 COPY --chown=node:node package*.json ./
 USER node
-RUN npm ci --no-optional
+RUN npm ci --no-optional --legacy-peer-deps
 
 COPY --chown=node:node ./static/ ./static/
 COPY --chown=node:node ./src/ ./src/
