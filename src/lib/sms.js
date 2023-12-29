@@ -1,23 +1,18 @@
 import * as env from '../config/environment';
-import fetch from 'node-fetch';
+const got = require('got');
 
 export async function sendSMS(to, message) {
-  const req = await fetch({
-    protocol: 'POST',
-    url: env.config.sms.posturl,
+  const req = await got.post(env.config.sms.posturl, {
     headers: {
       Authorization: `Bearer ${env.config.sms.apikey}`,
       'Content-type': 'application/json',
     },
-    body: JSON.stringify({
+    json: {
       to,
       message,
       bypass_optout: true,
       sender_id: 'Hjemmekorps',
-    }),
+    },
   });
-  if (req.ok) {
-    return req.json();
-  }
-  throw new Error('sending SMS failed');
+  return req.json();
 }
