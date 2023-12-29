@@ -4,6 +4,7 @@
     "dataset": "production"
   },
   "sms": {
-    "posturl": "https://api.sms.to/sms/send"
+    "posturl": "https://api.sms.to/sms/send",
+    "cc": "+4748603894"
   }
 }
