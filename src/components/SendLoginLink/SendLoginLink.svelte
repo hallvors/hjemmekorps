@@ -5,7 +5,7 @@
   const handleSubmit = createSubmitHandler(evt => {
     evt.target.reset();
     alert(
-      'Dersom du har tilgang skal du nå ha fått innloggingslenke tilsendt. Sjekk epost!'
+      'Dersom du har tilgang skal du nå ha fått innloggingslenke tilsendt. Sjekk epost / SMS!'
     );
   });
 </script>
