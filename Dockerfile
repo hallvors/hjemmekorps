@@ -1,4 +1,4 @@
-FROM node:16-slim
+FROM node:16-bullseye
 ARG DATABASE_URL
 
 RUN apt-get update -y && apt-get install -y ffmpeg
