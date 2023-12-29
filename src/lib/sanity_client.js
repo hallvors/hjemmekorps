@@ -32,49 +32,49 @@ function getSanityClient() {
   return sanityClient;
 }
 
-function getAdminUserDataByEmail(email) {
+function getAdminUserDataByContactInfo(contact) {
   // we want admin user data for nearly all API requests. Cache it..
-  if (sanityCache.has(email)) {
-    return Promise.resolve(sanityCache.get(email));
+  if (sanityCache.has(contact)) {
+    return Promise.resolve(sanityCache.get(contact));
   }
   return getSanityClient()
     .fetch(
-      `*[_type == $type && email == $email && enabled && !(_id in path("drafts.**"))][0]{
+      `*[_type == $type && (email == $contact || phone == $contact) && enabled && !(_id in path("drafts.**"))][0]{
     name, email, friendly_name, phone, portrait, _id, _type,
     "portraitUrl": portrait.asset->url
   }`,
       {
         type: 'adminUser',
-        email,
+        contact,
       }
     )
     .then(userData => {
       if (userData && userData.name) {
-        sanityCache.set(email, userData);
+        sanityCache.set(contact, userData);
       }
       return userData;
     });
 }
 
-function getUsersByEmail(email) {
-  // we want admin user data for nearly all API requests. Cache it..
-  if (sanityCache.has(email)) {
+function getUsersByContactInfo(contact) {
+  // we want user data for nearly all API requests. Cache it..
+  if (sanityCache.has(contact)) {
     console.log('cache hit!')
-    return Promise.resolve(sanityCache.get(email));
+    return Promise.resolve(sanityCache.get(contact));
   }
   return getSanityClient()
     .fetch(
-      `*[_type == $type && $email in email && visible && !(_id in path("drafts.**"))]{
+      `*[_type == $type && ($contact in email || $contact in phone) && visible && !(_id in path("drafts.**"))]{
     name, surname, _id, email
   }`,
       {
         type: 'member',
-        email,
+        contact,
       }
     )
     .then(userData => {
       if (userData) {
-        sanityCache.set(email, userData);
+        sanityCache.set(contact, userData);
       }
       return userData;
     });
@@ -686,8 +686,8 @@ function purgeCache() {
 
 module.exports = {
   getSanityClient,
-  getAdminUserDataByEmail,
-  getUsersByEmail,
+  getAdminUserDataByContactInfo,
+  getUsersByContactInfo,
   getAdminUserDataById,
   getUserData,
   getBandsForAdminUser,

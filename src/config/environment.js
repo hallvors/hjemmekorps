@@ -8,6 +8,7 @@ const APP_ENV_VARS = [
   'site__tokensecret',
   'sanity__dataset',
   'mailgun__apikey',
+  'sms__apikey',
 ];
 const { createPool } = require('slonik');
 const slonik = createPool(process.env.DATABASE_URL);
