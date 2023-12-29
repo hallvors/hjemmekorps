@@ -685,8 +685,8 @@
     <h1>Velkommen</h1>
     <p>Her kan du prøve <em>Treff noten</em>-spillet.</p>
     <p>
-      Skriv inn epost-adresse til musikant eller foresatt for å få
-      innloggingslenke til spillet på epost:
+      Skriv inn <em>epost-adresse</em> eller <em>mobilnummer</em> til musikant eller foresatt for å få
+      innloggingslenke til spillet:
     </p>
     <SendLoginLink targetUrl="/lek/treffnoten"></SendLoginLink>
   </div>
