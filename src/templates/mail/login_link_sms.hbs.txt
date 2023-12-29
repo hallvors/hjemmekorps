@@ -1,0 +1,6 @@
+Hei {{user.name}},
+du kan bruke {{hostname}} ved å klikke her:
+
+{{{link}}}
+
+Hilsen utviklerne :)

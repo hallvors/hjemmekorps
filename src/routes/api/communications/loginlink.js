@@ -15,6 +15,10 @@ const templateHTML = fs.readFileSync(
   join('src', 'templates', 'mail', 'login_link.hbs.html'),
   { encoding: 'utf8', flag: 'r' }
 );
+const templateSmsSource = fs.readFileSync(
+  join('src', 'templates', 'mail', 'login_link_sms.hbs.txt'),
+  { encoding: 'utf8', flag: 'r' }
+);
 
 export async function post(req, res, next) {
   let user, users, link, token;
@@ -57,9 +61,10 @@ export async function post(req, res, next) {
           console.log('compiling text with ', data);
           let templatePlain = Handlebars.compile(templateText);
           let templateRich = Handlebars.compile(templateHTML);
+          let templateSms = Handlebars.compile(templateSmsSource);
           let result;
           if (/^\+?[0-9]+$/.test(contact)) {
-            result = await sendSMS(contact, templatePlain(data));
+            result = await sendSMS(contact, templateSms(data));
           } else {
             result = await send(
               contact,
