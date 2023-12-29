@@ -59,7 +59,7 @@ export async function post(req, res, next) {
           let templateRich = Handlebars.compile(templateHTML);
           let result;
           if (/^\+?[0-9]+$/.test(contact)) {
-            sendSMS(contact, templatePlain(data));
+            result = await sendSMS(contact, templatePlain(data));
           } else {
             result = await send(
               contact,

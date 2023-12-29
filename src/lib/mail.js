@@ -20,7 +20,6 @@ export async function send(to, user, subject, text, html) {
     subject,
     text,
     html,
-   // 'o:testmode': env.development ? 'yes' : 'no',
   };
 
   return mg.messages.create('kom.hjemmekorps.no', data);
