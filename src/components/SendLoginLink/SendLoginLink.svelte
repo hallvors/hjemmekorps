@@ -16,7 +16,7 @@
   action="/api/communications/loginlink"
 >
   <p>
-    E-post: <input type="text" name="contact" required />
+    E-post eller mobilnummer: <input type="text" name="contact" required />
     <br />
     <Button type="submit" className="fa fa-paper-plane">Send</Button>
     {#if targetUrl}
