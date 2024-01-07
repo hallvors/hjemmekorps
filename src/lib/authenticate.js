@@ -31,6 +31,7 @@ function isOkWithoutSession(url) {
 }
 
 const authenticate = async function (req, res, next) {
+  console.log('authenticating ' + req.url);
   if (req.url && /^\/client\//.test(req.url)) {
     // Static files from /client are shown without a user session
     return next();
@@ -47,6 +48,7 @@ const authenticate = async function (req, res, next) {
     return;
   }
   let token = req.query.t || req.cookies.token;
+  console.log({token});
   try {
     let tokenData = jwt.verify(token, env.config.site.tokensecret);
     let user, projects;
