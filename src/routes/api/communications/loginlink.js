@@ -28,7 +28,7 @@ export async function post(req, res, next) {
     user = await sClient.getAdminUserDataByContactInfo(contact);
     console.log('admin user', user);
     const url =
-      req.body.url && /^\//.test(req.body.url) ? req.body.url : undefined;
+      req.body.url && /^\//.test(req.body.url) ? addCacheBreaker(req.body.url) : undefined;
     if (user && user.name) {
       users = [user];
     } else {
@@ -52,29 +52,29 @@ export async function post(req, res, next) {
         users[i]._type === 'adminUser'
           ? sign({ email: users[i].email }, env.config.site.tokensecret)
           : sign({ userId: users[i]._id, url }, env.config.site.tokensecret);
-          link = `https://${env.hostname}/?t=${token}`;
-          let data = {
-            link,
-            hostname: env.hostname,
-            user: users[i],
-          };
-          console.log('compiling text with ', data);
-          let templatePlain = Handlebars.compile(templateText);
-          let templateRich = Handlebars.compile(templateHTML);
-          let templateSms = Handlebars.compile(templateSmsSource);
-          let result;
-          if (/^\+?[0-9]+$/.test(contact)) {
-            result = await sendSMS(contact, templateSms(data));
-          } else {
-            result = await send(
-              contact,
-              { name: 'Admin' },
-              'Innlogging til ' + env.hostname + ' for ' + users[i].name,
-              templatePlain(data),
-              templateRich(data)
-            );
-          }
-          console.log(result);
+      link = `https://${env.hostname}/?t=${token}`;
+      let data = {
+        link,
+        hostname: env.hostname,
+        user: users[i],
+      };
+      console.log('compiling text with ', data);
+      let templatePlain = Handlebars.compile(templateText);
+      let templateRich = Handlebars.compile(templateHTML);
+      let templateSms = Handlebars.compile(templateSmsSource);
+      let result;
+      if (/^\+?[0-9]+$/.test(contact)) {
+        result = await sendSMS(contact, templateSms(data));
+      } else {
+        result = await send(
+          contact,
+          { name: 'Admin' },
+          'Innlogging til ' + env.hostname + ' for ' + users[i].name,
+          templatePlain(data),
+          templateRich(data)
+        );
+      }
+      console.log(result);
     }
 
     res.json({ status: 'ok' });
@@ -82,4 +82,14 @@ export async function post(req, res, next) {
   // should never get here..
   res.statusCode = 401;
   res.end();
+}
+
+function addCacheBreaker(url) {
+  if (url) {
+    return (
+      url +
+      (url.indexOf('?') > -1 ? '&' : '?') +
+      Buffer.from(String(Math.random() * 10e6)).toString('base64')
+    );
+  }
 }
