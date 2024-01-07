@@ -25,7 +25,7 @@
 </p>
 
 <p>
-  Er du en dirigent eller musikant som allerede bruker Hjemmekorps.no? Skriv inn epost-adresse for å få
+  Er du en dirigent eller musikant som allerede bruker Hjemmekorps.no? Skriv inn epost-adresse eller mobilnummer for å få
   tilsendt innloggingslenke:
 </p>
 
