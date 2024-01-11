@@ -91,7 +91,7 @@
       "key": "Bb",
       "transpose": 1
     },
-    { "title": "Melodisk slagverk", "value": "pitched_percussion" },
+    { "title": "Melodisk slagverk", "value": "pitched_percussion",   "transpose": 0.5 },
     { "title": "Perkusjon", "value": "percussion" },
     { "title": "Trommesett", "value": "drum" },
     { "title": "Pauke", "value": "timpani" }

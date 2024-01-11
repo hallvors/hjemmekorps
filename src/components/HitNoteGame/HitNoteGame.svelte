@@ -76,7 +76,7 @@
   console.log({ availableNotes, queryNotes, user });
   const selectedNotes = [];
   const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
-  const DIFFICULTIES = { EASY: 1, HARD: 2 };
+  const DIFFICULTIES = { EASY: 1, HARD: 2, PERC: 3 };
   let difficulty;
   let mode = MODES.CONFIGURE;
   let celebrate = false;
@@ -164,6 +164,10 @@
       user.band.groups.indexOf(user.subgroup) >= user.band.groups.length - 1
         ? DIFFICULTIES.HARD
         : DIFFICULTIES.EASY;
+
+    if (user.instrument === 'pitched_percussion') {
+      difficulty = DIFFICULTIES.PERC;
+    }
 
     width = Math.min(sheetmusicElm.offsetWidth * 0.9, window.innerWidth);
     const { Renderer } = Vex.Flow;
@@ -385,11 +389,10 @@
 
     const diffInCents =
       1200 * Math.log2(autoCorrelateValue / notes[currentTaskNote]);
-      const isCorrect =
+    const isCorrect =
       difficulty === DIFFICULTIES.HARD
         ? diffInCents && Math.abs(diffInCents) <= 3
         : `${nowPlayingNote}${nowPlayingOctave}` === currentTaskNote;
-
 
     if (isCorrect) {
       ignoreImperfectionsCount = SMOOTHING_FACTOR;
@@ -401,7 +404,11 @@
         // nice work! but maybe have to hold it for some duration??
         if (
           nowPlayingRightDuration >=
-          (difficulty === DIFFICULTIES.HARD ? 3000 : 1000)
+          (difficulty === DIFFICULTIES.HARD
+            ? 3000
+            : difficulty === DIFFICULTIES.PERC
+              ? 500
+              : 1000)
         ) {
           console.log('adding point because of ' + nowPlayingRightDuration);
           points++;
@@ -646,7 +653,11 @@
         <ProgressIndicator
           instrument={user.instrument}
           percentage={(nowPlayingRightDuration /
-            (difficulty === DIFFICULTIES.HARD ? 3000 : 1000)) *
+            (difficulty === DIFFICULTIES.HARD
+              ? 3000
+              : difficulty === DIFFICULTIES.PERC
+                ? 500
+                : 1000)) *
             100}
         />
       </div>
@@ -685,8 +696,8 @@
     <h1>Velkommen</h1>
     <p>Her kan du prøve <em>Treff noten</em>-spillet.</p>
     <p>
-      Skriv inn epost-adresse eller mobilnummer til musikant eller foresatt for å få
-      innloggingslenke til spillet:
+      Skriv inn epost-adresse eller mobilnummer til musikant eller foresatt for
+      å få innloggingslenke til spillet:
     </p>
     <SendLoginLink targetUrl="/lek/treffnoten"></SendLoginLink>
   </div>
