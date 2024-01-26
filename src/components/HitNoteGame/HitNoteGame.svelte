@@ -1,8 +1,4 @@
 <script>
-  // TODO:
-  // fortegn!
-  // longer durations for older members?
-
   import { onMount } from 'svelte';
   export let user;
   export let queryNotes;
@@ -32,6 +28,7 @@
     notes,
     noteNames,
     toSlashNotation,
+    selectScaleByNotes,
   } from '../../lib/notes';
   import { autoCorrelate } from '../../lib/pitch';
   import { instruments } from '../../lib/datastore';
@@ -69,12 +66,19 @@
     }
   }
   let sheetmusicElm;
-  let availableNotes =
-    queryNotes && queryNotes.length
-      ? queryNotes
-      : ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+  let selectedNotes = queryNotes && queryNotes.length ? queryNotes : [];
+  let availableNotes = (queryNotes &&
+    queryNotes.length &&
+    selectScaleByNotes(scales, queryNotes)?.notes) || [
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'A',
+    'B',
+  ];
   console.log({ availableNotes, queryNotes, user });
-  const selectedNotes = [];
   const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
   const DIFFICULTIES = { EASY: 1, HARD: 2, PERC: 3 };
   let difficulty;
@@ -371,6 +375,7 @@
     // transposing instrument? Change value to the Hz value
     // corresponding to the note we actually want to see on
     // the screen..
+
     if (userInstrument.transpose) {
       const obj = {
         preHz: autoCorrelateValue,

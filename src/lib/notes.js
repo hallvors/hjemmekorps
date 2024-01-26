@@ -234,10 +234,40 @@ export function getNotesMappedToOctave(scale, startingOctave) {
   });
 }
 
+// For a list of notes - for example ['C4', 'Bb4', 'D4'], select
+// a scale that contains these notes if available. Might return
+// nothing. (TODO: support more scales..)
+export function selectScaleByNotes(scales, notes) {
+  console.log({scales, notes});
+  for (const scale in scales) {
+    if (
+      notes.reduce(
+        (state, currentNote) =>
+          state && scales[scale].notes.includes(currentNote.replace(/\d+$/, '')),
+        true
+      )
+    ) {
+      return scales[scale];
+    }
+  }
+}
+
+// given a Hz value, map it to a note and move _offset_ steps up/down
+// return the note name after transposing
+export function transposeBySemiNotes(startNote, instrumentOffset) {
+  const start = semitones.indexOf(startNote);
+  if (start === -1) {
+    return null;
+  }
+  return semitones[start + instrumentOffset];
+}
+
 export function toSlashNotation(noteNameWithOctave) {
   if (!noteNameWithOctave) {
     return;
   }
   // Vexflow expects C/4, translate C4 to C/4 etc
-  return `${noteNameWithOctave.replace(/\d+$/, '')}/${noteNameWithOctave.match(/\d+$/)[0]}`
+  return `${noteNameWithOctave.replace(/\d+$/, '')}/${
+    noteNameWithOctave.match(/\d+$/)[0]
+  }`;
 }
