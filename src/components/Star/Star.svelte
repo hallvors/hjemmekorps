@@ -42,7 +42,7 @@
     width: 200px;
     height: 200px;
     animation-name: burst;
-    animation-duration: .8s;
+    animation-duration: .4s;
     animation-timing-function: ease-out;
     animation-iteration-count: infinite;
     animation-direction: alternate;
@@ -52,7 +52,7 @@
       transform: none;
     }
     to {
-      transform: scale(2, 2) rotate(0.95turn);
+      transform: scale(2, 2) rotate(1.95turn);
     }
   }
 </style>

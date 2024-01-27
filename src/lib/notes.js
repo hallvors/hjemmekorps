@@ -220,6 +220,8 @@ export const notes = {
   C8,
 };
 
+const semitones = Object.keys(notes).filter(note => !note.includes('#'));
+
 export const noteNames = Object.keys(notes);
 
 export function getNotesMappedToOctave(scale, startingOctave) {
@@ -238,7 +240,6 @@ export function getNotesMappedToOctave(scale, startingOctave) {
 // a scale that contains these notes if available. Might return
 // nothing. (TODO: support more scales..)
 export function selectScaleByNotes(scales, notes) {
-  console.log({scales, notes});
   for (const scale in scales) {
     if (
       notes.reduce(
@@ -252,14 +253,15 @@ export function selectScaleByNotes(scales, notes) {
   }
 }
 
-// given a Hz value, map it to a note and move _offset_ steps up/down
+// given a note+octave value, move _offset_ steps up/down
 // return the note name after transposing
-export function transposeBySemiNotes(startNote, instrumentOffset) {
+export function transposeBySemiNotes(startNote, instrumentOffset, direction = 1) {
   const start = semitones.indexOf(startNote);
   if (start === -1) {
     return null;
   }
-  return semitones[start + instrumentOffset];
+  console.log('transposing ' + startNote + ' ' + instrumentOffset + ' semitones to ' + semitones[start + instrumentOffset]);
+  return semitones[start + (instrumentOffset * direction)];
 }
 
 export function toSlashNotation(noteNameWithOctave) {

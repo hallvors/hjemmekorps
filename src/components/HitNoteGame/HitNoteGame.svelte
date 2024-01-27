@@ -29,6 +29,7 @@
     noteNames,
     toSlashNotation,
     selectScaleByNotes,
+    transposeBySemiNotes,
   } from '../../lib/notes';
   import { autoCorrelate } from '../../lib/pitch';
   import { instruments } from '../../lib/datastore';
@@ -78,7 +79,7 @@
     'A',
     'B',
   ];
-  console.log({ availableNotes, queryNotes, user });
+  console.log({ availableNotes, queryNotes, selectedNotes, user });
   const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
   const DIFFICULTIES = { EASY: 1, HARD: 2, PERC: 3 };
   let difficulty;
@@ -86,21 +87,16 @@
   let celebrate = false;
   let octaves;
   let renderer, context, stave, width, drawNoteVisual;
-  let currentTaskNote,
-    nowPlayingHz,
-    nowPlayingNote,
-    nowPlayingOctave,
-    nowPlayingRightLastTs,
-    selectedScale;
+  let currentTaskNote, nowPlayingRightLastTs, selectedScale;
   let nowPlayingRightDuration = 0;
   let analyser, audioContext, source;
   let points = 0;
   let serverData;
   let saveTimeout;
   // smoothing mike note rendering (and time calc) somewhat
-  const SMOOTHING_FACTOR = 20; // how many "odd" samples to ignore if we've seen a correct note
+  const SMOOTHING_FACTOR = 15; // how many "odd" samples to ignore if we've seen a correct note
   let ignoreImperfectionsCount = SMOOTHING_FACTOR;
-  let wasCorrect = true;
+  let wasCloseEnough = true;
   // we persist points to server no later than 15 sec after last correct note
   // (we also save every immediately after every 10th correct note)
   const SAVE_DELAY_MS = 5000;
@@ -319,7 +315,7 @@
           source = audioContext.createMediaStreamSource(stream);
           // Connect the source node to the analyzer
           source.connect(analyser);
-          drawNote();
+          analyzeSound();
         })
         .catch(function (err) {
           console.error(err);
@@ -352,61 +348,108 @@
     return Math.round(noteNum) + 69;
   }
 
-  // TODO: simplify this function or combine it with drawTask
-  // maybe this should be analyseInputSound and just set variables..
-  var drawNote = function () {
-    drawNoteVisual = requestAnimationFrame(drawNote); // TODO: too often??
+  function nextTask() {
+    let num = getRandomInt(0, selectedNotes.length - 1);
+    ignoreImperfectionsCount = SMOOTHING_FACTOR;
+    // Try to avoid the same note twice in a row
+    if (selectedNotes.length > 1) {
+      while (selectedNotes[num] === currentTaskNote) {
+        num = getRandomInt(0, selectedNotes.length - 1);
+      }
+    }
+    nowPlayingRightLastTs = null;
+    nowPlayingRightDuration = 0;
+    currentTaskNote = selectedNotes[num];
+    checkResultsAndDrawOutput(true);
+  }
+
+  function analyzeSound() {
+    drawNoteVisual = requestAnimationFrame(analyzeSound); // TODO: too often??
+    if (!currentTaskNote) {
+      return;
+    }
     var bufferLength = analyser.fftSize;
     var buffer = new Float32Array(bufferLength);
     analyser.getFloatTimeDomainData(buffer);
     var autoCorrelateValue = autoCorrelate(buffer, audioContext.sampleRate); //hz
+    if (autoCorrelateValue !== -1) {
+      return checkResultsAndDrawOutput(false, Math.round(autoCorrelateValue));
+    }
+    // -1 means no sound to analyse
+    nowPlayingRightLastTs = null;
+  }
 
-    // Handle rounding
-    var valueToDisplay = autoCorrelateValue;
-    valueToDisplay = Math.round(valueToDisplay);
-    if (autoCorrelateValue === -1) {
-      nowPlayingNote = null;
-      nowPlayingRightLastTs = null;
-      nowPlayingHz = null;
-      drawTask(false);
+  function checkResultsAndDrawOutput(starting, soundInHz) {
+    if (!currentTaskNote) {
       return;
     }
 
-    // transposing instrument? Change value to the Hz value
-    // corresponding to the note we actually want to see on
-    // the screen..
+    let isCloseEnough = false,
+      offByHz = null,
+      offByCentsPct = null,
+      diffInCents = null,
+      perfectPitch = null,
+      playingNoteValue = null,
+      transposedHz = null,
+      transposedNote = null;
+    if (soundInHz) {
+      const nowPlayingOctave = selectConcertPitchOctave(soundInHz);
+      const nowPlayingNote = noteStrings[noteFromPitch(soundInHz) % 12];
+      playingNoteValue =
+        nowPlayingNote && nowPlayingOctave > 1
+          ? `${nowPlayingNote}${nowPlayingOctave}`
+          : null;
+      perfectPitch = notes[currentTaskNote];
+      transposedHz = soundInHz;
+      transposedNote = playingNoteValue;
+      // transposing instrument? Change value to the Hz value
+      // corresponding to the note we actually want to see on
+      // the screen..
+      if (userInstrument.transposeSemi !== undefined) {
+        transposedNote = transposeBySemiNotes(
+          playingNoteValue,
+          userInstrument.transposeSemi
+        );
+        transposedHz = notes[transposedNote];
 
-    if (userInstrument.transpose) {
-      const obj = {
-        preHz: autoCorrelateValue,
-        preHzNote: noteStrings[noteFromPitch(autoCorrelateValue) % 12],
-      };
-      autoCorrelateValue *= userInstrument.transpose;
-      obj.postHz = autoCorrelateValue;
-      obj.postHzNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
-      console.log(obj);
+        const transposedTaskNote = transposeBySemiNotes(
+          currentTaskNote,
+          userInstrument.transposeSemi,
+          -1
+        );
+        perfectPitch = notes[transposedTaskNote];
+      }
+      /*
+        Now we have these inputs:
+        - playingNoteValue: the non-transposed ("piano") note closest to the Hz value we're hearing, with octave
+        - perfectPitch: the exact Hz value of the _transposed_ equivalent of the randomly selected note, our "target"
+        - transposedNote: the note the musician expects to see on screen from the sound! Fully qualified with octave
+        - transposedHz: the exact Hz value of the note we should render on screen (required? Maybe not..)
+
+        To compare _sound_ and _target_, we can
+        - check that task note matcheds transposed note (easy mode)
+        - check that soundInHz is close enough to perfectPitch
+      */
+      diffInCents = 1200 * Math.log2(soundInHz / perfectPitch);
+      isCloseEnough =
+        difficulty === DIFFICULTIES.HARD || difficulty === DIFFICULTIES.PERC
+          ? diffInCents && Math.abs(diffInCents) <= 3
+          : transposedNote === currentTaskNote;
+      offByHz = soundInHz - perfectPitch;
+      offByCentsPct = (diffInCents / 1200) * 100;
     }
-    // we also need octave info
-    nowPlayingOctave = selectConcertPitchOctave(autoCorrelateValue);
 
-    nowPlayingNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
-    nowPlayingHz = autoCorrelateValue;
-
-    const diffInCents =
-      1200 * Math.log2(autoCorrelateValue / notes[currentTaskNote]);
-    const isCorrect =
-      difficulty === DIFFICULTIES.HARD
-        ? diffInCents && Math.abs(diffInCents) <= 3
-        : `${nowPlayingNote}${nowPlayingOctave}` === currentTaskNote;
-
-    if (isCorrect) {
+    if (isCloseEnough) {
+      // we'll ignore some "odd" tones once we've seen a good one
+      // TODO: we may want less smoothing to make it pick up less
+      // voices speaking?
       ignoreImperfectionsCount = SMOOTHING_FACTOR;
       if (!celebrate) {
         if (nowPlayingRightLastTs) {
           nowPlayingRightDuration += Date.now() - nowPlayingRightLastTs;
         }
         nowPlayingRightLastTs = Date.now();
-        // nice work! but maybe have to hold it for some duration??
+        // nice work! but you have to hold it for some duration..
         if (
           nowPlayingRightDuration >=
           (difficulty === DIFFICULTIES.HARD
@@ -417,21 +460,12 @@
         ) {
           console.log('adding point because of ' + nowPlayingRightDuration);
           points++;
-          // we save data to server for each 10th point or after
-          // a given deadline
-          clearTimeout(saveTimeout);
-          saveTimeout = setTimeout(() => {
-            savePoints(points);
-          }, SAVE_DELAY_MS);
-          if (points % 10 === 0) {
-            clearTimeout(saveTimeout);
-            savePoints(points);
-          }
+          scheduleSavingPoints();
           celebrate = true;
           setTimeout(() => {
             celebrate = false;
             nextTask();
-          }, 500);
+          }, 600);
           return;
         }
       }
@@ -450,98 +484,24 @@
       }
     }
 
-    //      if (smoothingValue === 'none') {
-    //        smoothingThreshold = 99999;
-    //        smoothingCountThreshold = 0;
-    //      } else if (smoothingValue === 'basic') {
-    //        smoothingThreshold = 10;
-    //        smoothingCountThreshold = 5;
-    //      } else if (smoothingValue === 'very') {
-    //        smoothingThreshold = 5;
-    //        smoothingCountThreshold = 10;
-    //      }
-    //      function noteIsSimilarEnough() {
-    //        // Check threshold for number, or just difference for notes.
-    //        if (typeof(valueToDisplay) == 'number') {
-    //          return Math.abs(valueToDisplay - previousValueToDisplay) < smoothingThreshold;
-    //        } else {
-    //          return valueToDisplay === previousValueToDisplay;
-    //        }
-    //      }
-    //      // Check if this value has been within the given range for n iterations
-    //      if (noteIsSimilarEnough()) {
-    //        if (smoothingCount < smoothingCountThreshold) {
-    //          smoothingCount++;
-    //          return;
-    //        } else {
-    //          previousValueToDisplay = valueToDisplay;
-    //          smoothingCount = 0;
-    //        }
-    //      } else {
-    //        previousValueToDisplay = valueToDisplay;
-    //        smoothingCount = 0;
-    //        return;
-    //      }
-    //      if (typeof(valueToDisplay) == 'number') {
-    //        valueToDisplay += ' Hz';
-    //      }
-    drawTask(false);
-  };
-
-  function nextTask() {
-    let num = getRandomInt(0, selectedNotes.length - 1);
-    ignoreImperfectionsCount = SMOOTHING_FACTOR;
-    // Try to avoid the same note twice in a row
-    if (selectedNotes.length > 1) {
-      while (selectedNotes[num] === currentTaskNote) {
-        num = getRandomInt(0, selectedNotes.length - 1);
-      }
-    }
-    nowPlayingHz =
-      nowPlayingNote =
-      nowPlayingOctave =
-      nowPlayingRightLastTs =
-        null;
-    nowPlayingRightDuration = 0;
-    currentTaskNote = selectedNotes[num];
-    console.log({ num, currentTaskNote });
-    drawTask(true);
-  }
-
-  function drawTask(starting) {
-    if (!currentTaskNote) {
-      return;
-    }
-    // TODO: for greater efficiency, if nowPlayingNote is same as last time
-    // we might skip drawing things again
-    const npNoteValue =
-      nowPlayingNote && nowPlayingOctave > 1
-        ? `${nowPlayingNote}${nowPlayingOctave}`
-        : null;
-    const offByHz = nowPlayingHz ? notes[npNoteValue] - nowPlayingHz : null;
-    const offByHzPct = offByHz ? (offByHz / notes[npNoteValue]) * 100 : null;
-    const diffInCents = nowPlayingHz
-      ? 1200 * Math.log2(notes[currentTaskNote] / nowPlayingHz)
-      : null;
-
-    const isCorrect =
-      difficulty === DIFFICULTIES.HARD
-        ? diffInCents && Math.abs(diffInCents) <= 3
-        : npNoteValue === currentTaskNote;
-
-    if (wasCorrect && !isCorrect && !starting && ignoreImperfectionsCount > 0) {
-      return; // keep old rendering
+    if (
+      wasCloseEnough &&
+      !isCloseEnough &&
+      !starting &&
+      ignoreImperfectionsCount > 0
+    ) {
+      return; // keep old rendering (efficiency / battery saving..)
     }
     console.log({
-      offByHz,
-      offByHzPct,
+      isCloseEnough,
       diffInCents,
-      target: notes[currentTaskNote],
+      offByCentsPct,
+      offByHz,
+      soundInHz,
+      target: perfectPitch,
       nowPlayingRightDuration,
-      isCorrect,
-      npNoteValue,
+      playingNoteValue,
       currentTaskNote,
-      calcOpacity: Math.max(0.1, 1 - (Math.abs(offByHzPct) * 8) / 10),
     });
 
     const clef = userInstrument.clef || 'treble';
@@ -553,19 +513,25 @@
     stave.setKeySignature(availableNotes[0]);
     stave.setContext(context).draw();
     const voice = new Voice({
-      num_beats: difficulty === DIFFICULTIES.EASY ? 2 : 4,
+      num_beats:
+        difficulty === DIFFICULTIES.EASY || difficulty === DIFFICULTIES.PERC
+          ? 2
+          : 4,
       beat_value: 4,
     });
     if (currentTaskNote) {
       const taskNote = new StaveNote({
         keys: [toSlashNotation(currentTaskNote)],
         clef,
-        duration: difficulty === DIFFICULTIES.EASY ? 'h' : 'w',
+        duration:
+          difficulty === DIFFICULTIES.EASY || difficulty === DIFFICULTIES.PERC
+            ? 'h'
+            : 'w',
         align_center: true,
       });
       taskNote.setStyle({
-        fillStyle: isCorrect ? '#00a4d6' : 'black',
-        strokeStyle: isCorrect ? '#00a4d6' : 'black',
+        fillStyle: isCloseEnough ? '#00a4d6' : 'black',
+        strokeStyle: isCloseEnough ? '#00a4d6' : 'black',
       });
       voice.addTickables([taskNote]);
     }
@@ -574,20 +540,23 @@
 
     voice.draw(context, stave);
 
-    if (npNoteValue) {
+    if (transposedNote) {
       const npVoice = new Voice({
         num_beats: difficulty === DIFFICULTIES.EASY ? 2 : 4,
         beat_value: 4,
       });
       const nowPlayingStaveNote = new StaveNote({
-        keys: [toSlashNotation(npNoteValue)],
+        keys: [toSlashNotation(transposedNote)],
         clef,
-        duration: difficulty === DIFFICULTIES.EASY ? 'h' : 'w',
+        duration:
+          difficulty === DIFFICULTIES.EASY || difficulty === DIFFICULTIES.PERC
+            ? 'h'
+            : 'w',
         align_center: true,
       });
 
       npVoice.addTickables([nowPlayingStaveNote]);
-      Accidental.applyAccidentals([npVoice], 'C');
+      Accidental.applyAccidentals([npVoice], availableNotes[0]); // TODO: C ?
       new Formatter().joinVoices([npVoice]).format([npVoice], width * 0.93);
       npVoice.draw(context, stave);
 
@@ -596,25 +565,21 @@
 
       svg.setAttribute(
         'style',
-        `transform: translateY(${offByHzPct * 4}px);
-          fill: var(${isCorrect ? '--activeNoteColor' : '--dark'});
-          stroke: var(${isCorrect ? '--activeNoteColor' : '--dark'});
+        `transform: translateY(${parseInt(offByCentsPct / 12)}px);
+          fill: var(${isCloseEnough ? '--activeNoteColor' : '--dark'});
+          stroke: var(${isCloseEnough ? '--activeNoteColor' : '--dark'});
           fill-opacity: .5;
           stroke-opacity:.5;
           `
       );
     }
-    wasCorrect = isCorrect;
+    wasCloseEnough = isCloseEnough;
   }
   function stopGame() {
     mode = MODES.CONFIGURE;
     source.disconnect(analyser);
     cancelAnimationFrame(drawNoteVisual);
-    nowPlayingNote =
-      nowPlayingHz =
-      nowPlayingOctave =
-      nowPlayingRightLastTs =
-        null;
+    nowPlayingRightLastTs = null;
     nowPlayingRightDuration = 0;
     drawConfigNotes(availableNotes, octaves, userInstrument);
     savePoints(points);
@@ -632,6 +597,19 @@
       selectedScale = evt.target.value;
     }
   }
+
+  function scheduleSavingPoints() {
+    // we save data to server for each 10th point or after
+    // a given deadline
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      savePoints(points);
+    }, SAVE_DELAY_MS);
+    if (points % 10 === 0) {
+      clearTimeout(saveTimeout);
+      savePoints(points);
+    }
+  }
 </script>
 
 {#if user && user._id && user.instrument}
@@ -640,7 +618,7 @@
       message="Velg hvilke noter du vil øve på. Du kan velge en skala, klikke på noter du vil øve på, eller klikke og dra for å merke flere."
     />
   {:else if mode === MODES.PLAY}
-    <UsageHint message="Spill noten du ser!" />
+    <UsageHint message="Spill noten du ser til du får stjerne!" />
   {/if}
 
   <div class="parent">
