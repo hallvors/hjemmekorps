@@ -4,7 +4,7 @@
   import LinkedBoxList from '../LinkedBoxList/LinkedBoxList.svelte';
   let partslinks = project.partslist
     ? project.partslist.map(item => ({
-        href: `/prosjekt/${project._id}/${item.part}`,
+        href: `/prosjekt/${project._id}/${encodeURIComponent(item.part)}`,
         title: item.part,
       }))
     : [];
