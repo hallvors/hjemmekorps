@@ -244,7 +244,8 @@ export function selectScaleByNotes(scales, notes) {
     if (
       notes.reduce(
         (state, currentNote) =>
-          state && scales[scale].notes.includes(currentNote.replace(/\d+$/, '')),
+          state &&
+          scales[scale].notes.includes(currentNote.replace(/\d+$/, '')),
         true
       )
     ) {
@@ -255,13 +256,27 @@ export function selectScaleByNotes(scales, notes) {
 
 // given a note+octave value, move _offset_ steps up/down
 // return the note name after transposing
-export function transposeBySemiNotes(startNote, instrumentOffset, direction = 1) {
+export function transposeBySemiNotes(
+  startNote,
+  instrumentOffset,
+  direction = 1
+) {
   const start = semitones.indexOf(startNote);
   if (start === -1) {
     return null;
   }
-  console.log('transposing ' + startNote + ' ' + instrumentOffset + ' semitones to ' + semitones[start + instrumentOffset]);
-  return semitones[start + (instrumentOffset * direction)];
+  console.log(
+    'transposing ' +
+      startNote +
+      ' ' +
+      instrumentOffset +
+      ' semitones to ' +
+      semitones[start + instrumentOffset * direction] +
+      '(' +
+      notes[semitones[start + instrumentOffset * direction]] +
+      ')'
+  );
+  return semitones[start + instrumentOffset * direction];
 }
 
 export function toSlashNotation(noteNameWithOctave) {

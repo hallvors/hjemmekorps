@@ -667,15 +667,15 @@
       brightness(60%) contrast(101%);
     -webkit-filter: invert(29%) sepia(82%) saturate(4448%) hue-rotate(174deg)
       brightness(60%) contrast(101%);
-    fill: #00a4d6;
-    stroke: #00a4d6;
+    fill: #00994a;
+    stroke: #00994a;
   }
 
   :global(svg) {
     max-width: 100%;
   }
   :global(.staffOverlay) {
-    fill: #00a4d6;
+    fill: #00994a;
     fill-opacity: 0.15;
   }
   :global(.measureOverlay) {

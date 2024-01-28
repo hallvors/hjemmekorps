@@ -108,7 +108,7 @@
       "title": "Melodisk slagverk",
       "value": "pitched_percussion",
       "transpose": 0.5,
-      "transposeSemi": 12
+      "transposeSemi": -24
     },
     { "title": "Perkusjon", "value": "percussion" },
     { "title": "Trommesett", "value": "drum" },

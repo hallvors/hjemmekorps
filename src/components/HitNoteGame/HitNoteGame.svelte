@@ -52,16 +52,17 @@
       notes: ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'],
     },
   };
-
+  const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
+  const DIFFICULTIES = { EASY: 1, HARD: 2, PERC: 3 };
+  const CLOSE_ENOUGH_CENTS = 3.5;
   function selectConcertPitchOctave(hz) {
     for (let i = 0; i < noteNames.length; i++) {
-      if (notes[noteNames[i]] > hz) {
+      if (parseInt(notes[noteNames[i]]) === hz) {
+        return parseInt(noteNames[i].match(/\d+/)[0]);
+      }
+      if (parseInt(notes[noteNames[i]]) > hz) {
         // we've found the first note greater than this hz value
-        // but is the hz closer to notes[i] or notes[i-1] ?
-        if (hz > (notes[noteNames[i]] + notes[noteNames[i - 1]]) / 2) {
-          // [i] is closest match
-          return parseInt(noteNames[i].match(/\d+/)[0]);
-        }
+        // so the hz range belongs in the octave _below_
         return parseInt(noteNames[i - 1].match(/\d+/)[0]);
       }
     }
@@ -80,14 +81,16 @@
     'B',
   ];
   console.log({ availableNotes, queryNotes, selectedNotes, user });
-  const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
-  const DIFFICULTIES = { EASY: 1, HARD: 2, PERC: 3 };
   let difficulty;
   let mode = MODES.CONFIGURE;
   let celebrate = false;
   let octaves;
   let renderer, context, stave, width, drawNoteVisual;
-  let currentTaskNote, nowPlayingRightLastTs, selectedScale;
+  let currentTaskNote,
+    currentTaskNoteTransposed,
+    currentTaskHzTransposed,
+    nowPlayingRightLastTs,
+    selectedScale;
   let nowPlayingRightDuration = 0;
   let analyser, audioContext, source;
   let points = 0;
@@ -360,6 +363,18 @@
     nowPlayingRightLastTs = null;
     nowPlayingRightDuration = 0;
     currentTaskNote = selectedNotes[num];
+    currentTaskNoteTransposed = userInstrument?.transposeSemi
+      ? transposeBySemiNotes(currentTaskNote, userInstrument.transposeSemi, -1)
+      : currentTaskNote;
+    currentTaskHzTransposed = notes[currentTaskNoteTransposed];
+    console.log({
+      screenNote: currentTaskNote,
+      hz: notes[currentTaskNote],
+      trans: userInstrument.transposeSemi,
+      currentTaskNoteTransposed,
+      currentTaskHzTransposed,
+      old: notes[currentTaskNote] / userInstrument.transpose,
+    });
     checkResultsAndDrawOutput(true);
   }
 
@@ -387,55 +402,51 @@
     let isCloseEnough = false,
       offByHz = null,
       offByCentsPct = null,
+      offFromPlayingNoteByCentsPct = null,
       diffInCents = null,
-      perfectPitch = null,
       playingNoteValue = null,
-      transposedHz = null,
       transposedNote = null;
     if (soundInHz) {
       const nowPlayingOctave = selectConcertPitchOctave(soundInHz);
       const nowPlayingNote = noteStrings[noteFromPitch(soundInHz) % 12];
-      playingNoteValue =
+      playingNoteValue = // not transposed note
         nowPlayingNote && nowPlayingOctave > 1
           ? `${nowPlayingNote}${nowPlayingOctave}`
           : null;
-      perfectPitch = notes[currentTaskNote];
-      transposedHz = soundInHz;
       transposedNote = playingNoteValue;
-      // transposing instrument? Change value to the Hz value
-      // corresponding to the note we actually want to see on
-      // the screen..
+      // transposing instrument? Look up the note we actually want
+      // to see on the screen for the pitch the user plays..
       if (userInstrument.transposeSemi !== undefined) {
         transposedNote = transposeBySemiNotes(
           playingNoteValue,
           userInstrument.transposeSemi
         );
-        transposedHz = notes[transposedNote];
-
-        const transposedTaskNote = transposeBySemiNotes(
-          currentTaskNote,
-          userInstrument.transposeSemi,
-          -1
-        );
-        perfectPitch = notes[transposedTaskNote];
       }
       /*
         Now we have these inputs:
         - playingNoteValue: the non-transposed ("piano") note closest to the Hz value we're hearing, with octave
-        - perfectPitch: the exact Hz value of the _transposed_ equivalent of the randomly selected note, our "target"
         - transposedNote: the note the musician expects to see on screen from the sound! Fully qualified with octave
-        - transposedHz: the exact Hz value of the note we should render on screen (required? Maybe not..)
+        - currentTaskHzTransposed: the exact Hz value of the _transposed_ equivalent of the randomly selected note, our "target"
 
         To compare _sound_ and _target_, we can
         - check that task note matcheds transposed note (easy mode)
-        - check that soundInHz is close enough to perfectPitch
+        - check that soundInHz is close enough to currentTaskHzTransposed
       */
-      diffInCents = 1200 * Math.log2(soundInHz / perfectPitch);
+      diffInCents = 1200 * Math.log2(soundInHz / currentTaskHzTransposed);
+      offFromPlayingNoteByCentsPct =
+        ((1200 * Math.log2(soundInHz / notes[transposedNote])) / 1200) * 100;
+      console.log({
+        playingNoteValue,
+        transposedNote,
+        diffInCents,
+        offFromPlayingNoteByCentsPct,
+      });
+
       isCloseEnough =
         difficulty === DIFFICULTIES.HARD || difficulty === DIFFICULTIES.PERC
-          ? diffInCents && Math.abs(diffInCents) <= 3
+          ? diffInCents && Math.abs(diffInCents) <= CLOSE_ENOUGH_CENTS
           : transposedNote === currentTaskNote;
-      offByHz = soundInHz - perfectPitch;
+      offByHz = soundInHz - currentTaskHzTransposed;
       offByCentsPct = (diffInCents / 1200) * 100;
     }
 
@@ -498,7 +509,7 @@
       offByCentsPct,
       offByHz,
       soundInHz,
-      target: perfectPitch,
+      target: currentTaskHzTransposed,
       nowPlayingRightDuration,
       playingNoteValue,
       currentTaskNote,
@@ -530,8 +541,8 @@
         align_center: true,
       });
       taskNote.setStyle({
-        fillStyle: isCloseEnough ? '#00a4d6' : 'black',
-        strokeStyle: isCloseEnough ? '#00a4d6' : 'black',
+        fillStyle: isCloseEnough ? '#00994a' : 'black',
+        strokeStyle: isCloseEnough ? '#00994a' : 'black',
       });
       voice.addTickables([taskNote]);
     }
@@ -565,9 +576,14 @@
 
       svg.setAttribute(
         'style',
-        `transform: translateY(${parseInt(offByCentsPct / 12)}px);
-          fill: var(${isCloseEnough ? '--activeNoteColor' : '--dark'});
-          stroke: var(${isCloseEnough ? '--activeNoteColor' : '--dark'});
+        `transform: translateY(${tweakNotePosition(
+          offFromPlayingNoteByCentsPct,
+          isCloseEnough
+        )}px);
+          fill: var(${isCloseEnough ? '--activeNoteColor' : '--contrastColor'});
+          stroke: var(${
+            isCloseEnough ? '--activeNoteColor' : '--contrastColor'
+          });
           fill-opacity: .5;
           stroke-opacity:.5;
           `
@@ -575,6 +591,18 @@
     }
     wasCloseEnough = isCloseEnough;
   }
+
+  function tweakNotePosition(offByCentsPct, isCloseEnough) {
+    if (isCloseEnough) {
+      return 0;
+    }
+    if (offByCentsPct < 0) {
+      return Math.max(Math.ceil(offByCentsPct * 1.5) - 2, -6);
+    } else {
+      return Math.min(Math.ceil(offByCentsPct * 1.5) + 2, 6);
+    }
+  }
+
   function stopGame() {
     mode = MODES.CONFIGURE;
     source.disconnect(analyser);
@@ -631,7 +659,7 @@
         {/each}
       </select>
     {/if}
-    {#if mode === MODES.PLAY}
+    {#if mode === MODES.PLAY && nowPlayingRightDuration > 0}
       <div class="progress">
         <ProgressIndicator
           instrument={user.instrument}
