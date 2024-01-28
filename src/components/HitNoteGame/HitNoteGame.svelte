@@ -237,19 +237,34 @@
         }
       }
     }
-    sheetmusicElm.addEventListener('mouseup', cndStop, true);
+    // Attach this handler to _document_ to cancel drag-to-select even if
+    // drag ends outside SVG
+    document.addEventListener('mouseup', cndStop, true);
     function cndMoveSelectNotes(evt) {
       if (cndLassoPositions.x !== undefined) {
         const x = getEvtX(evt, cndLassoPositions.touchId);
         const y = getEvtY(evt, cndLassoPositions.touchId);
-        // We don't support right-to-left selections, sorry
-        if (x < cndLassoPositions.x || y < cndLassoPositions.y) {
-          cndStop(evt);
-          return;
+        if (x < cndLassoPositions.x) {
+          // right-to-left
+          const old = cndLassoPositions.x;
+          cndLassoPositions.x = x;
+          cndLassoPositions.width += old - x;
+        } else if (x > cndLassoPositions.x) {
+          // left-to-rigth
+          cndLassoPositions.width = x - cndLassoPositions.x;
         }
 
-        cndLassoPositions.width = x - cndLassoPositions.x;
-        cndLassoPositions.height = y - cndLassoPositions.y;
+        if (y < cndLassoPositions.y) {
+          // bottom-to-top
+          if (cndLassoPositions.y - y > 2) {
+            const old = cndLassoPositions.y;
+            cndLassoPositions.y = y;
+            cndLassoPositions.height += Math.ceil(old - y);
+          }
+        } else if (y > cndLassoPositions.y) {
+          // top-to-bottom
+          cndLassoPositions.height = y - cndLassoPositions.y;
+        }
         const elms = document.querySelectorAll('[data-notevalue]');
         let changed;
         for (let i = 0; i < elms.length; i++) {
