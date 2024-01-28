@@ -437,6 +437,9 @@
           userInstrument.transposeSemi
         );
       }
+      if (!transposedNote) {
+        return;
+      }
       /*
         Now we have these inputs:
         - playingNoteValue: the non-transposed ("piano") note closest to the Hz value we're hearing, with octave
@@ -451,6 +454,7 @@
       offFromPlayingNoteByCentsPct =
         ((1200 * Math.log2(soundInHz / notes[transposedNote])) / 1200) * 100;
       console.log({
+        soundInHz,
         playingNoteValue,
         transposedNote,
         diffInCents,
@@ -568,7 +572,7 @@
 
     if (transposedNote) {
       const npVoice = new Voice({
-        num_beats: difficulty === DIFFICULTIES.EASY ? 2 : 4,
+        num_beats: difficulty === DIFFICULTIES.EASY || difficulty === DIFFICULTIES.PERC ? 2 : 4,
         beat_value: 4,
       });
       const nowPlayingStaveNote = new StaveNote({
@@ -586,23 +590,33 @@
       new Formatter().joinVoices([npVoice]).format([npVoice], width * 0.93);
       npVoice.draw(context, stave);
 
-      // extra intonation correctness indication
       const svg = nowPlayingStaveNote.getSVGElement();
-
-      svg.setAttribute(
-        'style',
-        `transform: translateY(${tweakNotePosition(
-          offFromPlayingNoteByCentsPct,
-          isCloseEnough
-        )}px);
-          fill: var(${isCloseEnough ? '--activeNoteColor' : '--contrastColor'});
-          stroke: var(${
-            isCloseEnough ? '--activeNoteColor' : '--contrastColor'
-          });
-          fill-opacity: .5;
-          stroke-opacity:.5;
-          `
-      );
+      if (transposedNote === currentTaskNote) {
+        // extra intonation correctness indication
+        svg.setAttribute(
+          'style',
+          `transform: translateY(${tweakNotePosition(
+            offFromPlayingNoteByCentsPct,
+            isCloseEnough
+          )}px);
+            fill: var(${isCloseEnough ? '--activeNoteColor' : '--contrastColor'});
+            stroke: var(${
+              isCloseEnough ? '--activeNoteColor' : '--contrastColor'
+            });
+            fill-opacity: .85;
+            stroke-opacity:.85;
+            `
+        );
+      } else {
+        svg.setAttribute(
+          'style',
+          `fill: var(--contrastColor);
+            stroke: var(--contrastColor);
+            fill-opacity: .5;
+            stroke-opacity:.5;
+            `
+        );
+      }
     }
     wasCloseEnough = isCloseEnough;
   }
@@ -611,11 +625,14 @@
     if (isCloseEnough) {
       return 0;
     }
+    let value;
     if (offByCentsPct < 0) {
-      return Math.max(Math.ceil(offByCentsPct * 1.5) - 2, -6);
+      value = Math.max(Math.round(offByCentsPct / 100) - 2, -7);
     } else {
-      return Math.min(Math.ceil(offByCentsPct * 1.5) + 2, 6);
+      value = Math.min(Math.round(offByCentsPct / 100) + 2, 7);
     }
+    console.log({offByCentsPct, tweakValue: value})
+    return value;
   }
 
   function stopGame() {

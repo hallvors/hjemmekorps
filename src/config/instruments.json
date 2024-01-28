@@ -46,7 +46,7 @@
       "clef": "treble",
       "key": "Bb",
       "transpose": 2.247765006385696,
-      "transposeSemi": 14
+      "transposeSemi": 2
     },
     {
       "title": "Barytonsaxofon",
@@ -54,7 +54,7 @@
       "clef": "treble",
       "key": "Eb",
       "transpose": 3.36361778928012,
-      "transposeSemi": 26
+      "transposeSemi": 21
     },
     {
       "title": "Kornett",
