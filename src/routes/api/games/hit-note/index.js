@@ -1,5 +1,9 @@
 const { sql } = require('slonik');
 import * as env from '../../../../config/environment';
+import {
+  getHitNoteStatsForAdmin,
+  getHitNoteStatsForMember,
+} from '../../../../lib/db-queries';
 
 export async function get(req, res, next) {
   // We want to get various stats.. Sort of doodling, but what about
@@ -12,125 +16,13 @@ export async function get(req, res, next) {
   // Maybe weekly, monthly are also interesting..? Maybe too much..
 
   try {
-    const results = await env.slonik.connect(client => {
-      return Promise.allSettled([
-        // user TODAY
-        client.query(
-          sql`SELECT points FROM hit_note_game WHERE user_id = ${req.user._id} AND date = CURRENT_DATE`
-        ),
-        // band TODAY
-        client.query(
-          sql`SELECT SUM(points) as points FROM hit_note_game WHERE band_id = ${req.user.band._id} AND date = CURRENT_DATE`
-        ),
-        // band subgroup TODAY
-        client.query(
-          sql`SELECT SUM(points) as points FROM hit_note_game WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup} AND date = CURRENT_DATE`
-        ),
-        // raw data for user STREAK
-        client.query(sql`WITH date_with_prev AS (
-        SELECT
-          date,
-          LAG(date) OVER (ORDER BY date) AS prev_date
-        FROM
-          hit_note_game
-        WHERE user_id = ${req.user._id}
-      )
-      SELECT
-        date,
-        prev_date,
-        date - prev_date AS diff,
-        CASE
-          WHEN date - prev_date = 1 THEN 'streak'
-          WHEN date - prev_date > 1 THEN 'start'
-          WHEN prev_date IS NULL THEN 'start'
-          ELSE 'end'
-        END AS streak_status
-      FROM
-        date_with_prev;
-      `),
-        // raw data for band STREAK
-        client.query(sql`WITH date_with_prev AS (
-        SELECT
-          date,
-          LAG(date) OVER (ORDER BY date) AS prev_date
-        FROM
-          hit_note_game
-        WHERE band_id = ${req.user.band._id}
-      )
-      SELECT
-        date,
-        prev_date,
-        date - prev_date AS diff,
-        CASE
-          WHEN date - prev_date = 1 THEN 'streak'
-          WHEN date - prev_date > 1 THEN 'start'
-          WHEN prev_date IS NULL THEN 'start'
-          ELSE 'end'
-        END AS streak_status
-      FROM
-        date_with_prev;
-      `),
-        // raw data for band subgroup STREAK
-        client.query(sql`WITH date_with_prev AS (
-        SELECT
-          date,
-          LAG(date) OVER (ORDER BY date) AS prev_date
-        FROM
-          hit_note_game
-        WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup}
-      )
-      SELECT
-        date,
-        prev_date,
-        date - prev_date AS diff,
-        CASE
-          WHEN date - prev_date = 1 THEN 'streak'
-          WHEN date - prev_date > 1 THEN 'start'
-          WHEN prev_date IS NULL THEN 'start'
-          ELSE 'end'
-        END AS streak_status
-      FROM
-        date_with_prev;
-      `),
-        // user TOTALS
-        client.query(
-          sql`SELECT SUM(points) AS points FROM hit_note_game WHERE user_id = ${req.user._id}`
-        ),
-        // band TOTALS
-        client.query(
-          sql`SELECT SUM(points) AS points FROM hit_note_game WHERE band_id = ${req.user.band._id}`
-        ),
-        // band subgroup TOTALS
-        client.query(
-          sql`SELECT SUM(points) AS points FROM hit_note_game WHERE band_id = ${req.user.band._id} AND subgroup = ${req.user.subgroup}`
-        ),
-      ]);
-    });
-    console.log(results.map((obj, idx) => [idx, JSON.stringify(obj.value.rows)]));
+    const statsForMembers = req.user._type === 'member';
+    const bandId = statsForMembers ? req.user.band._id : req.query.band;
+    const results = statsForMembers
+      ? await getHitNoteStatsForMember(bandId, req.user._id, req.user.subgroup)
+      : await getHitNoteStatsForAdmin(bandId);
 
-    res.json({
-      userPointsToday: results[0].value.rows[0]?.points || 0,
-      bandPointsToday: results[1].value.rows[0]?.points || 0,
-      groupPointsToday: results[2].value.rows[0]?.points || 0,
-      userStreak:
-        results[3].value.rows.length -
-        results[3].value.rows
-          .map(row => row.streak_status)
-          .lastIndexOf('start'),
-      bandStreak:
-        results[4].value.rows.length -
-        results[4].value.rows
-          .map(row => row.streak_status)
-          .lastIndexOf('start'),
-      groupStreak:
-        results[5].value.rows.length -
-        results[5].value.rows
-          .map(row => row.streak_status)
-          .lastIndexOf('start'),
-      userPointsTotal: results[6].value.rows[0]?.points || 0,
-      bandPointsTotal: results[7].value.rows[0]?.points || 0,
-      groupPointsTotal: results[8].value.rows[0]?.points || 0,
-    });
+    res.json(results);
   } catch (err) {
     console.error(err);
     next(err);
