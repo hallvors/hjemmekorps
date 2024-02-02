@@ -219,6 +219,9 @@
   }
 
   var theBox;
+  export function loadCustomHitNoteGame() {
+    theBox.loadCustomHitNoteGame();
+  }
 </script>
 
 <LibLoader

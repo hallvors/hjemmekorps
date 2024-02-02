@@ -13,6 +13,7 @@
     numberToTempoUnit,
     STANDARD_BPM,
   } from '../../lib/osmd_helpers';
+  import { getNoteNameByPitch } from '../../lib/notes';
   const dispatch = createEventDispatcher();
 
   export let project;
@@ -630,6 +631,36 @@
     );
   }
 
+  function getAllNotesInPiece() {
+    const notes = [];
+    sheetMusicRenderer.graphic.MeasureList.forEach(outerList => {
+      outerList.forEach(innerList => {
+        innerList.staffEntries.forEach(staffEntry => {
+          staffEntry.graphicalVoiceEntries.forEach(voiceEntry => {
+            voiceEntry.notes.forEach(note => {
+              console.log(note, note.sourceNote.Pitch)
+              if (note.sourceNote && note.sourceNote.Pitch) {
+                const noteWithOctave = getNoteNameByPitch(
+                  note.sourceNote.Pitch.frequency
+                );
+                if (!notes.includes(noteWithOctave)) {
+                  notes.push(noteWithOctave);
+                }
+              }
+            });
+          });
+        });
+      });
+    });
+    return notes;
+  }
+
+  export function loadCustomHitNoteGame() {
+    const notes = getAllNotesInPiece();
+    const url = `/lek/treffnoten?noter=${notes.join(',')}`;
+    top.location.href = url;
+  }
+
   let winHeight;
 </script>
 
@@ -649,7 +680,7 @@
   <div class="loading">
     <Loading
       message={loadingMessage}
-      subMessage='Husk å bruke høretelefoner!'
+      subMessage="Husk å bruke høretelefoner!"
     />
   </div>
 {/if}

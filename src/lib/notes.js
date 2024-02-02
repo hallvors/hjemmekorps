@@ -236,6 +236,21 @@ export function getNotesMappedToOctave(scale, startingOctave) {
   });
 }
 
+export function getNoteNameByPitch(pitchInHz) {
+  // shortcut: b - keys are most used in our scores, hence semitones
+  for (const note of semitones) {
+    if (notes[note] === pitchInHz) {
+      return note;
+    }
+  }
+  // no hit? I don't think those decimals really matter..
+  for (const note of semitones) {
+    if (Math.floor(notes[note]) === Math.floor(pitchInHz)) {
+      return note;
+    }
+  }
+}
+
 // For a list of notes - for example ['C4', 'Bb4', 'D4'], select
 // a scale that contains these notes if available. Might return
 // nothing. (TODO: support more scales..)

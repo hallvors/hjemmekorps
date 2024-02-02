@@ -15,6 +15,7 @@
   import Loading from '../../../components/Loading/Loading.svelte';
   import { user, bands } from '../../../lib/datastore';
   import TracksPlayer from '../../../components/TracksPlayer/TracksPlayer.svelte';
+  import Button from '../../../components/Button/Button.svelte';
   let recordings = [];
   let project;
   let message = 'Henter noter og opptak...';
@@ -74,6 +75,10 @@
       tracksPlayer.stop();
     }
   }
+  let rUI;
+  function loadCustomHitNoteGame() {
+    rUI.loadCustomHitNoteGame();
+  }
 </script>
 
 <div class="main-wrapper">
@@ -88,6 +93,7 @@
           on:measuretime={evt => {
             if (tracksPlayer) tracksPlayer.jump(evt.detail.time);
           }}
+          bind:this={rUI}
         />
         <div slot="aside">
           {#if ENABLE_LISTEN_WHILE_RECORDING && recordings && recordings.length}
@@ -111,6 +117,14 @@
               >
             </p>
           {/if}
+        <p>
+          Trenger du å øve litt ekstra?
+        </p>
+      <div>
+        <Button onClick={loadCustomHitNoteGame} small={true}
+          >Øv <b>disse</b> notene i Treff noten!</Button
+        >
+      </div>
         </div>
         {#if activeRecordings && activeRecordings.length}
           <TracksPlayer
