@@ -6,7 +6,8 @@
       "clef": "treble",
       "key": "C",
       "transpose": 1,
-      "transposeSemi": 0
+      "transposeSemi": 0,
+      "rangeTo": "E6"
     },
     {
       "title": "Klarinett",
@@ -94,7 +95,9 @@
       "clef": "bass",
       "key": "Bb",
       "transpose": 1,
-      "transposeSemi": 0
+      "transposeSemi": 0,
+      "rangeFrom": "C2",
+      "rangeTo": "D4"
     },
     {
       "title": "Tuba",

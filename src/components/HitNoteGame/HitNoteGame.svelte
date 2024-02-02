@@ -30,6 +30,8 @@
     toSlashNotation,
     selectScaleByNotes,
     transposeBySemiNotes,
+    prependNotesTo,
+    appendNotesTo,
   } from '../../lib/notes';
   import { autoCorrelate } from '../../lib/pitch';
   import { instruments } from '../../lib/datastore';
@@ -105,7 +107,8 @@
   const SAVE_DELAY_MS = 5000;
   let userInstrument;
   let cndLassoPositions = {};
-
+  // noteNames is array of plain names without octave info - ['C', 'D', 'E' ...]
+  // octaves is array of octaves - [4,5]
   function drawConfigNotes(noteNames, octaves, instrument) {
     if (context) {
       context.clear();
@@ -117,27 +120,41 @@
     keySig.addToStave(stave);
     stave.setKeySignature(availableNotes[0]);
     stave.setContext(context).draw();
+
+    const octaveNotes = octaves
+      .map(octaveNum => getNotesMappedToOctave(noteNames, octaveNum))
+      .flat();
+    // Handle instrument ranges: expand available notes upwards or downwards
+    // until instrument range is covered
+    if (
+      instrument.rangeFrom &&
+      octaveNotes.indexOf(instrument.rangeFrom) === -1
+    ) {
+      prependNotesTo(octaveNotes, noteNames, instrument.rangeFrom);
+    }
+    if (instrument.rangeTo && octaveNotes.indexOf(instrument.rangeTo) === -1) {
+      appendNotesTo(octaveNotes, noteNames, instrument.rangeTo);
+    }
     const voice = new Voice({
-      num_beats: noteNames.length * octaves.length,
+      num_beats: octaveNotes.length,
       beat_value: 4,
     });
+
     const notes = [];
 
-    octaves.forEach(octave => {
-      getNotesMappedToOctave(noteNames, octave).forEach(valueWithOctave => {
-        const staveNote = new StaveNote({
-          keys: [toSlashNotation(valueWithOctave)],
-          clef,
-          duration: 'q',
-        });
-        const isActive = selectedNotes.includes(valueWithOctave);
-        staveNote.setStyle({
-          fillStyle: isActive ? 'var(--activeNoteColor)' : 'grey',
-          strokeStyle: isActive ? 'var(--activeNoteColor)' : 'grey',
-        });
-        staveNote.setAttribute('data-notevalue', valueWithOctave);
-        notes.push(staveNote);
+    octaveNotes.forEach(valueWithOctave => {
+      const staveNote = new StaveNote({
+        keys: [toSlashNotation(valueWithOctave)],
+        clef,
+        duration: 'q',
       });
+      const isActive = selectedNotes.includes(valueWithOctave);
+      staveNote.setStyle({
+        fillStyle: isActive ? 'var(--activeNoteColor)' : 'grey',
+        strokeStyle: isActive ? 'var(--activeNoteColor)' : 'grey',
+      });
+      staveNote.setAttribute('data-notevalue', valueWithOctave);
+      notes.push(staveNote);
     });
 
     voice.addTickables(notes);
@@ -572,7 +589,10 @@
 
     if (transposedNote) {
       const npVoice = new Voice({
-        num_beats: difficulty === DIFFICULTIES.EASY || difficulty === DIFFICULTIES.PERC ? 2 : 4,
+        num_beats:
+          difficulty === DIFFICULTIES.EASY || difficulty === DIFFICULTIES.PERC
+            ? 2
+            : 4,
         beat_value: 4,
       });
       const nowPlayingStaveNote = new StaveNote({
@@ -599,7 +619,9 @@
             offFromPlayingNoteByCentsPct,
             isCloseEnough
           )}px);
-            fill: var(${isCloseEnough ? '--activeNoteColor' : '--contrastColor'});
+            fill: var(${
+              isCloseEnough ? '--activeNoteColor' : '--contrastColor'
+            });
             stroke: var(${
               isCloseEnough ? '--activeNoteColor' : '--contrastColor'
             });

@@ -254,6 +254,75 @@ export function selectScaleByNotes(scales, notes) {
   }
 }
 
+// gets for example ['C4', 'D4' .. ], ['C', 'D', 'E'...] and 'E3'
+// should add notes at start of noteArray (yes, this modifies input - sue me)
+// until  the first note is E3
+export function prependNotesTo(noteArray, scale, newStartingNote) {
+  const originalStartNoteParts = noteArray[0].match(/([A-Gb#]+)(\d+)/);
+  const newStartNoteParts = newStartingNote.match(/([A-Gb#]+)(\d+)/);
+  if (originalStartNoteParts) {
+    const noteName = originalStartNoteParts[1];
+    let octave = parseInt(originalStartNoteParts[2]);
+
+    // check if the desired starting note is higher in the scale
+    // than current starting note
+    if (
+      parseInt(newStartNoteParts[2]) > octave ||
+      (parseInt(newStartNoteParts[2]) === octave &&
+        scale.indexOf(newStartNoteParts[1]) >= scale.indexOf(noteName))
+    ) {
+      return;
+    }
+
+    let nextNoteIndex = scale.indexOf(noteName) - 1;
+    if (nextNoteIndex === -1) {
+      nextNoteIndex = scale.length - 1;
+      octave--;
+    }
+    while (noteArray[0] !== newStartingNote && octave > -1) {
+      noteArray.unshift(`${scale[nextNoteIndex]}${octave}`);
+      nextNoteIndex--;
+      if (nextNoteIndex === -1) {
+        nextNoteIndex = scale.length - 1;
+        octave--;
+      }
+    }
+  }
+}
+export function appendNotesTo(noteArray, scale, newEndingNote) {
+  const originalStartNoteParts =
+    noteArray[noteArray.length - 1].match(/([A-Gb#]+)(\d+)/);
+  const newEndingNoteParts = newEndingNote.match(/([A-Gb#]+)(\d+)/);
+  if (originalStartNoteParts) {
+    const noteName = originalStartNoteParts[1];
+    let octave = parseInt(originalStartNoteParts[2]);
+    // check if the desired starting note is earlier in the scale
+    // than current starting note
+    if (
+      parseInt(newEndingNoteParts[2]) < octave ||
+      (parseInt(newEndingNoteParts[2]) === octave &&
+        scale.indexOf(newEndingNoteParts[1]) <= scale.indexOf(noteName))
+    ) {
+      return;
+    }
+
+    let nextNoteIndex = scale.indexOf(noteName) + 1;
+    if (nextNoteIndex >= scale.length) {
+      nextNoteIndex = 0;
+      octave++;
+    }
+    while (noteArray[noteArray.length - 1] !== newEndingNote && octave < 12) {
+      // random-ish octave limit to not run forever
+      noteArray.push(`${scale[nextNoteIndex]}${octave}`);
+      nextNoteIndex++;
+      if (nextNoteIndex >= scale.length) {
+        nextNoteIndex = 0;
+        octave++;
+      }
+    }
+  }
+}
+
 // given a note+octave value, move _offset_ steps up/down
 // return the note name after transposing
 export function transposeBySemiNotes(
