@@ -1,9 +1,12 @@
 <script>
   export let onClick = () => {};
   export let type = 'button';
+  export let small = false;
 </script>
 
-<button {type} on:click={onClick}><slot /></button>
+<button {type} on:click={onClick} class={small ? 'small' : 'large'}
+  ><slot /></button
+>
 
 <style>
   button {
@@ -15,6 +18,10 @@
     border: 2px solid;
     padding: 1vw 2vw;
     border-color: var(--secondaryColor);
+  }
+
+  button.small {
+    font-size: 1.6vw;
   }
 
   button:hover,
@@ -31,6 +38,13 @@
   button::before {
     content: '♪♪ ';
     color: var(--activeNoteColor);
+  }
+  button.small::after {
+    content: none;
+    color: var(--activeNoteColor);
+  }
+  button.small::before {
+    content: none;
   }
   @keyframes pulse {
     0% {
