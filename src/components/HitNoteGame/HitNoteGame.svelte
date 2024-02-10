@@ -157,6 +157,11 @@
         strokeStyle: isActive ? 'var(--activeNoteColor)' : 'grey',
       });
       staveNote.setAttribute('data-notevalue', valueWithOctave);
+      staveNote.setAttribute(
+        'data-selected',
+        isActive ? 'selected' : 'unselected'
+      );
+      staveNote.setAttribute('pointer-events', 'bounding-box');
       notes.push(staveNote);
     });
 
@@ -166,11 +171,14 @@
     new Formatter().joinVoices([voice]).format([voice], width * 0.9);
 
     voice.draw(context, stave);
-    notes.forEach(note =>
-      note
-        .getSVGElement()
-        .setAttribute('data-notevalue', note.getAttribute('data-notevalue'))
-    );
+    notes.forEach(note => {
+      // Note is drawn, so we now have an SVG element
+      const svg = note.getSVGElement();
+      svg.setAttribute('data-notevalue', note.getAttribute('data-notevalue'));
+      svg.setAttribute('pointer-events', 'bounding-box');
+      // VF should have .addClass() but it seems to not add anything
+      svg.classList.add('selected', note.getAttribute('data-selected'));
+    });
   }
 
   onMount(async function () {

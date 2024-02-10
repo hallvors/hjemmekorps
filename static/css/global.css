@@ -3,12 +3,13 @@
   --dark: #333;
 
   --textColorDark: #333;
+  --textColorLessDark: #5b5a5a;
   --textColorLight: #fbfbfb;
 
   --mainColor: #55bcc6;
   --secondaryColor: #3feee6;
   --contrastColor: #fc4445;
-  --activeNoteColor: #00a4d6;
+  --activeNoteColor: #077afd;
 
   --border: 1px solid #333;
   --shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
@@ -31,8 +32,8 @@ body {
 
 body {
   color: var(--textColorDark);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 
   background-color: var(--mainColor);
 }
@@ -81,7 +82,7 @@ ul a {
 }
 /*
 a:visited {
-   color: rgb(96, 119, 143); 
+   color: rgb(96, 119, 143);
 }*/
 
 label {
@@ -122,4 +123,16 @@ button:not(:disabled):active {
 
 button:focus {
   border-color: #666;
+}
+
+/*
+Vexflow notes in Hit note game
+*/
+.vf-stavenote:hover {
+  stroke: var(--dark);
+  fill: var(--dark);
+}
+.vf-stavenote.selected:hover {
+  stroke: var(--activeNoteColor);
+  fill: var(--activeNoteColor);
 }
