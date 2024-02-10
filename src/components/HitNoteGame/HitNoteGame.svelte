@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
   export let user;
   export let queryNotes;
   import {
@@ -89,6 +90,7 @@
   let difficulty;
   let mode = MODES.CONFIGURE;
   let celebrate = false;
+  let bigParty = false;
   let octaves;
   let renderer, context, stave, width, drawNoteVisual;
   let currentTaskNote,
@@ -491,7 +493,8 @@
 
       isCloseEnough =
         difficulty === DIFFICULTIES.HARD || difficulty === DIFFICULTIES.PERC
-          ? diffInCents && Math.abs(diffInCents) <= (CLOSE_ENOUGH_CENTS + difficultyAdjustment)
+          ? diffInCents &&
+            Math.abs(diffInCents) <= CLOSE_ENOUGH_CENTS + difficultyAdjustment
           : transposedNote === currentTaskNote;
       offByHz = soundInHz - currentTaskHzTransposed;
       offByCentsPct = (diffInCents / 1200) * 100;
@@ -522,7 +525,15 @@
           celebrate = true;
           setTimeout(() => {
             celebrate = false;
-            nextTask();
+            if (points > 1 && points % 15 === 0) {
+              bigParty = true;
+              setTimeout(() => {
+                bigParty = false;
+                nextTask();
+              }, 3000);
+            } else {
+              nextTask();
+            }
           }, 600);
           return;
         }
@@ -668,7 +679,7 @@
     } else {
       value = Math.min(Math.round(offByCentsPct / 100) + 2, 7);
     }
-    console.log({offByCentsPct, tweakValue: value})
+    console.log({ offByCentsPct, tweakValue: value });
     return value;
   }
 
@@ -744,6 +755,20 @@
     {/if}
     <div bind:this={sheetmusicElm}></div>
     {#if celebrate}<div class="star"><Star /></div>{/if}
+    {#if bigParty}<div in:scale out:fade class="party">
+      <div class="starfield">
+        <Star />
+        <Star />
+        <Star />
+      </div>
+
+      <div class="msg">Bravo! <br />{points} poeng!</div>
+        <div class="starfield">
+          <Star />
+          <Star />
+          <Star />
+        </div>
+      </div>{/if}
   </div>
   <div class="toolbar">
     {#if mode === MODES.CONFIGURE}
@@ -808,5 +833,28 @@
     left: calc(50% - 64px);
     z-index: 10;
     opacity: 0.2;
+  }
+
+  .party {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-content: center;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: .9;
+    vertical-align: top;
+    text-align: center;
+    font-size: 6em;
+    color: var(--contrastColor);
+    background-color: var(--light);
+    z-index: 2;
+  }
+  .party .starfield {
+    display: flex;
+    justify-content: space-between;
   }
 </style>
