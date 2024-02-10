@@ -57,6 +57,9 @@
   const MODES = { CONFIGURE: 1, TUNE: 2, PLAY: 3 };
   const DIFFICULTIES = { EASY: 1, HARD: 2, PERC: 3 };
   const CLOSE_ENOUGH_CENTS = 3.5;
+  const MAX_DIFFICULTY_ADJUSTMENT = 2.5;
+  let difficultyAdjustment = 0;
+
   function selectConcertPitchOctave(hz) {
     for (let i = 0; i < noteNames.length; i++) {
       if (parseInt(notes[noteNames[i]]) === hz) {
@@ -480,7 +483,7 @@
 
       isCloseEnough =
         difficulty === DIFFICULTIES.HARD || difficulty === DIFFICULTIES.PERC
-          ? diffInCents && Math.abs(diffInCents) <= CLOSE_ENOUGH_CENTS
+          ? diffInCents && Math.abs(diffInCents) <= (CLOSE_ENOUGH_CENTS + difficultyAdjustment)
           : transposedNote === currentTaskNote;
       offByHz = soundInHz - currentTaskHzTransposed;
       offByCentsPct = (diffInCents / 1200) * 100;
@@ -523,6 +526,10 @@
       if (ignoreImperfectionsCount <= 0) {
         // more than 3 cents off more than _threshold_ times: set last TS to null
         nowPlayingRightLastTs = null;
+        if (difficultyAdjustment < MAX_DIFFICULTY_ADJUSTMENT) {
+          // if the player is struggling, we can make things slightly easier over time..
+          difficultyAdjustment += 0.05;
+        }
       } else {
         if (nowPlayingRightLastTs) {
           nowPlayingRightDuration += Date.now() - nowPlayingRightLastTs;
