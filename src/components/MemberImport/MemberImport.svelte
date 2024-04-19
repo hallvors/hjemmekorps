@@ -54,17 +54,16 @@
           const existing = band.members.find(
             member =>
               member.name === name ||
-              (member.name === entry.name && member.surname === entry.surname) ||
-                  // handle cases where we wanted to split first- and surname differently
-                  `${entry?.name} ${entry?.surname}` === `${member.name} ${member.surname}`
+              (member.name === entry.name &&
+                member.surname === entry.surname) ||
+              // handle cases where we wanted to split first- and surname differently
+              `${entry?.name} ${entry?.surname}` ===
+                `${member.name} ${member.surname}`
           );
           if (existing) {
-            console.log('existing entry to update ', existing, entry);
-            // the last entry here works around the old data model
-            // being different and having .name for both first
-            // and surname. We do not want to overwrite a new
-            // .name with the existing .name value
-            Object.assign(entry, existing, entry);
+            // TODO: conside a more complex algorithm if there's older
+            // data we want to keep? But it might be too unpredictable..
+            Object.assign(entry, { _id: existing._id });
           }
         });
 
@@ -75,8 +74,9 @@
                 entry.fullname === existing.name ||
                 (entry.name === existing.name &&
                   entry.surname === existing.surname) ||
-                  // handle cases where we wanted to split first- and surname differently
-                  `${entry.name} ${entry.surname}` === `${existing.name} ${existing.surname}`
+                // handle cases where we wanted to split first- and surname differently
+                `${entry.name} ${entry.surname}` ===
+                  `${existing.name} ${existing.surname}`
             );
           });
         }
@@ -181,11 +181,8 @@
               {#if data._id}Oppdater!{:else}Ny!{/if}
             </span>
             <label
-              ><input
-                type="checkbox"
-                value={data.fullname}
-                checked
-              /> {data.fullname}</label
+              ><input type="checkbox" value={data.fullname} checked />
+              {data.fullname}</label
             >
           </td>
           <td>{data.subgroup}</td>
@@ -203,7 +200,8 @@
           </td>
           <td>
             {#each data.email as mail}
-              <label><input type="checkbox" value={mail} checked /> {mail}</label
+              <label
+                ><input type="checkbox" value={mail} checked /> {mail}</label
               >
             {/each}
           </td>
