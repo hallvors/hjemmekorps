@@ -22,7 +22,7 @@
               return;
             }
             let rowData = row.trim().split(/[\t;]/g);
-            let data;
+            let data = null;
             if (rowData.length > 1) {
               data = {
                 name: rowData[0],
@@ -42,8 +42,8 @@
                   data.instrument = getInstrumentValueByTitle(rowData[i] || '');
                 }
               }
+              return data;
             }
-            return data;
           })
           .filter(Boolean);
         parsedImportData.forEach(entry => {
@@ -54,7 +54,9 @@
           const existing = band.members.find(
             member =>
               member.name === name ||
-              (member.name === entry.name && member.surname === entry.surname)
+              (member.name === entry.name && member.surname === entry.surname) ||
+                  // handle cases where we wanted to split first- and surname differently
+                  `${entry.name} ${entry.surname}` === `${existing.name} ${existing.surname}`
           );
           if (existing) {
             // the last entry here works around the old data model
@@ -71,7 +73,9 @@
               entry =>
                 entry.fullname === existing.name ||
                 (entry.name === existing.name &&
-                  entry.surname === existing.surname)
+                  entry.surname === existing.surname) ||
+                  // handle cases where we wanted to split first- and surname differently
+                  `${entry.name} ${entry.surname}` === `${existing.name} ${existing.surname}`
             );
           });
         }
