@@ -35,6 +35,7 @@
                 if (/^[0-9 +]{8,}$/.test(rowData[i])) {
                   data.phone.push(rowData[i]);
                 } else if (/@/.test(rowData[i])) {
+                  console.log('found email ' + rowData[i]);
                   data.email.push(rowData[i]);
                 } else if (band.groups.includes(rowData[i])) {
                   data.subgroup = rowData[i];
@@ -59,6 +60,7 @@
                   `${entry.name} ${entry.surname}` === `${existing.name} ${existing.surname}`
           );
           if (existing) {
+            console.log('existing entry to update ', existing, entry);
             // the last entry here works around the old data model
             // being different and having .name for both first
             // and surname. We do not want to overwrite a new
