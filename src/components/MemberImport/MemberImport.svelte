@@ -17,12 +17,12 @@
         const isStyreportalenData = tmp[0].trim() === 'Medlemmer';
         parsedImportData = tmp
           .map((row, idx) => {
+            let data = null;
             // Styreportalen list: two first rows headers
             if (isStyreportalenData && idx < 2) {
               return;
             }
             let rowData = row.trim().split(/[\t;]/g);
-            let data = null;
             if (rowData.length > 1) {
               data = {
                 name: rowData[0],
@@ -35,7 +35,6 @@
                 if (/^[0-9 +]{8,}$/.test(rowData[i])) {
                   data.phone.push(rowData[i]);
                 } else if (/@/.test(rowData[i])) {
-                  console.log('found email ' + rowData[i]);
                   data.email.push(rowData[i]);
                 } else if (band.groups.includes(rowData[i])) {
                   data.subgroup = rowData[i];
@@ -57,7 +56,7 @@
               member.name === name ||
               (member.name === entry.name && member.surname === entry.surname) ||
                   // handle cases where we wanted to split first- and surname differently
-                  `${entry.name} ${entry.surname}` === `${existing.name} ${existing.surname}`
+                  `${entry?.name} ${entry?.surname}` === `${member.name} ${member.surname}`
           );
           if (existing) {
             console.log('existing entry to update ', existing, entry);
