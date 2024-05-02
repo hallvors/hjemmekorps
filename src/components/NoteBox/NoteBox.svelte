@@ -415,11 +415,14 @@
     let measure = measureList[measureCount];
     if (!measure) {
       if (measureCount >= measureList.length) {
-        dispatch('ended');
-        metronome.stop();
-        clearHighlight();
+        // we're at the last measure, but does it end with a jump?
+        if (!(measure && measure.jumps && measure.jumps.length)) {
+          dispatch('ended');
+          metronome.stop();
+          clearHighlight();
+          return;
+        }
       }
-      return;
     }
     let newMeasure = false;
     if (previousMeasure !== measureCount) {
