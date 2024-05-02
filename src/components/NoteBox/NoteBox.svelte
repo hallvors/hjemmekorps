@@ -425,7 +425,7 @@
     if (previousMeasure !== measureCount) {
       // we're entering a new measure
       // check if the previous measure ends with a jump
-      if (measureList[previousMeasure].jumps.length) {
+      if (measureList[previousMeasure] && measureList[previousMeasure].jumps.length) {
         measureCount = measureList[previousMeasure].jumps.shift();
         measure = measureList[measureCount];
         metronome.jumpToMeasure(measureCount);
