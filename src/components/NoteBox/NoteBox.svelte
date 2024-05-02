@@ -416,7 +416,13 @@
     if (!measure) {
       if (measureCount >= measureList.length) {
         // we're at the last measure, but does it end with a jump?
-        if (!(measure && measure.jumps && measure.jumps.length)) {
+        if (
+          !(
+            measureList[previousMeasure] &&
+            measureList[previousMeasure].jumps &&
+            measureList[previousMeasure].jumps.length
+          )
+        ) {
           dispatch('ended');
           metronome.stop();
           clearHighlight();
@@ -428,7 +434,10 @@
     if (previousMeasure !== measureCount) {
       // we're entering a new measure
       // check if the previous measure ends with a jump
-      if (measureList[previousMeasure] && measureList[previousMeasure].jumps.length) {
+      if (
+        measureList[previousMeasure] &&
+        measureList[previousMeasure].jumps.length
+      ) {
         measureCount = measureList[previousMeasure].jumps.shift();
         measure = measureList[measureCount];
         metronome.jumpToMeasure(measureCount);
@@ -642,7 +651,7 @@
         innerList.staffEntries.forEach(staffEntry => {
           staffEntry.graphicalVoiceEntries.forEach(voiceEntry => {
             voiceEntry.notes.forEach(note => {
-              console.log(note, note.sourceNote.Pitch)
+              console.log(note, note.sourceNote.Pitch);
               if (note.sourceNote && note.sourceNote.Pitch) {
                 const noteWithOctave = getNoteNameByPitch(
                   note.sourceNote.Pitch.frequency
