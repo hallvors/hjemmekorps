@@ -212,7 +212,7 @@
         repeatStarts.push(repeat);
       } else if (repeat.type === 2) {
         // end of repetition - :|
-        let jpmIdx = repeat.measureIndex + 1;
+        let jpmIdx = repeat.measureIndex;
         let target = repeatStarts.length
           ? repeatStarts.shift().measureIndex
           : 0;
@@ -424,8 +424,9 @@
     let newMeasure = false;
     if (previousMeasure !== measureCount) {
       // we're entering a new measure
-      if (measure.jumps.length) {
-        measureCount = measure.jumps.shift();
+      // check if the previous measure ends with a jump
+      if (measureList[previousMeasure].jumps.length) {
+        measureCount = measureList[previousMeasure].jumps.shift();
         measure = measureList[measureCount];
         metronome.jumpToMeasure(measureCount);
       }
