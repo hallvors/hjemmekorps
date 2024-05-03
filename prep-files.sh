@@ -10,9 +10,6 @@
 mkdir -p static/js/web-audio-recorder/lib-minified
 cp -f -v node_modules/web-audio-recorder-js/lib-minified/* static/js/web-audio-recorder/lib-minified
 
-mkdir -p static/js/meyda/
-cp -f -v node_modules/meyda/dist/web/meyda.min.js static/js/meyda/
-
 mkdir -p sanity/hjemmekorps-settings
 echo "export default " > sanity/hjemmekorps-settings/instruments.js
 cat src/config/instruments.json >> sanity/hjemmekorps-settings/instruments.js

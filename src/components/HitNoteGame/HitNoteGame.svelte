@@ -364,21 +364,6 @@
           // Initialize the SourceNode
           source = audioContext.createMediaStreamSource(stream);
 
-          if (typeof Meyda === 'undefined') {
-            console.log('Meyda could not be found! Have you included it?');
-          } else {
-            const meyAnalyzer = Meyda.createMeydaAnalyzer({
-              audioContext: audioContext,
-              source: source,
-              bufferSize: 512,
-              featureExtractors: ['chroma', 'spectralFlatness', 'spectralSlope'],
-              callback: features => {
-                console.log(features);
-              },
-            });
-            meyAnalyzer.start();
-          }
-
           // Connect the source node to the analyzer
           source.connect(analyser);
           analyzeSound();
@@ -737,11 +722,6 @@
     }
   }
 </script>
-
-<LibLoader
-  src="/js/meyda/meyda.min.js"
-  libraryDetectionObject="WebAudioRecorder"
-/>
 
 {#if user && user._id && user.instrument}
   {#if mode === MODES.CONFIGURE}
