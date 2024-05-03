@@ -212,7 +212,7 @@
         repeatStarts.push(repeat);
       } else if (repeat.type === 2) {
         // end of repetition - :|
-        let jpmIdx = repeat.measureIndex + 1;
+        let jpmIdx = repeat.measureIndex;
         let target = repeatStarts.length
           ? repeatStarts.shift().measureIndex
           : 0;
@@ -415,17 +415,30 @@
     let measure = measureList[measureCount];
     if (!measure) {
       if (measureCount >= measureList.length) {
-        dispatch('ended');
-        metronome.stop();
-        clearHighlight();
+        // we're at the last measure, but does it end with a jump?
+        if (
+          !(
+            measureList[previousMeasure] &&
+            measureList[previousMeasure].jumps &&
+            measureList[previousMeasure].jumps.length
+          )
+        ) {
+          dispatch('ended');
+          metronome.stop();
+          clearHighlight();
+          return;
+        }
       }
-      return;
     }
     let newMeasure = false;
     if (previousMeasure !== measureCount) {
       // we're entering a new measure
-      if (measure.jumps.length) {
-        measureCount = measure.jumps.shift();
+      // check if the previous measure ends with a jump
+      if (
+        measureList[previousMeasure] &&
+        measureList[previousMeasure].jumps.length
+      ) {
+        measureCount = measureList[previousMeasure].jumps.shift();
         measure = measureList[measureCount];
         metronome.jumpToMeasure(measureCount);
       }
@@ -638,7 +651,7 @@
         innerList.staffEntries.forEach(staffEntry => {
           staffEntry.graphicalVoiceEntries.forEach(voiceEntry => {
             voiceEntry.notes.forEach(note => {
-              console.log(note, note.sourceNote.Pitch)
+              console.log(note, note.sourceNote.Pitch);
               if (note.sourceNote && note.sourceNote.Pitch) {
                 const noteWithOctave = getNoteNameByPitch(
                   note.sourceNote.Pitch.frequency

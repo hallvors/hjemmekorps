@@ -29,7 +29,8 @@
   "dependencies": {
     "@rollup/plugin-json": "^4.1.0",
     "@sanity/client": "^2.2.6",
-    "@slonik/migrator": "^0.8.4",
+    "@slonik/migrator": "^0.9.1",
+    "@types/meyda": "^4.3.8",
     "body-parser": "^1.19.0",
     "bull": "^3.21.1",
     "canvas": "^2.8.0",
@@ -47,6 +48,7 @@
     "jsonwebtoken": "^8.5.1",
     "jszip": "^3.10.1",
     "mailgun.js": "^3.2.0",
+    "meyda": "^5.6.2",
     "multer": "^1.4.2",
     "nanoid": "^3.1.20",
     "node-cache": "^5.1.2",
