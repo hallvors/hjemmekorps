@@ -22,6 +22,9 @@
   let activeRecordings = [];
   let ENABLE_LISTEN_WHILE_RECORDING;
   const band = $bands[0];
+  // TODO: enable for older players only? Per-track basis?
+  // Let members opt-out of having tracks plaid to others?
+  const tracksPlayerEnabled = false;
 
   onMount(async function () {
     project = await (
@@ -126,7 +129,7 @@
         >
       </div>
         </div>
-        {#if activeRecordings && activeRecordings.length}
+        {#if activeRecordings && activeRecordings.length && tracksPlayerEnabled}
           <TracksPlayer
             {recordings}
             {activeRecordings}
