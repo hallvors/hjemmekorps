@@ -8,6 +8,10 @@ async function getHitNoteStatsForMember(bandId, memberId, subgroup) {
       client.query(
         sql`SELECT points FROM hit_note_game WHERE user_id = ${memberId} AND date = CURRENT_DATE`
       ),
+      // user THIS WEEK (last 7 days)
+      client.query(
+        sql`SELECT points FROM hit_note_game WHERE user_id = ${memberId} AND date >= CURRENT_DATE - INTERVAL '7 days'`
+      ),
       // band TODAY
       client.query(
         sql`SELECT SUM(points) as points FROM hit_note_game WHERE band_id = ${bandId} AND date = CURRENT_DATE`
@@ -15,6 +19,10 @@ async function getHitNoteStatsForMember(bandId, memberId, subgroup) {
       // band subgroup TODAY
       client.query(
         sql`SELECT SUM(points) as points FROM hit_note_game WHERE band_id = ${bandId} AND subgroup = ${subgroup} AND date = CURRENT_DATE`
+      ),
+      // band subgroup THIS WEEK (last 7 days)
+      client.query(
+        sql`SELECT SUM(points) as points FROM hit_note_game WHERE band_id = ${bandId} AND subgroup = ${subgroup} AND date >= CURRENT_DATE - INTERVAL '7 days'`
       ),
       // raw data for user STREAK
       client.query(sql`WITH date_with_prev AS (
@@ -97,26 +105,28 @@ async function getHitNoteStatsForMember(bandId, memberId, subgroup) {
     ]);
     return {
       userPointsToday: results[0].value.rows[0]?.points || 0,
-      bandPointsToday: results[1].value.rows[0]?.points || 0,
-      groupPointsToday: results[2].value.rows[0]?.points || 0,
+      userPointsThisWeek: results[1].value.rows[0]?.points || 0,
+      bandPointsToday: results[2].value.rows[0]?.points || 0,
+      groupPointsToday: results[3].value.rows[0]?.points || 0,
+      groupPointsThisWeek: results[4].value.rows[0]?.points || 0,
       userStreak:
-        results[3].value.rows.length -
-        results[3].value.rows
+        results[5].value.rows.length -
+        results[5].value.rows
           .map(row => row.streak_status)
           .lastIndexOf('start'),
       bandStreak:
-        results[4].value.rows.length -
-        results[4].value.rows
+        results[6].value.rows.length -
+        results[6].value.rows
           .map(row_1 => row_1.streak_status)
           .lastIndexOf('start'),
       groupStreak:
-        results[5].value.rows.length -
-        results[5].value.rows
+        results[7].value.rows.length -
+        results[7].value.rows
           .map(row_2 => row_2.streak_status)
           .lastIndexOf('start'),
-      userPointsTotal: results[6].value.rows[0]?.points || 0,
-      bandPointsTotal: results[7].value.rows[0]?.points || 0,
-      groupPointsTotal: results[8].value.rows[0]?.points || 0,
+      userPointsTotal: results[8].value.rows[0]?.points || 0,
+      bandPointsTotal: results[9].value.rows[0]?.points || 0,
+      groupPointsTotal: results[10].value.rows[0]?.points || 0,
     };
   });
 }
@@ -138,6 +148,10 @@ async function getHitNoteStatsForAdmin(bandId) {
       // band subgroups TODAY
       client.query(
         sql`SELECT SUM(points)as points, subgroup  FROM hit_note_game WHERE band_id = ${bandId} AND date = CURRENT_DATE GROUP BY subgroup`
+      ),
+      // band subgroups THIS WEEK (last 7 days)
+      client.query(
+        sql`SELECT SUM(points)as points, subgroup  FROM hit_note_game WHERE band_id = ${bandId} AND date >= CURRENT_DATE - INTERVAL '7 days' GROUP BY subgroup`
       ),
       // raw data for band STREAK
       client.query(sql`WITH date_with_prev AS (
@@ -202,19 +216,18 @@ async function getHitNoteStatsForAdmin(bandId) {
         sql`SELECT SUM(points) AS points, subgroup FROM hit_note_game WHERE band_id = ${bandId} GROUP BY subgroup`
       ),
     ]);
-    console.log(JSON.stringify(results[3], null, 5));
-    console.log(JSON.stringify(results[4], null, 5));
     return {
       userPointsToday: results[0].value.rows || [],
       bandPointsToday: results[1].value.rows[0]?.points || 0,
       groupPointsToday: results[2].value.rows || [],
+      groupPointsThisWeek: results[3].value.rows || [],
       bandStreak:
-        results[3].value.rows.length -
-        results[3].value.rows
+        results[4].value.rows.length -
+        results[4].value.rows
           .map(row => row.streak_status)
           .lastIndexOf('start'),
       groupStreak:
-        results[4].value?.map(groupValue => ({
+        results[5].value?.map(groupValue => ({
           streak:
             groupValue.rows.length -
             groupValue.rows
@@ -222,9 +235,9 @@ async function getHitNoteStatsForAdmin(bandId) {
               .lastIndexOf('start'),
           subgroup: groupValue.rows[0].subgroup,
         })) || [],
-      userPointsTotal: results[5].value.rows || [],
-      bandPointsTotal: results[6].value.rows[0]?.points || 0,
-      groupPointsTotal: results[7].value.rows || [],
+      userPointsTotal: results[6].value.rows || [],
+      bandPointsTotal: results[7].value.rows[0]?.points || 0,
+      groupPointsTotal: results[8].value.rows || [],
     };
   });
 }

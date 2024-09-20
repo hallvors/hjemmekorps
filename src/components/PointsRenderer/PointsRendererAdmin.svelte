@@ -17,6 +17,13 @@
       </tr>
     {/each}
     <tr><th>Hele korpset i dag</th><td>{points.bandPointsToday}</td></tr>
+    <tr><th colspan="2" class="categoryhead">Denne uka!</th></tr>
+    {#each points.groupPointsThisWeek as groupPoints}
+      <tr>
+        <th>{determinative(groupPoints.subgroup)}</th>
+        <td>{groupPoints.points}</td>
+      </tr>
+    {/each}
     <tr><th colspan="2" class="categoryhead">Strekk</th></tr>
     {#each points.groupStreak as gStreak}
       <tr
