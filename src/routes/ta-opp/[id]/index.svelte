@@ -40,7 +40,7 @@
       });
     }
     // still working on this feature, will be enabled later
-    ENABLE_LISTEN_WHILE_RECORDING = Boolean(recordings.length);
+    ENABLE_LISTEN_WHILE_RECORDING = Boolean(recordings.length) && tracksPlayerEnabled;
 
     if (project && project.partslist) {
       project.partslist.forEach(part => {
