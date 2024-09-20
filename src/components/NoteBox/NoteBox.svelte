@@ -648,21 +648,23 @@
     const notes = [];
     sheetMusicRenderer.graphic.MeasureList.forEach(outerList => {
       outerList.forEach(innerList => {
-        innerList.staffEntries.forEach(staffEntry => {
-          staffEntry.graphicalVoiceEntries.forEach(voiceEntry => {
-            voiceEntry.notes.forEach(note => {
-              console.log(note, note.sourceNote.Pitch);
-              if (note.sourceNote && note.sourceNote.Pitch) {
-                const noteWithOctave = getNoteNameByPitch(
-                  note.sourceNote.Pitch.frequency
-                );
-                if (!notes.includes(noteWithOctave)) {
-                  notes.push(noteWithOctave);
+        if (innerList.staffEntries) {
+          innerList.staffEntries.forEach(staffEntry => {
+            staffEntry.graphicalVoiceEntries.forEach(voiceEntry => {
+              voiceEntry.notes.forEach(note => {
+                console.log(note, note.sourceNote.Pitch);
+                if (note.sourceNote && note.sourceNote.Pitch) {
+                  const noteWithOctave = getNoteNameByPitch(
+                    note.sourceNote.Pitch.frequency
+                  );
+                  if (!notes.includes(noteWithOctave)) {
+                    notes.push(noteWithOctave);
+                  }
                 }
-              }
+              });
             });
           });
-        });
+        }
       });
     });
     return notes;
