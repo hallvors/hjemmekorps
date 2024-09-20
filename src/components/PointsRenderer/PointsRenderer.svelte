@@ -17,7 +17,7 @@
       <p>
         <b>Du har fått</b>
         {points} <b>poeng i dag!</b>
-        <br><b>Hele {subGroupName.toLowerCase()} har fått</b> {furtherStats.groupPointsThisWeek} <b>poeng denne uka</b>!
+        <br><b>Hele {subGroupName.toLowerCase()} har fått</b> {furtherStats.groupPointsThisWeek + extraPointsSinceLoad} <b>poeng denne uka</b>!
       </p>
     </div>
   {/key}
