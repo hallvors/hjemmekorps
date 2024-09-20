@@ -113,12 +113,14 @@
               />
             {/each}
           {:else}
-            <p>
-              <em
-                >Ingen stemmer spilt inn enda <i class="fas fa-music" /> - blir din
-                den første?</em
-              >
-            </p>
+            {#if recordings.length === 0}
+              <p>
+                <em
+                  >Ingen stemmer spilt inn enda <i class="fas fa-music" /> - blir din
+                  den første?</em
+                >
+              </p>
+            {/if}
           {/if}
         <p>
           Trenger du å øve litt ekstra?
