@@ -14,7 +14,7 @@
     if (importData) {
       let tmp = importData.split(/\r?\n/g);
       if (tmp.length > 1) {
-        const isStyreportalenData = tmp[0].trim() === 'Medlemmer';
+        const isStyreportalenData = tmp[0].trim() === 'Medlemmer' || / medlemmer$/i.test(tmp[0].trim());
         parsedImportData = tmp
           .map((row, idx) => {
             let data = null;
