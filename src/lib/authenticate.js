@@ -31,11 +31,11 @@ function isOkWithoutSession(url) {
 }
 
 const authenticate = async function (req, res, next) {
-  console.log('authenticating ' + req.url);
   if (req.url && /^\/client\//.test(req.url)) {
     // Static files from /client are shown without a user session
     return next();
   }
+  console.log('authenticating ' + req.url);
   if (!(req.query.t || req.cookies.token)) {
     console.log('no token in URL or cookie, ', req.url);
 
