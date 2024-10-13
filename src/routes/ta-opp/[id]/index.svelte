@@ -27,6 +27,7 @@
   const tracksPlayerEnabled = false;
 
   onMount(async function () {
+    console.log('will fetch notes');
     project = await (
       await fetch(`/api/project/${id}`, { credentials: 'same-origin' })
     ).json();
