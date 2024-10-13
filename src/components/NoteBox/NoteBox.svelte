@@ -647,8 +647,11 @@
   function getAllNotesInPiece() {
     const notes = [];
     sheetMusicRenderer.graphic.MeasureList.forEach(outerList => {
+      if (!outerList) {
+        return;
+      }
       outerList.forEach(innerList => {
-        if (innerList.staffEntries) {
+        if (innerList && innerList.staffEntries) {
           innerList.staffEntries.forEach(staffEntry => {
             staffEntry.graphicalVoiceEntries.forEach(voiceEntry => {
               voiceEntry.notes.forEach(note => {
