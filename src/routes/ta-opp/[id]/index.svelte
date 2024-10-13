@@ -23,7 +23,7 @@
   let ENABLE_LISTEN_WHILE_RECORDING;
   const band = $bands[0];
   // TODO: enable for older players only? Per-track basis?
-  // Let members opt-out of having tracks plaid to others?
+  // Let members opt-out of having tracks played to others?
   const tracksPlayerEnabled = false;
 
   onMount(async function () {

@@ -83,6 +83,11 @@ const authenticate = async function (req, res, next) {
 
     user.token = token;
     req.user = user;
+
+    if (!env.production) {
+      console.log(JSON.stringify(user, null, 2));
+    }
+
     // if token does not exist or is not the value we use for auth now,
     // make a new cookie.
     if (
