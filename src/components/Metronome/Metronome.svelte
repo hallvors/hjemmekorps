@@ -131,10 +131,10 @@
     // should be silent).
     // That means the first measure we start from will be
     // (8 * nthBeatSounded) / timeNumerator * -1
-    // If music has upbeat, we add 1 because the music "starts"
-    // in the -1th measure, so it's one less to count down
     measureCount = ((8 * nthBeatSounded) / timeNumerator) * -1;
     countDownBeats = [true, false, true, false, true, true, true, true]; // 1, 2, 1, 2, 3, 4 ..
+    // If music has upbeat, we add 1 because the music "starts"
+    // in the -1th measure, so it's one less to count down
     measureCount += upbeat ? 1 : 0;
     nextBeatCounter = 0;
     startTime = audioContext.currentTime;
