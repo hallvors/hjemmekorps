@@ -255,7 +255,7 @@
         continue;
       }
       // pick up changing time signatures..
-      if (measure.timeSignature) {
+      if (measure && measure.timeSignature) {
         beatDuration = 1 / measure.timeSignature.numerator;
       }
 
@@ -492,6 +492,7 @@
     let tsChanged = false;
     let oldMeter;
     if (
+      measure &&
       measure.timeSignature &&
       (measure.timeSignature.numerator !== timeNumerator ||
         measure.timeSignature.denominator !== timeDenominator)

@@ -92,7 +92,7 @@ function getEvtX(evt, touchIdentifier) {
   if (evt.clientX) {
     return evt.clientX;
   }
-  if (evt.touches) {
+  if (evt.touches && evt.touches.find) {
     const touch = touchIdentifier
       ? evt.touches.find(touch => (touch.identifier = touchIdentifier))
       : evt.touches[0];
@@ -106,7 +106,7 @@ function getEvtY(evt, touchIdentifier) {
   if (evt.clientY) {
     return evt.clientY;
   }
-  if (evt.touches) {
+  if (evt.touches && evt.touches.find) {
     const touch = touchIdentifier
       ? evt.touches.find(touch => (touch.identifier = touchIdentifier))
       : evt.touches[0];
