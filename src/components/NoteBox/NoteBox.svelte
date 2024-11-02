@@ -490,7 +490,7 @@
 
   function setGlobalMetronomeVars(measure) {
     if (!measure) {
-      throw new Error('no measure data for metronome');
+      return;
     }
     // did the time signature change?
     let tsChanged = false;

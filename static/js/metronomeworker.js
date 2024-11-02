@@ -4,6 +4,9 @@ var interval=100;
 self.onmessage=function(e){
 	if (e.data=="start") {
 		console.log("mw starting");
+		if (timerID) { // paranoia..
+			clearInterval(timerID);
+		}
 		timerID=setInterval(function(){postMessage("tick");},interval)
 	}
 	else if (e.data.interval) {

@@ -146,6 +146,7 @@
   // We expect the caller to take care of stopping other things..
   export function stop() {
     isPlaying = false;
+    measureCount = 0;
     nextBeatCounter = null;
     startTime = nextBeatTime = 0.0;
     timerWorker.postMessage('stop');
