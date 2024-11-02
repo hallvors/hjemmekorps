@@ -255,7 +255,7 @@
         continue;
       }
       // pick up changing time signatures..
-      if (measure && measure.timeSignature) {
+      if (measure.timeSignature) {
         beatDuration = 1 / measure.timeSignature.numerator;
       }
 
@@ -504,7 +504,7 @@
       console.log(`${timeNumerator}/${timeDenominator}`);
     }
     // detect tempo changes
-    if (measure.metronome) {
+    if (measure && measure.metronome) {
       // Svelte makes these changes cascade somewhat, it's good for performance
       // to check if they really change before assignment
       if (
