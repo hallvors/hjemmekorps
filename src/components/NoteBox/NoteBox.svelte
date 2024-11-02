@@ -426,6 +426,7 @@
           dispatch('ended');
           metronome.stop();
           clearHighlight();
+          previousMeasure = undefined;
           return;
         }
       }
