@@ -488,11 +488,13 @@
   }
 
   function setGlobalMetronomeVars(measure) {
+    if (!measure) {
+      throw new Error('no measure data for metronome');
+    }
     // did the time signature change?
     let tsChanged = false;
     let oldMeter;
     if (
-      measure &&
       measure.timeSignature &&
       (measure.timeSignature.numerator !== timeNumerator ||
         measure.timeSignature.denominator !== timeDenominator)
@@ -504,7 +506,7 @@
       console.log(`${timeNumerator}/${timeDenominator}`);
     }
     // detect tempo changes
-    if (measure && measure.metronome) {
+    if (measure.metronome) {
       // Svelte makes these changes cascade somewhat, it's good for performance
       // to check if they really change before assignment
       if (
