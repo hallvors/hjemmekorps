@@ -31,7 +31,7 @@
     "@sanity/client": "^2.2.6",
     "@slonik/migrator": "^0.9.1",
     "body-parser": "^1.19.0",
-    "bull": "^3.21.1",
+    "bull": "^4.16.4",
     "canvas": "^2.8.0",
     "compose-middleware": "^5.0.1",
     "compression": "^1.7.1",
